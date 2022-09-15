@@ -1,2 +1,5 @@
 *.yy.c
 dusk
+src/lex.yy.o
+src/y.tab.cc
+src/y.tab.hh
