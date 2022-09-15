@@ -18,9 +18,13 @@ Uses YACC as a parser generator.
 
 ## Installation
 
-Ensure you have flex and libfl-dev installed
+### Ubuntu:
 
-`sudo apt install flex libfl-dev`
+Ensure you have flex and bison
+
+`sudo apt install flex libfl-dev bison libbison-dev`
+
+## Building
 
 Then run the build script
 
