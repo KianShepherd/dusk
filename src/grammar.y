@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 %type<number> exp num;
 %token <string> STRING
 %type<string> str;
-%token DIV MULT PLUS MINUS SEMICOLON
+%token DIVIDE TIMES PLUS MINUS SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON
 %left PLUS MINUS
 %left MULT DIV
 

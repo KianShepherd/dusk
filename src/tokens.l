@@ -8,11 +8,15 @@ extern YYSTYPE yylval;
 %%
 [0-9]+          yylval.number=atoi(yytext); return NUMBER;
 \"[a-zA-Z ]+\"  yylval.string=strdup(yytext); return STRING;
-[ \n]+          /* eat whitespace */;
+[ \t\r\n]+          /* eat whitespace */;
 \+              return PLUS;
 \-              return MINUS;
-\*              return MULT;
-\/              return DIV;
+\*              return TIMES;
+\/              return DIVIDE;
 ;               return SEMICOLON;
-.               return (int) yytext[0];
+{               return RBRACE;
+}               return LBRACE;
+\(              return RPAREN;
+\)              return LPAREN;
+:               return COLON;
 %%
