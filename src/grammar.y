@@ -1,9 +1,13 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <string.h>
 
+
 extern "C" {
-    int yyparse(void);
+
+    int yyparse();
 
     int yylex(void);  
 
@@ -11,44 +15,96 @@ extern "C" {
             return 1;
     }
 
-    void yyerror(const char *str) {
+    void yyerror(const char* str) {
 	    fprintf(stderr,"error: %s\n",str);
     }
 }
 
 
-int main()
-{
-	yyparse();
-    return 0;
-}
-%}
+extern "C" FILE* yyin;
 
-%token NUMBER TOKHEAT STATE TOKTARGET TOKTEMPERATURE
+
+int main(int argc, char** argv) {
+    if (argc > 1) {
+        FILE* fp = fopen(argv[1], "r");
+        yyin = fp;
+    }
+    yyparse();
+}
+
+%}
+%union 
+{
+        int number;
+        double fl;
+        char* string;
+}
+
+%token<number> NUMBER
+%type<number> exp num;
+%token <string> STRING
+%type<string> str;
+%token DIV MULT PLUS MINUS SEMICOLON
+%left PLUS MINUS
+%left MULT DIV
 
 %%
 
-commands: /* empty */
-	| commands command
-	;
+statements: 
+    |
+    statements statement
+    ;
 
+str: STRING
+    {
+        $$ = $1;
+    }
+    ;
 
-command:
-	heat_switch
-	|
-	target_set
-	;
+num: NUMBER
+    {
+        $$ = $1;
+    }
+    ;
 
-heat_switch:
-	TOKHEAT STATE 
-	{
-		printf("\tHeat turned on or off\n");
-	}
-	;
+exp: num
+    {
+        $$ = $1;
+    }
+    |
+    exp PLUS exp
+    {
+        printf("expr %d + %d\n", $1, $3);
+        $$ = $1 + $3;
+    }
+    |
+    exp MINUS exp
+    {
+        printf("expr %d - %d\n", $1, $3);
+        $$ = $1 - $3;
+    }
+    |
+    exp MULT exp
+    {
+        printf("expr %d * %d\n", $1, $3);
+        $$ = $1 * $3;
+    }
+    |
+    exp DIV exp
+    {
+        printf("expr %d / %d\n", $1, $3);
+        $$ = $1 / $3;
+    }
+    |
+    str
+    {
+        printf("String %s\n", $1);
+    }
+    ;
 
-target_set:
-	TOKTARGET TOKTEMPERATURE NUMBER
-	{
-		printf("\tTemperature set\n");
-	}
-	;
+statement: exp SEMICOLON
+    {
+        printf("statement\n");
+    }
+    ;
+
