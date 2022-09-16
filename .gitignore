@@ -1,5 +1,4 @@
-*.yy.c
+src/parser.cc
+src/parser.h
+src/scanner.cc
 dusk
-src/lex.yy.o
-src/y.tab.cc
-src/y.tab.hh

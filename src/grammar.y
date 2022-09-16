@@ -1,110 +1,98 @@
-%{
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
+%code requires {
+#include <string>
+#include <vector>
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include "expression.hh"
 
+using Vec = std::vector<Expression>;
 
-extern "C" {
+#define YYSTYPE std::string*
 
-    int yyparse();
+extern FILE* yyin;
+extern int yylineno;
+int yylex();  
+void yyerror(Vec&, const char*);
 
-    int yylex(void);  
-
-    int yywrap() {
-            return 1;
-    }
-
-    void yyerror(const char* str) {
-	    fprintf(stderr,"error: %s\n",str);
-    }
 }
+%output "src/parser.cc"
+%defines "src/parser.h"
 
+%parse-param { Vec& exprs }
 
-extern "C" FILE* yyin;
-
-
-int main(int argc, char** argv) {
-    if (argc > 1) {
-        FILE* fp = fopen(argv[1], "r");
-        yyin = fp;
-    }
-    yyparse();
-}
-
-%}
-%union 
-{
-        int number;
-        double fl;
-        char* string;
-}
-
-%token<number> NUMBER
-%type<number> exp num;
-%token <string> STRING
-%type<string> str;
-%token DIVIDE TIMES PLUS MINUS SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON
+%token NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
+%token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
+%token SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
+%token INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %left PLUS MINUS
 %left MULT DIV
 
+%destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
+%destructor { delete $$; } DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
+%destructor { delete $$; } SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
+%destructor { delete $$; } INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %%
 
-statements: 
-    |
-    statements statement
+statements: %empty
+    | statements statement
     ;
 
-str: STRING
+exp: NUMBER
     {
-        $$ = $1;
+
+    }
+    | STRING
+    {
+
+    }
+    | DOUBLE
+    {
+
     }
     ;
 
-num: NUMBER
+exp: exp PLUS exp
     {
-        $$ = $1;
-    }
-    ;
 
-exp: num
-    {
-        $$ = $1;
     }
-    |
-    exp PLUS exp
+    | exp MINUS exp
     {
-        printf("expr %d + %d\n", $1, $3);
-        $$ = $1 + $3;
+
     }
-    |
-    exp MINUS exp
+    | exp MULT exp
     {
-        printf("expr %d - %d\n", $1, $3);
-        $$ = $1 - $3;
-    }
-    |
-    exp MULT exp
-    {
-        printf("expr %d * %d\n", $1, $3);
-        $$ = $1 * $3;
+
     }
     |
     exp DIV exp
     {
-        printf("expr %d / %d\n", $1, $3);
-        $$ = $1 / $3;
-    }
-    |
-    str
-    {
-        printf("String %s\n", $1);
+
     }
     ;
 
 statement: exp SEMICOLON
     {
-        printf("statement\n");
+        
     }
     ;
+%%
 
+void yyerror(Vec& expr, const char* msg) {
+    std::cerr << msg << " at line " << yylineno << '\n';
+}
+
+int main(int argc, char** argv) {
+    Vec expressions = std::vector<Expression>();
+    if (argc > 1) {
+        yyin = fopen(argv[1], "r");
+        if (!yyin) {
+            std::cerr << "Unable to open " << argv[1] << ": " << strerror(errno) << '\n';
+            return 1;
+        }
+    } else {
+        yyin = stdin;
+    }
+    int rc = yyparse(expressions);
+    return rc;
+}

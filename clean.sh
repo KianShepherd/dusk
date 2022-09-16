@@ -1,5 +1,4 @@
-rm src/lex.yy.c
-rm src/lex.yy.o
-rm src/y.tab.cc
-rm src/y.tab.hh
+rm src/parser.cc
+rm src/parser.h
+rm src/scanner.cc
 rm dusk

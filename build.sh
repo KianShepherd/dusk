@@ -1,6 +1,5 @@
-lex -o src/lex.yy.c src/tokens.l
-yacc -d src/grammar.y -o src/y.tab.cc
+flex src/tokens.l
+bison src/grammar.y
 
-gcc -c src/lex.yy.c -o src/lex.yy.o
-g++ src/lex.yy.o src/y.tab.cc -o dusk
+g++ --std=c++11 -Wall src/parser.cc src/scanner.cc src/expression.cc -o dusk
 
