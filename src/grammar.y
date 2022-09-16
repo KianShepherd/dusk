@@ -8,29 +8,35 @@
 
 using Vec = std::vector<Expression*>;
 
-#define YYSTYPE std::string*
 
 extern FILE* yyin;
 extern int yylineno;
 int yylex();  
 void yyerror(Vec&, const char*);
-
 }
 %output "src/parser.cc"
 %defines "src/parser.h"
 
 %parse-param { Vec& exprs }
 
-%token NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
-%token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
-%token SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
-%token INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
+%union
+{
+    std::string* str;
+    Expression* expr;
+}
+
+%token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
+%token<str> DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
+%token<str> SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
+%token<str> INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
+
+%type<expr> exp
+
 %left PLUS MINUS
-%left MULT DIV
+%left TIMES DIVIDE
 
-
-%destructor { delete $$; } STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
-%destructor { delete $$; } DIVIDE TIMES MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
+%destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
+%destructor { delete $$; } PLUS DIVIDE TIMES MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %destructor { delete $$; } SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
 %destructor { delete $$; } INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %%
@@ -41,40 +47,40 @@ statements: %empty
 
 exp: NUMBER
     {
-        exprs.push_back(new ExpressionAtomic(std::stoll(*$1)));
+        $$ = new ExpressionAtomic(std::stoll(*($1)));
     }
     | STRING
     {
-
+        $$ = new ExpressionAtomic(*($1));
     }
     | DOUBLE
     {
-
+        $$ = new ExpressionAtomic(std::stod(*($1)));
     }
     ;
 
 exp: exp PLUS exp
     {
-
+        $$ = new BinaryExpression($1, $3, std::string("+"));
     }
     | exp MINUS exp
     {
-
+        $$ = new BinaryExpression($1, $3, std::string("-"));
     }
-    | exp MULT exp
+    | exp TIMES exp
     {
-
+        $$ = new BinaryExpression($1, $3, std::string("*"));
     }
     |
-    exp DIV exp
+    exp DIVIDE exp
     {
-
+        $$ = new BinaryExpression($1, $3, std::string("/"));
     }
     ;
 
 statement: exp SEMICOLON
     {
-        
+        exprs.push_back($1);
     }
     ;
 %%
@@ -97,6 +103,7 @@ int main(int argc, char** argv) {
     int rc = yyparse(expressions);
     for (int i = 0; i < expressions.size(); i++) {
         expressions[i]->debug();
+        std::cout << "-----" << std::endl;
     }
     return rc;
 }

@@ -11,7 +11,7 @@ class ExpressionAtomic : public Expression {
 public:
     ExpressionAtomic(long long num);
     ExpressionAtomic(double num);
-    ExpressionAtomic(char* str);
+    ExpressionAtomic(std::string str);
 
     void debug() override;
 private:

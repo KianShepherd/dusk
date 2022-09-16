@@ -2,3 +2,5 @@ src/parser.cc
 src/parser.h
 src/scanner.cc
 dusk
+
+.ccls

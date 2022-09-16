@@ -10,13 +10,19 @@ ExpressionAtomic::ExpressionAtomic(double num) {
     this->type = 1;
 }
 
-ExpressionAtomic::ExpressionAtomic(char* str) {
-    this->str = std::string(str);
+ExpressionAtomic::ExpressionAtomic(std::string str) {
+    this->str = std::string(str.substr(1, str.length() - 2));
     this->type = 2;
 }
 
 void ExpressionAtomic::debug() {
-    std::cout << this->number << " " << this->type << std::endl;
+    if (this->type == 0) {
+        std::cout << this->number << " : int"<< std::endl;
+    } else if (this->type == 1) {
+        std::cout << this->floating << " : float" << std::endl;
+    } else if (this->type == 2) {
+        std::cout << this->str << " - len = " << this->str.length() << " : str" << std::endl;
+    }
 }
 
 BinaryExpression::BinaryExpression(Expression* l, Expression* r, std::string t) {
