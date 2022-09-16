@@ -6,7 +6,7 @@
 #include <iostream>
 #include "expression.hh"
 
-using Vec = std::vector<Expression>;
+using Vec = std::vector<Expression*>;
 
 #define YYSTYPE std::string*
 
@@ -28,8 +28,9 @@ void yyerror(Vec&, const char*);
 %left PLUS MINUS
 %left MULT DIV
 
-%destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
-%destructor { delete $$; } DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
+
+%destructor { delete $$; } STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
+%destructor { delete $$; } DIVIDE TIMES MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %destructor { delete $$; } SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
 %destructor { delete $$; } INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %%
@@ -40,7 +41,7 @@ statements: %empty
 
 exp: NUMBER
     {
-
+        exprs.push_back(new ExpressionAtomic(std::stoll(*$1)));
     }
     | STRING
     {
@@ -83,7 +84,7 @@ void yyerror(Vec& expr, const char* msg) {
 }
 
 int main(int argc, char** argv) {
-    Vec expressions = std::vector<Expression>();
+    Vec expressions = Vec();
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         if (!yyin) {
@@ -94,5 +95,8 @@ int main(int argc, char** argv) {
         yyin = stdin;
     }
     int rc = yyparse(expressions);
+    for (int i = 0; i < expressions.size(); i++) {
+        expressions[i]->debug();
+    }
     return rc;
 }

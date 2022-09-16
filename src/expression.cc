@@ -15,13 +15,34 @@ ExpressionAtomic::ExpressionAtomic(char* str) {
     this->type = 2;
 }
 
-BinaryExpression::BinaryExpression(Expression l, Expression r, char* t) {
-    this->lhs = l;
-    this->rhs = r;
-    this->type = 0;
+void ExpressionAtomic::debug() {
+    std::cout << this->number << " " << this->type << std::endl;
 }
 
-UnaryExpression::UnaryExpression(Expression expr, char* op) {
+BinaryExpression::BinaryExpression(Expression* l, Expression* r, std::string t) {
+    this->lhs = l;
+    this->rhs = r;
+    this->type = t;
+}
+
+void BinaryExpression::debug() {
+    std::cout << "lhs: ";
+    this->lhs->debug();
+
+    std::cout << "rhs: ";
+    this->rhs->debug();
+    
+    std::cout << "type: " << this->type << std::endl;
+}
+
+UnaryExpression::UnaryExpression(Expression* expr, char* op) {
     this->operand = expr;
     this->op = 0;
+}
+
+void UnaryExpression::debug() {
+    std::cout << "operand: ";
+    this->operand->debug();
+    
+    std::cout << "op: " << this->op << std::endl;
 }

@@ -10,7 +10,7 @@
 [0-9]+          { yylval = new std::string(yytext, yyleng); return NUMBER; }
 \"(.*?)\"       { yylval = new std::string(yytext, yyleng); return STRING; }
 [0-9]+\.[0-9]+  { yylval = new std::string(yytext, yyleng); return DOUBLE; }
-[ \t\r\n]+      /* eat whitespace */;
+[[:space:]]     ; /* Ignore whitespace */
 \+              { yylval = new std::string(yytext, yyleng); return PLUS; }
 \-              { yylval = new std::string(yytext, yyleng); return MINUS; }
 \*              { yylval = new std::string(yytext, yyleng); return TIMES; }

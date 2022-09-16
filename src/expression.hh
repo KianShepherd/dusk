@@ -1,8 +1,10 @@
 #include <string>
+#include <iostream>
 
 
 class Expression {
-
+public:
+    virtual void debug() {};
 };
 
 class ExpressionAtomic : public Expression {
@@ -10,6 +12,8 @@ public:
     ExpressionAtomic(long long num);
     ExpressionAtomic(double num);
     ExpressionAtomic(char* str);
+
+    void debug() override;
 private:
     std::string str;
     double floating;
@@ -19,17 +23,21 @@ private:
 
 class BinaryExpression : public Expression {
 public:
-    BinaryExpression(Expression l, Expression r, char* t);
+    BinaryExpression(Expression* l, Expression* r, std::string t);
+
+    void debug() override;
 private:
-    Expression lhs;
-    Expression rhs;
-    char type;
+    Expression* lhs;
+    Expression* rhs;
+    std::string type;
 };
 
 class UnaryExpression : public Expression {
 public:
-    UnaryExpression(Expression expr, char* op);
+    UnaryExpression(Expression* expr, char* op);
+
+    void debug() override;
 private:
-    Expression operand;
+    Expression* operand;
     char op;
 };
