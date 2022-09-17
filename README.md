@@ -14,7 +14,7 @@ A simple programming language built from scratch.
 
 Uses flex as a tokenizer.
 
-Uses YACC as a parser generator.
+Uses bison as a parser generator.
 
 ## Installation
 

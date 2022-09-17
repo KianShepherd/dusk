@@ -1,6 +1,14 @@
 #include <string>
 #include <iostream>
 
+enum Type {
+    t_bool,
+    t_number,
+    t_float,
+    t_identifier,
+    t_string,
+    t_null
+};
 
 class Expression {
 public:
@@ -11,14 +19,17 @@ class ExpressionAtomic : public Expression {
 public:
     ExpressionAtomic(long long num);
     ExpressionAtomic(double num);
-    ExpressionAtomic(std::string str);
+    ExpressionAtomic(std::string str, bool is_identifier);
+    ExpressionAtomic(bool b);
+    ExpressionAtomic();
 
     void debug() override;
 private:
     std::string str;
     double floating;
     long long number;
-    char type;
+    bool boolean;
+    Type type;
 };
 
 class BinaryExpression : public Expression {

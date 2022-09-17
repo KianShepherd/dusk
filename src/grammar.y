@@ -29,6 +29,7 @@ void yyerror(Vec&, const char*);
 %token<str> DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token<str> SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
 %token<str> INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
+%token<str> LEXERROR;
 
 %type<expr> exp
 
@@ -41,6 +42,7 @@ void yyerror(Vec&, const char*);
 %destructor { delete $$; } INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %%
 
+
 statements: %empty
     | statements statement
     ;
@@ -51,11 +53,27 @@ exp: NUMBER
     }
     | STRING
     {
-        $$ = new ExpressionAtomic(*($1));
+        $$ = new ExpressionAtomic(*($1), false);
     }
     | DOUBLE
     {
         $$ = new ExpressionAtomic(std::stod(*($1)));
+    }
+    | TRUE
+    {
+        $$ = new ExpressionAtomic(true);
+    }
+    | FALSE
+    {
+        $$ = new ExpressionAtomic(false);
+    }
+    | NULLTOK
+    {
+        $$ = new ExpressionAtomic();
+    }
+    | IDENTIFIER
+    {
+        $$ = new ExpressionAtomic(*($1), true);
     }
     ;
 
@@ -71,8 +89,7 @@ exp: exp PLUS exp
     {
         $$ = new BinaryExpression($1, $3, std::string("*"));
     }
-    |
-    exp DIVIDE exp
+    | exp DIVIDE exp
     {
         $$ = new BinaryExpression($1, $3, std::string("/"));
     }
@@ -83,6 +100,12 @@ statement: exp SEMICOLON
         exprs.push_back($1);
     }
     ;
+
+err: LEXERROR
+     {
+        std::cout << $1 << std::endl;
+     }
+     ;
 %%
 
 void yyerror(Vec& expr, const char* msg) {
