@@ -31,8 +31,11 @@ void yyerror(AST&, const char*);
 
 %type<expr> exp
 
+%left OR AND
+%left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
 %left PLUS MINUS
 %left TIMES DIVIDE
+%left UNARY
 
 %destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
 %destructor { delete $$; } PLUS DIVIDE TIMES MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
@@ -91,6 +94,48 @@ exp: exp PLUS exp
     {
         $$ = new BinaryExpression($1, $3, std::string("/"));
     }
+    | exp MORETHAN exp
+    {
+        $$ = new BinaryExpression($1, $3, std::string(">"));
+    }
+    | exp LESSTHAN exp
+    {
+        $$ = new BinaryExpression($1, $3, std::string("<"));
+    }
+    | exp MOREEQUAL exp
+    {
+        $$ = new BinaryExpression($1, $3, std::string(">="));
+    }
+    | exp LESSEQUAL exp
+    {
+        $$ = new BinaryExpression($1, $3, std::string("<="));
+    }
+    | exp EQUALEQUAL exp
+    {
+        $$ = new BinaryExpression($1, $3, std::string("=="));
+    }
+    | exp BANGEQUAL exp
+    {
+        $$ = new BinaryExpression($1, $3, std::string("!="));
+    }
+    | exp AND exp
+    {
+        $$ = new BinaryExpression($1, $3, std::string("and"));
+    }
+    | exp OR exp
+    {
+        $$ = new BinaryExpression($1, $3, std::string("or"));
+    }
+    ;
+
+exp: NOT exp %prec UNARY
+    {
+        $$ = new UnaryExpression($2, std::string("!"));
+    }
+    | MINUS exp %prec UNARY
+    {
+        $$ = new UnaryExpression($2, std::string("-"));
+    }
     ;
 
 statement: exp SEMICOLON
@@ -122,7 +167,7 @@ int main(int argc, char** argv) {
         yyin = stdin;
     }
     int rc = yyparse(ast);
-    if (!ast.check_error()) {
+    if (ast.check_error()) {
         return 2;
     }
     ast.debug();

@@ -46,10 +46,10 @@ private:
 
 class UnaryExpression : public Expression {
 public:
-    UnaryExpression(Expression* expr, char* op);
+    UnaryExpression(Expression* expr, std::string op);
 
     void debug() override;
 private:
     Expression* operand;
-    char op;
+    std::string op;
 };
