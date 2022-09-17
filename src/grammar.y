@@ -5,19 +5,17 @@
 #include <cstring>
 #include <iostream>
 #include "expression.hh"
-
-using Vec = std::vector<Expression*>;
-
+#include "ast.hh"
 
 extern FILE* yyin;
 extern int yylineno;
 int yylex();  
-void yyerror(Vec&, const char*);
+void yyerror(AST&, const char*);
 }
 %output "src/parser.cc"
 %defines "src/parser.h"
 
-%parse-param { Vec& exprs }
+%parse-param { AST& ast }
 
 %union
 {
@@ -97,23 +95,23 @@ exp: exp PLUS exp
 
 statement: exp SEMICOLON
     {
-        exprs.push_back($1);
+        ast.push_expr($1);
     }
     ;
 
 err: LEXERROR
      {
-        std::cout << $1 << std::endl;
+        ast.push_err($1);
      }
      ;
 %%
 
-void yyerror(Vec& expr, const char* msg) {
+void yyerror(AST& unused, const char* msg) {
     std::cerr << msg << " at line " << yylineno << '\n';
 }
 
 int main(int argc, char** argv) {
-    Vec expressions = Vec();
+    AST ast = AST();
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         if (!yyin) {
@@ -123,10 +121,10 @@ int main(int argc, char** argv) {
     } else {
         yyin = stdin;
     }
-    int rc = yyparse(expressions);
-    for (int i = 0; i < expressions.size(); i++) {
-        expressions[i]->debug();
-        std::cout << "-----" << std::endl;
+    int rc = yyparse(ast);
+    if (!ast.check_error()) {
+        return 2;
     }
+    ast.debug();
     return rc;
 }
