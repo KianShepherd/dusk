@@ -36,10 +36,10 @@ Null                    { yylval.str = new std::string(yytext, yyleng); return N
 !                       { return NOT;        }
 
 ;                       { return SEMICOLON; }
-{                       { return RBRACE;    }
-}                       { return LBRACE;    }
-\(                      { return RPAREN;    }
-\)                      { return LPAREN;    }
+\{                       { return LBRACE;    }
+\}                       { return RBRACE;    }
+\(                      { return LPAREN;    }
+\)                      { return RPAREN;    }
 :                       { return COLON;     }
 ,                       { return COMMA;     }
 ->                      { return ARROW;     }

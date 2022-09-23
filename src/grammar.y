@@ -5,6 +5,7 @@
 #include <cstring>
 #include <iostream>
 #include "expression.hh"
+#include "statement.hh"
 #include "ast.hh"
 
 extern FILE* yyin;
@@ -21,6 +22,8 @@ void yyerror(AST&, const char*);
 {
     std::string* str;
     Expression* expr;
+    Statement* stat;
+    std::vector<Statement*>* stats;
 }
 
 %token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
@@ -30,6 +33,8 @@ void yyerror(AST&, const char*);
 %token<str> LEXERROR;
 
 %type<expr> exp
+%type<stat> statement statementblock;
+%type<stats> statements;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -43,9 +48,29 @@ void yyerror(AST&, const char*);
 %destructor { delete $$; } INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %%
 
+statementblock: LBRACE statements RBRACE
+    {
+        $$ = new StatementBlock(*($2));
+        ast.push_statement(($$));
+    }
+    ;
 
 statements: %empty
     | statements statement
+    {
+        if (!$1) {
+            $$ = new std::vector<Statement*>();
+        } else {
+            $$ = $1;
+        }
+        $$->push_back($2);
+    }
+    ;
+
+statement: exp SEMICOLON
+    {
+        $$ = new ExpressionStatement($1);
+    }
     ;
 
 exp: NUMBER
@@ -136,11 +161,9 @@ exp: NOT exp %prec UNARY
     {
         $$ = new UnaryExpression($2, std::string("-"));
     }
-    ;
-
-statement: exp SEMICOLON
+    | LPAREN exp RPAREN
     {
-        ast.push_expr($1);
+        $$ = new UnaryExpression($2, std::string("()"));
     }
     ;
 
