@@ -1,3 +1,4 @@
+clean.sh
 flex src/tokens.l
 bison src/grammar.y
 
