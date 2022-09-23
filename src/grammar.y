@@ -149,27 +149,4 @@ err: LEXERROR
         ast.push_err($1);
      }
      ;
-%%
 
-void yyerror(AST& unused, const char* msg) {
-    std::cerr << msg << " at line " << yylineno << '\n';
-}
-
-int main(int argc, char** argv) {
-    AST ast = AST();
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        if (!yyin) {
-            std::cerr << "Unable to open " << argv[1] << ": " << strerror(errno) << '\n';
-            return 1;
-        }
-    } else {
-        yyin = stdin;
-    }
-    int rc = yyparse(ast);
-    if (ast.check_error()) {
-        return 2;
-    }
-    ast.debug();
-    return rc;
-}
