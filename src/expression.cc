@@ -42,13 +42,10 @@ BinaryExpression::BinaryExpression(Expression* l, Expression* r, std::string t) 
 }
 
 void BinaryExpression::debug(size_t depth) {
-    std::cout << std::string(depth * 4, ' ') << "lhs:\n";
+    std::cout << std::string(depth * 4, ' ') << "binary " << this->type << std::endl;
     this->lhs->debug(depth + 1);
-
-    std::cout << std::string(depth * 4, ' ') << "rhs:\n";
     this->rhs->debug(depth + 1);
     
-    std::cout << std::string(depth * 4, ' ') << "type: " << this->type << std::endl;
 }
 
 UnaryExpression::UnaryExpression(Expression* expr, std::string op) {
@@ -57,8 +54,7 @@ UnaryExpression::UnaryExpression(Expression* expr, std::string op) {
 }
 
 void UnaryExpression::debug(size_t depth) {
-    std::cout << std::string(depth * 4, ' ') << "operand:\n";
+    std::cout << std::string(depth * 4, ' ') << "unary " << this->op << std::endl;
     this->operand->debug(depth + 1);
     
-    std::cout << std::string(depth * 4, ' ') << "op: " << this->op << std::endl;
 }
