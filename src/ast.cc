@@ -25,7 +25,7 @@ bool AST::check_error() {
 void AST::debug() {
     std::cout << "-----DEBUG-----" << std::endl;
     for (int i = 0; i < (int)this->exprs.size(); i++) {
-        this->exprs[i]->debug();
+        this->exprs[i]->debug(0);
     }
     std::cout << "-----DEBUG-----" << std::endl;
 }

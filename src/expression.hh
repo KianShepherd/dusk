@@ -13,7 +13,7 @@ enum Type {
 
 class Expression {
 public:
-    virtual void debug() {};
+    virtual void debug(size_t depth) {};
 };
 
 class ExpressionAtomic : public Expression {
@@ -24,7 +24,7 @@ public:
     ExpressionAtomic(bool b);
     ExpressionAtomic();
 
-    void debug() override;
+    void debug(size_t depth) override;
 private:
     std::string str;
     double floating;
@@ -37,7 +37,7 @@ class BinaryExpression : public Expression {
 public:
     BinaryExpression(Expression* l, Expression* r, std::string t);
 
-    void debug() override;
+    void debug(size_t depth) override;
 private:
     Expression* lhs;
     Expression* rhs;
@@ -48,7 +48,7 @@ class UnaryExpression : public Expression {
 public:
     UnaryExpression(Expression* expr, std::string op);
 
-    void debug() override;
+    void debug(size_t depth) override;
 private:
     Expression* operand;
     std::string op;

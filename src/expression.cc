@@ -24,14 +24,14 @@ ExpressionAtomic::ExpressionAtomic() {
     this->type = t_null;
 }
 
-void ExpressionAtomic::debug() {
+void ExpressionAtomic::debug(size_t depth) {
     switch (this->type) {
-        case t_number: std::cout << this->number << " : int"<< std::endl; break;
-        case t_float: std::cout << this->floating << " : float" << std::endl; break;
-        case t_string: std::cout << this->str << " - len = " << this->str.length() << " : str" << std::endl; break;
-        case t_identifier: std::cout << this->str << " - len = " << this->str.length() << " : identifier" << std::endl; break;
-        case t_null: std::cout << "null : null" << std::endl; break;
-        case t_bool: std::cout << ((this->boolean)?"True : bool":"False : bool") << std::endl; break;
+        case t_number: std::cout << std::string(depth * 4, ' ') << this->number << " : int"<< std::endl; break;
+        case t_float: std::cout << std::string(depth * 4, ' ') << this->floating << " : float" << std::endl; break;
+        case t_string: std::cout << std::string(depth * 4, ' ') << this->str << " - len = " << this->str.length() << " : str" << std::endl; break;
+        case t_identifier: std::cout << std::string(depth * 4, ' ') << this->str << " - len = " << this->str.length() << " : identifier" << std::endl; break;
+        case t_null: std::cout << std::string(depth * 4, ' ') << "null : null" << std::endl; break;
+        case t_bool: std::cout << std::string(depth * 4, ' ') << ((this->boolean)?"True : bool":"False : bool") << std::endl; break;
     }
 }
 
@@ -41,14 +41,14 @@ BinaryExpression::BinaryExpression(Expression* l, Expression* r, std::string t) 
     this->type = t;
 }
 
-void BinaryExpression::debug() {
-    std::cout << "lhs: ";
-    this->lhs->debug();
+void BinaryExpression::debug(size_t depth) {
+    std::cout << std::string(depth * 4, ' ') << "lhs:\n";
+    this->lhs->debug(depth + 1);
 
-    std::cout << "rhs: ";
-    this->rhs->debug();
+    std::cout << std::string(depth * 4, ' ') << "rhs:\n";
+    this->rhs->debug(depth + 1);
     
-    std::cout << "type: " << this->type << std::endl;
+    std::cout << std::string(depth * 4, ' ') << "type: " << this->type << std::endl;
 }
 
 UnaryExpression::UnaryExpression(Expression* expr, std::string op) {
@@ -56,9 +56,9 @@ UnaryExpression::UnaryExpression(Expression* expr, std::string op) {
     this->op = op;
 }
 
-void UnaryExpression::debug() {
-    std::cout << "operand: ";
-    this->operand->debug();
+void UnaryExpression::debug(size_t depth) {
+    std::cout << std::string(depth * 4, ' ') << "operand:\n";
+    this->operand->debug(depth + 1);
     
-    std::cout << "op: " << this->op << std::endl;
+    std::cout << std::string(depth * 4, ' ') << "op: " << this->op << std::endl;
 }
