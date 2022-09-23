@@ -65,6 +65,15 @@ statements: %empty
         }
         $$->push_back($2);
     }
+    | statements statementblock
+    {
+        if (!$1) {
+            $$ = new std::vector<Statement*>();
+        } else {
+            $$ = $1;
+        }
+        $$->push_back($2);
+    }
     ;
 
 statement: exp SEMICOLON
