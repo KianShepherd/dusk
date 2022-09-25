@@ -11,7 +11,7 @@
 
 extern FILE* yyin;
 extern int yylineno;
-int yylex();  
+int yylex();
 void yyerror(AST&, const char*);
 }
 %output "src/parser.cc"
@@ -24,6 +24,7 @@ void yyerror(AST&, const char*);
     std::string* str;
     Expression* expr;
     Statement* stat;
+    Function* func;
     std::vector<Statement*>* stats;
     std::vector<Function*>* funcs;
 }
@@ -34,10 +35,11 @@ void yyerror(AST&, const char*);
 %token<str> INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %token<str> LEXERROR;
 
-%type<expr> exp
-%type<stat> statement statementblock;
+%type<expr>  exp;
+%type<stat>  statement statementblock;
 %type<stats> statements;
-%type<str> functions function;
+%type<func>  function;
+%type<funcs> functions;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -49,11 +51,15 @@ void yyerror(AST&, const char*);
 %destructor { delete $$; } PLUS DIVIDE TIMES MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %destructor { delete $$; } SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
 %destructor { delete $$; } INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
+
 %%
 functions: %empty
+    {
+        $$ = new std::vector<Function*>();
+    }
     | functions function
     {
-        $$ = new std::string("a");
+        $$->push_back($2);
     }
     ;
 
@@ -61,7 +67,7 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         Function* f = new Function(std::string(*($2)), $5);
         ast.push_function(f);
-        $$ = new std::string("a");
+        $$ = f;
     }
     ;
 
@@ -77,20 +83,10 @@ statements:%empty
     }
     | statements statement
     {
-        if (!$1) {
-            $$ = new std::vector<Statement*>();
-        } else {
-            $$ = $1;
-        }
         $$->push_back($2);
     }
     | statements statementblock
     {
-        if (!$1) {
-            $$ = new std::vector<Statement*>();
-        } else {
-            $$ = $1;
-        }
         $$->push_back($2);
     }
     ;

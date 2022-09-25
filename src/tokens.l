@@ -36,8 +36,8 @@ Null                    { yylval.str = new std::string(yytext, yyleng); return N
 !                       { return NOT;        }
 
 ;                       { return SEMICOLON; }
-\{                       { return LBRACE;    }
-\}                       { return RBRACE;    }
+\{                      { return LBRACE;    }
+\}                      { return RBRACE;    }
 \(                      { return LPAREN;    }
 \)                      { return RPAREN;    }
 :                       { return COLON;     }
@@ -57,7 +57,7 @@ let                     { return LET;      }
 mut                     { return MUTABLE;  }
 return                  { return RETURN;   }
 
-^[a-zA-Z][a-zA-Z0-9]*   { yylval.str = new std::string(yytext, yyleng); return IDENTIFIER; }
+[a-zA-Z][a-zA-Z0-9]*   { yylval.str = new std::string(yytext, yyleng); return IDENTIFIER; }
 
 [[:space:]]             ; /* Ignore whitespace */
 .                       { std::stringstream ss; ss << "bad input character '" << yytext << "' at line " << yylineno << std::endl; yylval.str = new std::string(ss.str()); return LEXERROR; }
