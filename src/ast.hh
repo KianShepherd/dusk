@@ -5,18 +5,19 @@
 #include <vector>
 #include "expression.hh"
 #include "statement.hh"
+#include "function.hh"
 
 class AST {
 public:
     AST();
 
-    void push_statement(Statement* statement);
+    void push_function(Function* function);
     void push_err(std::string msg);
 
     bool check_error();
     void debug();
 private:
-    std::vector<Statement*> statements;
+    std::vector<Function*> functions;
     bool error;
     std::stringstream err;
 };

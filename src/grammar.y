@@ -6,6 +6,7 @@
 #include <iostream>
 #include "expression.hh"
 #include "statement.hh"
+#include "function.hh"
 #include "ast.hh"
 
 extern FILE* yyin;
@@ -23,7 +24,9 @@ void yyerror(AST&, const char*);
     std::string* str;
     Expression* expr;
     Statement* stat;
+    Function* func;
     std::vector<Statement*>* stats;
+    std::vector<Function*>* funcs;
 }
 
 %token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
@@ -35,6 +38,8 @@ void yyerror(AST&, const char*);
 %type<expr> exp
 %type<stat> statement statementblock;
 %type<stats> statements;
+%type<func> function;
+%type<funcs> functions;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -47,11 +52,29 @@ void yyerror(AST&, const char*);
 %destructor { delete $$; } SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
 %destructor { delete $$; } INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %%
+functions: %empty
+    | functions function
+    {
+        if (!$1) {
+            $$ = new std::vector<Function*>();
+        } else {
+            $$ = $1;
+        }
+
+    }
+    ;
+
+function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
+    {
+        Function* f = new Function(std::string(*($2)), $5);
+        ast.push_function(f);
+        $$ = f;
+    }
+    ;
 
 statementblock: LBRACE statements RBRACE
     {
         $$ = new StatementBlock(*($2));
-        ast.push_statement(($$));
     }
     ;
 

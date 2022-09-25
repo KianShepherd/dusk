@@ -1,13 +1,13 @@
 #include "ast.hh"
 
 AST::AST() {
-    this->statements = std::vector<Statement*>();
+    this->functions = std::vector<Function*>();
     this->error = false;
     this->err = std::stringstream();
 }
 
-void AST::push_statement(Statement* statement) {
-    this->statements.push_back(statement);
+void AST::push_function(Function* function) {
+    this->functions.push_back(function);
 }
 
 void AST::push_err(std::string msg) {
@@ -24,8 +24,8 @@ bool AST::check_error() {
 
 void AST::debug() {
     std::cout << "-----DEBUG-----" << std::endl;
-    for (int i = 0; i < (int)this->statements.size(); i++) {
-        this->statements[i]->debug(0);
+    for (int i = 0; i < (int)this->functions.size(); i++) {
+        this->functions[i]->debug();
     }
     std::cout << "-----DEBUG-----" << std::endl;
 }
