@@ -24,7 +24,6 @@ void yyerror(AST&, const char*);
     std::string* str;
     Expression* expr;
     Statement* stat;
-    Function* func;
     std::vector<Statement*>* stats;
     std::vector<Function*>* funcs;
 }
@@ -38,8 +37,7 @@ void yyerror(AST&, const char*);
 %type<expr> exp
 %type<stat> statement statementblock;
 %type<stats> statements;
-%type<func> function;
-%type<funcs> functions;
+%type<str> functions function;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -55,12 +53,7 @@ void yyerror(AST&, const char*);
 functions: %empty
     | functions function
     {
-        if (!$1) {
-            $$ = new std::vector<Function*>();
-        } else {
-            $$ = $1;
-        }
-
+        $$ = new std::string("a");
     }
     ;
 
@@ -68,7 +61,7 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         Function* f = new Function(std::string(*($2)), $5);
         ast.push_function(f);
-        $$ = f;
+        $$ = new std::string("a");
     }
     ;
 
@@ -78,7 +71,10 @@ statementblock: LBRACE statements RBRACE
     }
     ;
 
-statements: %empty
+statements:%empty
+    {
+        $$ = new std::vector<Statement*>();
+    }
     | statements statement
     {
         if (!$1) {
