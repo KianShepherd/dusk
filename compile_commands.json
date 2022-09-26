@@ -1,0 +1,37 @@
+[
+{
+  "directory": "/home/kian/workspace/dusk/Debug",
+  "command": "/usr/bin/c++   -I/home/kian/workspace/dusk/include  -g   -std=gnu++11 -o CMakeFiles/Dusk.dir/src/dusk.cc.o -c /home/kian/workspace/dusk/src/dusk.cc",
+  "file": "/home/kian/workspace/dusk/src/dusk.cc"
+},
+{
+  "directory": "/home/kian/workspace/dusk/Debug",
+  "command": "/usr/bin/c++   -I/home/kian/workspace/dusk/include  -g   -std=gnu++11 -o CMakeFiles/Dusk.dir/src/parser.cc.o -c /home/kian/workspace/dusk/src/parser.cc",
+  "file": "/home/kian/workspace/dusk/src/parser.cc"
+},
+{
+  "directory": "/home/kian/workspace/dusk/Debug",
+  "command": "/usr/bin/c++   -I/home/kian/workspace/dusk/include  -g   -std=gnu++11 -o CMakeFiles/Dusk.dir/src/scanner.cc.o -c /home/kian/workspace/dusk/src/scanner.cc",
+  "file": "/home/kian/workspace/dusk/src/scanner.cc"
+},
+{
+  "directory": "/home/kian/workspace/dusk/Debug",
+  "command": "/usr/bin/c++   -I/home/kian/workspace/dusk/include  -g   -std=gnu++11 -o CMakeFiles/Dusk.dir/src/ast.cc.o -c /home/kian/workspace/dusk/src/ast.cc",
+  "file": "/home/kian/workspace/dusk/src/ast.cc"
+},
+{
+  "directory": "/home/kian/workspace/dusk/Debug",
+  "command": "/usr/bin/c++   -I/home/kian/workspace/dusk/include  -g   -std=gnu++11 -o CMakeFiles/Dusk.dir/src/expression.cc.o -c /home/kian/workspace/dusk/src/expression.cc",
+  "file": "/home/kian/workspace/dusk/src/expression.cc"
+},
+{
+  "directory": "/home/kian/workspace/dusk/Debug",
+  "command": "/usr/bin/c++   -I/home/kian/workspace/dusk/include  -g   -std=gnu++11 -o CMakeFiles/Dusk.dir/src/statement.cc.o -c /home/kian/workspace/dusk/src/statement.cc",
+  "file": "/home/kian/workspace/dusk/src/statement.cc"
+},
+{
+  "directory": "/home/kian/workspace/dusk/Debug",
+  "command": "/usr/bin/c++   -I/home/kian/workspace/dusk/include  -g   -std=gnu++11 -o CMakeFiles/Dusk.dir/src/function.cc.o -c /home/kian/workspace/dusk/src/function.cc",
+  "file": "/home/kian/workspace/dusk/src/function.cc"
+}
+]
