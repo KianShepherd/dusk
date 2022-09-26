@@ -2,7 +2,7 @@
 #include <string>
 #include <cstdio>
 #include <sstream>
-#include "parser.h"
+#include "parser.hh"
 /*
 
 %token<str> IDENTIFIER

@@ -16,7 +16,7 @@ void yyerror(AST&, const char*);
 }
 
 %output "src/parser.cc"
-%defines "src/parser.h"
+%defines "include/parser.hh"
 
 %parse-param { AST& ast }
 

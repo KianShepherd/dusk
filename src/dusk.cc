@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "parser.hh"
 #include "ast.hh"
 #include "expression.hh"
 

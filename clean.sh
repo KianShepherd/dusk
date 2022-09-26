@@ -1,4 +1,5 @@
 rm src/parser.cc
-rm src/parser.h
+rm include/parser.hh
 rm src/scanner.cc
+rm src/parser.output
 rm dusk
