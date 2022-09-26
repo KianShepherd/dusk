@@ -1,6 +1,4 @@
 ./clean.sh
-flex src/tokens.l
-bison src/grammar.y
 
 mkdir build
 cd build
