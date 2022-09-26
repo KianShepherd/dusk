@@ -1,9 +1,6 @@
 ./clean.sh
 
-mkdir build
-cd build
-cmake ..
-cmake --build .
-cd ..
+cmake -S . -B build
+cmake --build build
 mv build/Dusk dusk
 
