@@ -99,7 +99,7 @@ statementblock: LBRACE statements RBRACE
     }
     ;
 
-statements:%empty
+statements: %empty
     {
         $$ = new std::vector<Statement*>();
     }
