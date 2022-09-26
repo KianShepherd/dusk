@@ -3,6 +3,6 @@ include/parser.hh
 src/scanner.cc
 src/parser.output
 dusk
-build/*
+CMake/*
 
 .ccls

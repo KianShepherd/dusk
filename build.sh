@@ -1,6 +1,6 @@
 ./clean.sh
 
-cmake -S . -B build
-cmake --build build
-mv build/Dusk dusk
+cmake -S . -B CMake
+cmake --build CMake
+mv CMake/Dusk dusk
 
