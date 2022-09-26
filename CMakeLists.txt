@@ -4,6 +4,7 @@ project(Dusk VERSION 0.1)
 
 find_package(FLEX)
 find_package(BISON)
+add_compile_options(-Wall)
 
 FLEX_TARGET(Scanner ${CMAKE_SOURCE_DIR}/src/tokens.l  ${CMAKE_SOURCE_DIR}/src/scanner.cc)
 BISON_TARGET(Parser ${CMAKE_SOURCE_DIR}/src/grammar.y ${CMAKE_SOURCE_DIR}/src/parser.cc)
