@@ -39,8 +39,6 @@ void yyerror(AST&, const char*);
 %type<expr>  exp;
 %type<stat>  statement statementblock;
 %type<stats> statements;
-%type<func>  function;
-%type<funcs> functions;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -52,50 +50,34 @@ void yyerror(AST&, const char*);
 
 %%
 functions: %empty
-    {
-        $$ = new std::vector<Function*>();
-    }
     | functions function
-    {
-        $$->push_back($2);
-    }
     ;
 
 function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
-        Function* f = new Function(std::string(*($2)), $5, t_null);
-        ast.push_function(f);
-        $$ = f;
+        ast.push_function(new Function(std::string(*($2)), std::move($5), t_null));
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW BOOL statementblock
     {
-        Function* f = new Function(std::string(*($2)), $7, t_bool);
-        ast.push_function(f);
-        $$ = f;
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_bool));
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW INT statementblock
     {
-        Function* f = new Function(std::string(*($2)), $7, t_number);
-        ast.push_function(f);
-        $$ = f;
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_number));
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW FLOAT statementblock
     {
-        Function* f = new Function(std::string(*($2)), $7, t_float);
-        ast.push_function(f);
-        $$ = f;
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_float));
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW STR statementblock
     {
-        Function* f = new Function(std::string(*($2)), $7, t_string);
-        ast.push_function(f);
-        $$ = f;
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_string));
     }
     ;
 
 statementblock: LBRACE statements RBRACE
     {
-        $$ = new StatementBlock(*($2));
+        $$ = new StatementBlock(std::move(*($2)));
     }
     ;
 
@@ -105,17 +87,17 @@ statements: %empty
     }
     | statements statement
     {
-        $$->push_back($2);
+        $$->push_back(std::move($2));
     }
     | statements statementblock
     {
-        $$->push_back($2);
+        $$->push_back(std::move($2));
     }
     ;
 
 statement: exp SEMICOLON
     {
-        $$ = new ExpressionStatement($1);
+        $$ = new ExpressionStatement(std::move($1));
     }
     ;
 
@@ -158,65 +140,65 @@ exp: NUMBER
 
 exp: exp PLUS exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("+"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("+"));
     }
     | exp MINUS exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("-"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("-"));
     }
     | exp TIMES exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("*"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("*"));
     }
     | exp DIVIDE exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("/"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("/"));
     }
     | exp MORETHAN exp
     {
-        $$ = new BinaryExpression($1, $3, std::string(">"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string(">"));
     }
     | exp LESSTHAN exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("<"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("<"));
     }
     | exp MOREEQUAL exp
     {
-        $$ = new BinaryExpression($1, $3, std::string(">="));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string(">="));
     }
     | exp LESSEQUAL exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("<="));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("<="));
     }
     | exp EQUALEQUAL exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("=="));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("=="));
     }
     | exp BANGEQUAL exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("!="));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("!="));
     }
     | exp AND exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("and"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("and"));
     }
     | exp OR exp
     {
-        $$ = new BinaryExpression($1, $3, std::string("or"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("or"));
     }
     ;
 
 exp: NOT exp %prec UNARY
     {
-        $$ = new UnaryExpression($2, std::string("!"));
+        $$ = new UnaryExpression(std::move($2), std::string("!"));
     }
     | MINUS exp %prec UNARY
     {
-        $$ = new UnaryExpression($2, std::string("-"));
+        $$ = new UnaryExpression(std::move($2), std::string("-"));
     }
     | LPAREN exp RPAREN
     {
-        $$ = new UnaryExpression($2, std::string("()"));
+        $$ = new UnaryExpression(std::move($2), std::string("()"));
     }
     ;
 
