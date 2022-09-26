@@ -1,6 +1,7 @@
 src/parser.cc
 src/parser.h
 src/scanner.cc
+src/parser.output
 dusk
 
 .ccls
