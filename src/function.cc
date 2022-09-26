@@ -13,7 +13,7 @@ void Function::debug() {
         case t_string: std::cout << "str"; break;
         case t_null: std::cout << "void"; break;
         case t_bool: std::cout << "bool"; break;
-        default: break;
+        default: std::cerr << "Unknown function type"; break;
     }
     std::cout << " function " << this->name <<  std::endl;
     this->statements->debug(0);

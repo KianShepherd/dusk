@@ -9,12 +9,12 @@
 #include "function.hh"
 #include "ast.hh"
 
-
 extern FILE* yyin;
 extern int yylineno;
 int yylex();
 void yyerror(AST&, const char*);
 }
+
 %output "src/parser.cc"
 %defines "src/parser.h"
 
@@ -33,7 +33,7 @@ void yyerror(AST&, const char*);
 %token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
 %token<str> DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token<str> SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
-%token<str> INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
+%token<str> INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %token<str> LEXERROR;
 
 %type<expr>  exp;
@@ -51,7 +51,7 @@ void yyerror(AST&, const char*);
 %destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
 %destructor { delete $$; } PLUS DIVIDE TIMES MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %destructor { delete $$; } SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
-%destructor { delete $$; } INT VOID FLOAT BOOL FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
+%destructor { delete $$; } INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 
 %%
 functions: %empty
@@ -67,6 +67,30 @@ functions: %empty
 function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         Function* f = new Function(std::string(*($2)), $5, t_null);
+        ast.push_function(f);
+        $$ = f;
+    }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW BOOL statementblock
+    {
+        Function* f = new Function(std::string(*($2)), $7, t_bool);
+        ast.push_function(f);
+        $$ = f;
+    }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW INT statementblock
+    {
+        Function* f = new Function(std::string(*($2)), $7, t_number);
+        ast.push_function(f);
+        $$ = f;
+    }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW FLOAT statementblock
+    {
+        Function* f = new Function(std::string(*($2)), $7, t_float);
+        ast.push_function(f);
+        $$ = f;
+    }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW STR statementblock
+    {
+        Function* f = new Function(std::string(*($2)), $7, t_string);
         ast.push_function(f);
         $$ = f;
     }

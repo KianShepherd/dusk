@@ -48,6 +48,7 @@ int                     { return INT;      }
 void                    { return VOID;     }
 float                   { return FLOAT;    }
 bool                    { return BOOL;     }
+string                  { return STR;      }
 fn                      { return FUNCTION; }
 if                      { return IF;       }
 else                    { return ELSE;     }
