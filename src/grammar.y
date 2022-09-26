@@ -9,6 +9,7 @@
 #include "function.hh"
 #include "ast.hh"
 
+
 extern FILE* yyin;
 extern int yylineno;
 int yylex();
@@ -65,7 +66,7 @@ functions: %empty
 
 function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
-        Function* f = new Function(std::string(*($2)), $5);
+        Function* f = new Function(std::string(*($2)), $5, t_null);
         ast.push_function(f);
         $$ = f;
     }

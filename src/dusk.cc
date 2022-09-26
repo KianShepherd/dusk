@@ -7,6 +7,9 @@ void yyerror(AST& unused, const char* msg) {
 }
 
 int main(int argc, char** argv) {
+#ifdef DEBUGGING
+    yydebug = 1;
+#endif
     AST ast = AST();
     if (argc > 1) {
         yyin = fopen(argv[1], "r");

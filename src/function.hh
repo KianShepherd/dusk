@@ -7,9 +7,10 @@
 
 class Function {
 public:
-    Function(std::string name, Statement* statements);
+    Function(std::string name, Statement* statements, Type type);
     void debug();
 private:
     std::string name;
     Statement* statements;
+    Type type;
 };
