@@ -50,6 +50,8 @@ void yyerror(AST&, const char*);
 
 %%
 functions: %empty
+    | err
+    | error
     | functions function
     ;
 
@@ -204,7 +206,7 @@ exp: NOT exp %prec UNARY
 
 err: LEXERROR
      {
-        ast.push_err($1);
+        ast.push_err(std::string(*($1)));
      }
      ;
 
