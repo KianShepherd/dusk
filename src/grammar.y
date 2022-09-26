@@ -31,9 +31,9 @@ void yyerror(AST&, const char*);
 }
 
 %token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
-%token<str> DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
-%token<str> SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
-%token<str> INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
+%token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
+%token SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
+%token INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 %token<str> LEXERROR;
 
 %type<expr>  exp;
@@ -49,9 +49,6 @@ void yyerror(AST&, const char*);
 %left UNARY
 
 %destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
-%destructor { delete $$; } PLUS DIVIDE TIMES MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
-%destructor { delete $$; } SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
-%destructor { delete $$; } INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
 
 %%
 functions: %empty
@@ -125,30 +122,37 @@ statement: exp SEMICOLON
 exp: NUMBER
     {
         $$ = new ExpressionAtomic(std::stoll(*($1)));
+        free($1);
     }
     | STRING
     {
-        $$ = new ExpressionAtomic(*($1), false);
+        $$ = new ExpressionAtomic(std::string(*($1)), false);
+        free($1);
     }
     | DOUBLE
     {
         $$ = new ExpressionAtomic(std::stod(*($1)));
+        free($1);
     }
     | TRUE
     {
         $$ = new ExpressionAtomic(true);
+        free($1);
     }
     | FALSE
     {
         $$ = new ExpressionAtomic(false);
+        free($1);
     }
     | NULLTOK
     {
         $$ = new ExpressionAtomic();
+        free($1);
     }
     | IDENTIFIER
     {
-        $$ = new ExpressionAtomic(*($1), true);
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
     }
     ;
 
