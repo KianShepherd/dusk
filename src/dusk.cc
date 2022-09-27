@@ -1,9 +1,13 @@
 #include "parser.hh"
 #include "ast.hh"
 #include "expression.hh"
+#include <string>
 
-void yyerror(AST& unused, const char* msg) {
-    std::cerr << msg << " at line " << yylineno << '\n';
+void yyerror(AST& ast, const char* msg) {
+    std::string err_msg = std::string(msg);
+    err_msg.append(" at line ");
+    err_msg.append(std::string(std::to_string(yylineno)));
+    ast.push_err(err_msg);
 }
 
 int main(int argc, char** argv) {

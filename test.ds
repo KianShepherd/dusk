@@ -1,7 +1,10 @@
-fn foo() {
+fn foo(a: int) {
 3 - 4;
 }
-fn main() -> int {
+fn bar() -> int {
+    3;
+}
+fn main(argc: int, argv:string) -> int {
     2+2;
     2+2;
     2+2;

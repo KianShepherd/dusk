@@ -28,17 +28,20 @@ void yyerror(AST&, const char*);
     Function* func;
     std::vector<Statement*>* stats;
     std::vector<Function*>* funcs;
+    std::vector<std::string>* strs;
+    std::vector<std::vector<std::string>>* vstrs;
 }
 
-%token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
+%token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
 %token INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
-%token<str> LEXERROR;
 
 %type<expr>  exp;
 %type<stat>  statement statementblock;
 %type<stats> statements;
+%type<strs> typedarg;
+%type<vstrs> typedargs;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -57,23 +60,43 @@ functions: %empty
 
 function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($5), t_null));
+        ast.push_function(new Function(std::string(*($2)), std::move($5), t_null, std::vector<std::vector<std::string>>()));
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW BOOL statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_bool));
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_bool, std::vector<std::vector<std::string>>()));
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW INT statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_number));
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_number, std::vector<std::vector<std::string>>()));
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW FLOAT statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_float));
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_float, std::vector<std::vector<std::string>>()));
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW STR statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_string));
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_string, std::vector<std::vector<std::string>>()));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($6), t_null, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_bool, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW INT statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_number, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_float, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW STR statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_string, std::move(*($4))));
     }
     ;
 
@@ -102,6 +125,54 @@ statement: exp SEMICOLON
         $$ = new ExpressionStatement(std::move($1));
     }
     ;
+typedargs: %empty
+    {
+        $$ = new std::vector<std::vector<std::string>>();
+    }
+    | typedargs typedarg
+    {
+        if ($$->size() > 0) {
+            yyerror(ast, "Expected a comma between arguments.");
+        } else {
+            $$->push_back(std::move(*($2)));
+        }
+    }
+    | typedargs COMMA typedarg
+    {
+        $$->push_back(std::move(*($3)));
+    }
+    ;
+
+typedarg: IDENTIFIER COLON INT
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("int"));
+        delete $1;
+    }
+    | IDENTIFIER COLON FLOAT
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("float"));
+        delete $1;
+    }
+    | IDENTIFIER COLON BOOL
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("bool"));
+        delete $1;
+    }
+    | IDENTIFIER COLON STR
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("string"));
+        delete $1;
+    }
+    ;
+
 
 exp: NUMBER
     {

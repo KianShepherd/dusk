@@ -25,8 +25,8 @@ public:
     ExpressionAtomic();
 
     void debug(size_t depth) override;
-private:
     std::string str;
+private:
     double floating;
     long long number;
     bool boolean;
