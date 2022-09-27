@@ -29,3 +29,13 @@ public:
 private:
     std::vector<Statement*> statements;
 };
+
+class ReturnStatement : public Statement {
+public:
+    ReturnStatement(Expression* exp);
+
+    void debug(size_t depth) override;
+
+private:
+    Expression* expr;
+};

@@ -20,3 +20,12 @@ void StatementBlock::debug(size_t depth) {
     }
     std::cout << std::string(depth * 4, ' ') << "}" << std::endl;
 }
+
+ReturnStatement::ReturnStatement(Expression* expr) {
+    this->expr = expr;
+}
+
+void ReturnStatement::debug(size_t depth) {
+    std::cout << std::string(depth * 4, ' ')<< "RETURN" << std::endl;
+    this->expr->debug(depth + 1);
+}

@@ -124,7 +124,12 @@ statement: exp SEMICOLON
     {
         $$ = new ExpressionStatement(std::move($1));
     }
+    | RETURN exp SEMICOLON
+    {
+        $$ = new ReturnStatement(std::move($2));
+    }
     ;
+
 typedargs: %empty
     {
         $$ = new std::vector<std::vector<std::string>>();

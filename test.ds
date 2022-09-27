@@ -6,6 +6,5 @@ fn bar() -> int {
 }
 fn main(argc: int, argv:string) -> int {
     2+2;
-    2+2;
-    2+2;
+    return 1;
 }
