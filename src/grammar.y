@@ -46,7 +46,7 @@ void yyerror(AST&, const char*);
 %left TIMES DIVIDE
 %left UNARY
 
-%destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK
+%destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 
 %%
 functions: %empty
