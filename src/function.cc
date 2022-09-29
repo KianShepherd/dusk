@@ -8,10 +8,7 @@ Function::Function(std::string name, Statement* statements, Type type, std::vect
     this->indentifiers = std::vector<Expression*>();
     this->indentifier_type = std::vector<Type>();
     for (size_t i = 0; i < this->arg_count; i++) {
-        std::string s = std::string(" ");
-        s.append(std::string(args[i][0]));
-        s.append(" ");
-        this->indentifiers.push_back(new ExpressionAtomic(s, true));
+        this->indentifiers.push_back(new ExpressionAtomic(std::string(args[i][0]), true));
         if (args[i][0].compare("int")) {
             this->indentifier_type.push_back(t_number);
         } else if (args[i][0].compare("float")) {

@@ -30,6 +30,7 @@ void yyerror(AST&, const char*);
     std::vector<Function*>* funcs;
     std::vector<std::string>* strs;
     std::vector<std::vector<std::string>>* vstrs;
+    std::vector<Expression*>* exprs;
 }
 
 %token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
@@ -42,6 +43,7 @@ void yyerror(AST&, const char*);
 %type<stats> statements;
 %type<strs> typedarg;
 %type<vstrs> typedargs;
+%type<exprs> exprlist;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -128,7 +130,53 @@ statement: exp SEMICOLON
     {
         $$ = new ReturnStatement(std::move($2));
     }
+    | LET exp COLON INT EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_number);
+    }
+    | LET exp COLON FLOAT EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_float);
+    }
+    | LET exp COLON BOOL EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_bool);
+    }
+    | LET exp COLON STR EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_string);
+    }
+    | LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_number);
+    }
+    | LET MUTABLE exp COLON FLOAT EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_float);
+    }
+    | LET MUTABLE exp COLON BOOL EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_bool);
+    }
+    | LET MUTABLE exp COLON STR EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_string);
+    }
+    | IF exp statementblock
+    {
+        $$ = new IfStatement(std::move($2), std::move($3), nullptr);
+    }
+    | IF exp statementblock ELSE statement
+    {
+        $$ = new IfStatement(std::move($2), std::move($3), std::move($5));
+    }
+    | IF exp statementblock ELSE statementblock
+    {
+        $$ = new IfStatement(std::move($2), std::move($3), std::move($5));
+    }
     ;
+
+
 
 typedargs: %empty
     {
@@ -178,6 +226,24 @@ typedarg: IDENTIFIER COLON INT
     }
     ;
 
+exprlist: %empty
+    {
+        $$ = new std::vector<Expression*>();
+    }
+    | exprlist exp
+    {
+        if ($$->size() > 0) {
+            yyerror(ast, "Expected a comma between expressions.");
+        } else {
+            $$->push_back($2);
+        }
+    }
+    | exprlist COMMA exp
+    {
+        $$->push_back($3);
+    }
+    ;
+
 
 exp: NUMBER
     {
@@ -207,6 +273,16 @@ exp: NUMBER
     | NULLTOK
     {
         $$ = new ExpressionAtomic();
+        free($1);
+    }
+    | IDENTIFIER LPAREN RPAREN
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), std::vector<Expression*>());
+        free($1);
+    }
+    | IDENTIFIER LPAREN exprlist RPAREN
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), std::move(*($3)));
         free($1);
     }
     | IDENTIFIER
@@ -263,6 +339,11 @@ exp: exp PLUS exp
     | exp OR exp
     {
         $$ = new BinaryExpression(std::move($1), std::move($3), std::string("or"));
+    }
+    | IDENTIFIER EQUAL exp
+    {
+        $$ = new AssignmentExpression(new ExpressionAtomic(std::string(*($1)), true), std::move($3));
+        free($1);
     }
     ;
 

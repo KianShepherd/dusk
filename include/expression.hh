@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <vector>
 
 enum Type {
     t_bool,
@@ -8,7 +9,8 @@ enum Type {
     t_float,
     t_identifier,
     t_string,
-    t_null
+    t_null,
+    t_function_call
 };
 
 class Expression {
@@ -22,6 +24,7 @@ public:
     ExpressionAtomic(double num);
     ExpressionAtomic(std::string str, bool is_identifier);
     ExpressionAtomic(bool b);
+    ExpressionAtomic(std::string str, std::vector<Expression*> args);
     ExpressionAtomic();
 
     void debug(size_t depth) override;
@@ -31,6 +34,7 @@ private:
     long long number;
     bool boolean;
     Type type;
+    std::vector<Expression*> args;
 };
 
 class BinaryExpression : public Expression {
@@ -52,4 +56,14 @@ public:
 private:
     Expression* operand;
     std::string op;
+};
+
+class AssignmentExpression : public Expression {
+public:
+    AssignmentExpression(Expression* expr, Expression* op);
+
+    void debug(size_t depth) override;
+private:
+    class Expression* identifier;
+    class Expression* value;
 };

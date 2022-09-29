@@ -11,7 +11,7 @@ ExpressionAtomic::ExpressionAtomic(double num) {
 }
 
 ExpressionAtomic::ExpressionAtomic(std::string str, bool is_identifier) {
-    this->str = std::string(str.substr(1, str.length() - 2));
+    this->str = (is_identifier)?std::string(str):std::string(str.substr(1, str.length() - 2));
     this->type = (is_identifier)?t_identifier:t_string;
 }
 
@@ -24,6 +24,12 @@ ExpressionAtomic::ExpressionAtomic() {
     this->type = t_null;
 }
 
+ExpressionAtomic::ExpressionAtomic(std::string str, std::vector<Expression*> args) {
+    this->str = std::string(str);
+    this->args = args;
+    this->type = t_function_call;
+}
+
 void ExpressionAtomic::debug(size_t depth) {
     switch (this->type) {
         case t_number: std::cout << std::string(depth * 4, ' ') << this->number << " : int"<< std::endl; break;
@@ -32,6 +38,7 @@ void ExpressionAtomic::debug(size_t depth) {
         case t_identifier: std::cout << std::string(depth * 4, ' ') << this->str << " - len = " << this->str.length() << " : identifier" << std::endl; break;
         case t_null: std::cout << std::string(depth * 4, ' ') << "null : null" << std::endl; break;
         case t_bool: std::cout << std::string(depth * 4, ' ') << ((this->boolean)?"True : bool":"False : bool") << std::endl; break;
+        case t_function_call: std::cout << std::string(depth * 4, ' ') << "call " << this->str << " : " << this->args.size() << " args" << std::endl; for (size_t i = 0; i < this->args.size(); i++) this->args[i]->debug(depth + 1); break;
     }
 }
 
@@ -57,4 +64,13 @@ void UnaryExpression::debug(size_t depth) {
     std::cout << std::string(depth * 4, ' ') << "unary " << this->op << std::endl;
     this->operand->debug(depth + 1);
     
+}
+AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* value) {
+    this->identifier = identifier;
+    this->value = value;
+}
+
+void AssignmentExpression::debug(size_t depth) {
+    std::cout << std::string(depth * 4, ' ') << ((ExpressionAtomic*)this->identifier)->str << " = " << std::endl;
+    this->value->debug(depth + 1);
 }

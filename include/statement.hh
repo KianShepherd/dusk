@@ -35,7 +35,29 @@ public:
     ReturnStatement(Expression* exp);
 
     void debug(size_t depth) override;
-
 private:
     Expression* expr;
+};
+
+class AssignmentStatement : public Statement {
+public:
+    AssignmentStatement(Expression* identifier, Expression* value, bool mut, Type type);
+
+    void debug(size_t depth) override;
+private:
+    Expression* identifier;
+    Expression* value;
+    bool mut;
+    Type type;
+};
+
+class IfStatement : public Statement {
+public:
+    IfStatement(Expression* condition, Statement* block1, Statement* block2);
+
+    void debug(size_t depth) override;
+private:
+    Expression* condition;
+    Statement* block1;
+    Statement* block2;
 };
