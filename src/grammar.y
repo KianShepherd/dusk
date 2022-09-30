@@ -39,7 +39,7 @@ void yyerror(AST&, const char*);
 %token INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE BREAK
 
 %type<expr>  exp;
-%type<stat>  statement statementblock;
+%type<stat>  statement statementblock mutassign;
 %type<stats> statements;
 %type<strs> typedarg;
 %type<vstrs> typedargs;
@@ -146,21 +146,9 @@ statement: exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_string);
     }
-    | LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
+    | mutassign
     {
-        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_number);
-    }
-    | LET MUTABLE exp COLON FLOAT EQUAL exp SEMICOLON
-    {
-        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_float);
-    }
-    | LET MUTABLE exp COLON BOOL EQUAL exp SEMICOLON
-    {
-        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_bool);
-    }
-    | LET MUTABLE exp COLON STR EQUAL exp SEMICOLON
-    {
-        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_string);
+        $$ = std::move($1);
     }
     | IF exp statementblock
     {
@@ -178,9 +166,35 @@ statement: exp SEMICOLON
     {
         $$ = new WhileStatement(std::move($2), std::move($3));
     }
+    | FOR LPAREN mutassign exp SEMICOLON exp RPAREN statementblock
+    {
+        StatementBlock* s = (StatementBlock*)std::move($8);
+        s->statements.push_back(new ExpressionStatement(std::move($6)));
+        WhileStatement* a = new WhileStatement(std::move($4), std::move(s));
+        std::vector<Statement*> stats = std::vector<Statement*>();
+        stats.push_back(std::move($3));
+        stats.push_back(a);
+        $$ = new StatementBlock(stats);
+    }
     ;
 
-
+mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_number);
+    }
+    | LET MUTABLE exp COLON FLOAT EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_float);
+    }
+    | LET MUTABLE exp COLON BOOL EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_bool);
+    }
+    | LET MUTABLE exp COLON STR EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_string);
+    }
+    ;
 
 typedargs: %empty
     {

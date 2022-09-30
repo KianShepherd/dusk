@@ -26,7 +26,6 @@ public:
 
     void debug(size_t depth) override;
 
-private:
     std::vector<Statement*> statements;
 };
 
