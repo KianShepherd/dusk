@@ -67,3 +67,15 @@ void IfStatement::debug(size_t depth) {
         this->block2->debug(depth + 1);
     }
 }
+
+WhileStatement::WhileStatement(Expression* cond, Statement* block) {
+    this->condition = cond;
+    this->block = block;
+}
+
+void WhileStatement::debug(size_t depth) {
+    std::cout << std::string(depth * 4, ' ') << "While" << std::endl;
+    this->condition->debug(depth + 1);
+    std::cout << std::string(depth * 4, ' ') << "Do" << std::endl;
+    this->block->debug(depth + 1);
+}

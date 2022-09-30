@@ -1,3 +1,6 @@
 fn main(argc: int, argv:string) -> int {
-   a = 3;
+    while True {
+        1;
+        break;
+    }
 }

@@ -57,6 +57,7 @@ while                   { return WHILE;    }
 let                     { return LET;      }
 mut                     { return MUTABLE;  }
 return                  { return RETURN;   }
+break                   { return BREAK;    }
 
 [a-zA-Z][a-zA-Z0-9]*   { yylval.str = new std::string(yytext, yyleng); return IDENTIFIER; }
 

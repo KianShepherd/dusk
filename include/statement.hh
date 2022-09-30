@@ -61,3 +61,13 @@ private:
     Statement* block1;
     Statement* block2;
 };
+
+class WhileStatement : public Statement {
+public:
+    WhileStatement(Expression* cond, Statement* block);
+
+    void debug(size_t depth) override;
+private:
+    Expression* condition;
+    Statement* block;
+};

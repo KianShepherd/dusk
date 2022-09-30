@@ -67,3 +67,10 @@ private:
     class Expression* identifier;
     class Expression* value;
 };
+
+class BreakExpression : public Expression {
+public:
+    BreakExpression();
+
+    void debug(size_t depth) override;
+};

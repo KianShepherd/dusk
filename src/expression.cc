@@ -74,3 +74,11 @@ void AssignmentExpression::debug(size_t depth) {
     std::cout << std::string(depth * 4, ' ') << ((ExpressionAtomic*)this->identifier)->str << " = " << std::endl;
     this->value->debug(depth + 1);
 }
+
+BreakExpression::BreakExpression() {
+
+}
+
+void BreakExpression::debug(size_t depth) {
+    std::cout << std::string(depth * 4, ' ') << "BREAK" << std::endl;
+}

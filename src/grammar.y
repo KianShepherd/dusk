@@ -36,7 +36,7 @@ void yyerror(AST&, const char*);
 %token<str> NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
-%token INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE
+%token INT VOID FLOAT BOOL STR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE BREAK
 
 %type<expr>  exp;
 %type<stat>  statement statementblock;
@@ -174,6 +174,10 @@ statement: exp SEMICOLON
     {
         $$ = new IfStatement(std::move($2), std::move($3), std::move($5));
     }
+    | WHILE exp statementblock
+    {
+        $$ = new WhileStatement(std::move($2), std::move($3));
+    }
     ;
 
 
@@ -289,6 +293,10 @@ exp: NUMBER
     {
         $$ = new ExpressionAtomic(std::string(*($1)), true);
         free($1);
+    }
+    | BREAK
+    {
+        $$ = new BreakExpression();
     }
     ;
 
