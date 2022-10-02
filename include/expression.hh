@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+class AST;
+
 enum Type {
     t_bool,
     t_number,
@@ -10,12 +12,38 @@ enum Type {
     t_identifier,
     t_string,
     t_null,
-    t_function_call
+    t_function_call,
+};
+
+enum ExpType {
+    t_atomic,
+    t_binary,
+    t_unary,
+    t_break,
+    t_assignment,
+    t_undef
+};
+
+enum Operators {
+    op_add,
+    op_sub,
+    op_mul,
+    op_div,
+    op_equal,
+    op_not_equal,
+    op_greater,
+    op_less,
+    op_greater_equal,
+    op_less_equal,
+    op_and,
+    op_or
 };
 
 class Expression {
 public:
     virtual void debug(size_t depth) {};
+    virtual Expression* fold(AST* ast) { return nullptr; };
+    virtual ExpType get_type() { return t_undef; };
 };
 
 class ExpressionAtomic : public Expression {
@@ -28,8 +56,12 @@ public:
     ExpressionAtomic();
 
     void debug(size_t depth) override;
+    Expression* fold(AST* ast) override;
+    ExpType get_type() override { return t_atomic; };
+    Type get_atomic_type() { return this->type; };
+    uintptr_t get_value();
     std::string str;
-private:
+
     double floating;
     long long number;
     bool boolean;
@@ -39,13 +71,15 @@ private:
 
 class BinaryExpression : public Expression {
 public:
-    BinaryExpression(Expression* l, Expression* r, std::string t);
+    BinaryExpression(Expression* l, Expression* r, Operators t);
 
     void debug(size_t depth) override;
+    Expression* fold(AST* ast) override;
+    ExpType get_type() override { return t_binary; };
 private:
     Expression* lhs;
     Expression* rhs;
-    std::string type;
+    Operators type;
 };
 
 class UnaryExpression : public Expression {
@@ -53,6 +87,8 @@ public:
     UnaryExpression(Expression* expr, std::string op);
 
     void debug(size_t depth) override;
+    Expression* fold(AST* ast) override;
+    ExpType get_type() override { return t_unary; };
 private:
     Expression* operand;
     std::string op;
@@ -63,6 +99,8 @@ public:
     AssignmentExpression(Expression* expr, Expression* op);
 
     void debug(size_t depth) override;
+    Expression* fold(AST* ast) override;
+    ExpType get_type() override { return t_assignment; };
 private:
     class Expression* identifier;
     class Expression* value;
@@ -73,4 +111,6 @@ public:
     BreakExpression();
 
     void debug(size_t depth) override;
+    Expression* fold(AST* ast) override;
+    ExpType get_type() override { return t_break; };
 };

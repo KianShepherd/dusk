@@ -47,3 +47,7 @@ void Function::debug() {
     std::cout << std::endl;
     this->statements->debug(0);
 }
+
+void Function::fold(AST* ast) {
+    this->statements->fold(ast);
+}

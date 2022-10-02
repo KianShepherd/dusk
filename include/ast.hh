@@ -14,8 +14,9 @@ public:
     void push_function(Function* function);
     void push_err(std::string msg);
 
-    bool check_error();
+    bool check_error(std::string stage);
     void debug();
+    void fold_const_expressions();
 private:
     std::vector<Function*> functions;
     bool error;

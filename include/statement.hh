@@ -4,9 +4,12 @@
 #include <vector>
 #include "expression.hh"
 
+class AST;
+
 class Statement {
 public:
     virtual void debug(size_t depth) {};
+    virtual void fold(AST* ast) {};
 };
 
 
@@ -15,7 +18,7 @@ public:
     ExpressionStatement(Expression* exp);
 
     void debug(size_t depth) override;
-
+    void fold(AST* ast) override;
 private:
     Expression* expr;
 };
@@ -25,6 +28,7 @@ public:
     StatementBlock(std::vector<Statement*> statements);
 
     void debug(size_t depth) override;
+    void fold(AST* ast) override;
 
     std::vector<Statement*> statements;
 };
@@ -34,6 +38,7 @@ public:
     ReturnStatement(Expression* exp);
 
     void debug(size_t depth) override;
+    void fold(AST* ast) override;
 private:
     Expression* expr;
 };
@@ -43,6 +48,7 @@ public:
     AssignmentStatement(Expression* identifier, Expression* value, bool mut, Type type);
 
     void debug(size_t depth) override;
+    void fold(AST* ast) override;
 private:
     Expression* identifier;
     Expression* value;
@@ -55,6 +61,7 @@ public:
     IfStatement(Expression* condition, Statement* block1, Statement* block2);
 
     void debug(size_t depth) override;
+    void fold(AST* ast) override;
 private:
     Expression* condition;
     Statement* block1;
@@ -66,6 +73,7 @@ public:
     WhileStatement(Expression* cond, Statement* block);
 
     void debug(size_t depth) override;
+    void fold(AST* ast) override;
 private:
     Expression* condition;
     Statement* block;

@@ -15,9 +15,9 @@ void AST::push_err(std::string msg) {
     this->err << msg;
 }
 
-bool AST::check_error() {
+bool AST::check_error(std::string stage) {
     if (this->error) {
-        std::cout << this->err.str() << std::endl;
+        std::cout << stage << this->err.str() << std::endl;
     }
     return this->error;
 }
@@ -28,4 +28,10 @@ void AST::debug() {
         this->functions[i]->debug();
     }
     std::cout << "-----DEBUG-----" << std::endl;
+}
+
+void AST::fold_const_expressions() {
+    for (int i = 0; i < (int)this->functions.size(); i++) {
+        this->functions[i]->fold(this);
+    }
 }

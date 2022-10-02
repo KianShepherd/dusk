@@ -25,7 +25,12 @@ int main(int argc, char** argv) {
         yyin = stdin;
     }
     int rc = yyparse(ast);
-    if (ast.check_error()) {
+    if (ast.check_error(std::string("Parse Error: "))) {
+        return 1;
+    }
+    ast.debug();
+    ast.fold_const_expressions();
+    if (ast.check_error(std::string("Logic Error: "))) {
         return 2;
     }
     ast.debug();

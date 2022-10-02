@@ -41,7 +41,7 @@ void yyerror(AST&, const char*);
 %type<expr>  exp;
 %type<stat>  statement statementblock mutassign;
 %type<stats> statements;
-%type<strs> typedarg;
+%type<strs>  typedarg;
 %type<vstrs> typedargs;
 %type<exprs> exprlist;
 
@@ -316,51 +316,51 @@ exp: NUMBER
 
 exp: exp PLUS exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("+"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_add);
     }
     | exp MINUS exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("-"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_sub);
     }
     | exp TIMES exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("*"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_mul);
     }
     | exp DIVIDE exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("/"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_div);
     }
     | exp MORETHAN exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string(">"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_greater);
     }
     | exp LESSTHAN exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("<"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_less);
     }
     | exp MOREEQUAL exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string(">="));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_greater_equal);
     }
     | exp LESSEQUAL exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("<="));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_less_equal);
     }
     | exp EQUALEQUAL exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("=="));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_equal);
     }
     | exp BANGEQUAL exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("!="));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_not_equal);
     }
     | exp AND exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("and"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_and);
     }
     | exp OR exp
     {
-        $$ = new BinaryExpression(std::move($1), std::move($3), std::string("or"));
+        $$ = new BinaryExpression(std::move($1), std::move($3), op_or);
     }
     | IDENTIFIER EQUAL exp
     {

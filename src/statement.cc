@@ -8,6 +8,10 @@ void ExpressionStatement::debug(size_t depth) {
     this->expr->debug(depth);
 }
 
+void ExpressionStatement::fold(AST* ast) {
+    this->expr = this->expr->fold(ast);
+}
+
 StatementBlock::StatementBlock(std::vector<Statement*> statements) {
     this->statements = statements;
 }
@@ -21,6 +25,12 @@ void StatementBlock::debug(size_t depth) {
     std::cout << std::string(depth * 4, ' ') << "}" << std::endl;
 }
 
+void StatementBlock::fold(AST* ast) {
+    for (size_t i = 0; i < this->statements.size(); i++) {
+        this->statements[i]->fold(ast);
+    }
+}
+
 ReturnStatement::ReturnStatement(Expression* expr) {
     this->expr = expr;
 }
@@ -28,6 +38,10 @@ ReturnStatement::ReturnStatement(Expression* expr) {
 void ReturnStatement::debug(size_t depth) {
     std::cout << std::string(depth * 4, ' ')<< "RETURN" << std::endl;
     this->expr->debug(depth + 1);
+}
+
+void ReturnStatement::fold(AST* ast) {
+    this->expr = this->expr->fold(ast);
 }
 
 AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* value, bool mut, Type type) {
@@ -51,6 +65,10 @@ void AssignmentStatement::debug(size_t depth) {
     this->value->debug(depth + 1);
 }
 
+void AssignmentStatement::fold(AST* ast) {
+    this->value = this->value->fold(ast);
+}
+
 IfStatement::IfStatement(Expression* condition, Statement* block1, Statement* block2) {
     this->condition = condition;
     this->block1 = block1;
@@ -68,6 +86,12 @@ void IfStatement::debug(size_t depth) {
     }
 }
 
+void IfStatement::fold(AST* ast) {
+    this->condition = this->condition->fold(ast);
+    this->block1->fold(ast);
+    this->block2->fold(ast);
+}
+
 WhileStatement::WhileStatement(Expression* cond, Statement* block) {
     this->condition = cond;
     this->block = block;
@@ -78,4 +102,9 @@ void WhileStatement::debug(size_t depth) {
     this->condition->debug(depth + 1);
     std::cout << std::string(depth * 4, ' ') << "Do" << std::endl;
     this->block->debug(depth + 1);
+}
+
+void WhileStatement::fold(AST* ast) {
+    this->condition = this->condition->fold(ast);
+    this->block->fold(ast);
 }
