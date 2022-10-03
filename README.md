@@ -29,8 +29,11 @@ Ensure you have flex and bison
 Ensure you have flex and bison
 
 `brew install bison flex cmake`
+
 `brew unlink bison`
+
 `brew link bison --force`
+
 `echo 'export PATH="/opt/homebrew/opt/bison/bin:$PATH"'>> ~/.zshrc`
 
 ## Building
