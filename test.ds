@@ -1,5 +1,4 @@
 fn main(argc: int, argv:string) -> int {
     let mut a: int = 1;
-    a = 4;
-    a + 2;
+    a;
 }

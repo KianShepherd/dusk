@@ -52,16 +52,21 @@ void AST::pop_scope() {
     }
 }
 
+ScopeValue::ScopeValue(Expression* value, bool mut) {
+    this->value = value;
+    this->mut = mut;
+}
+
 ScopeFrame::ScopeFrame() {
     this->prev_frame = nullptr;
     this->next_frame = nullptr;
-    this->variables = std::map<std::string, Expression*>();
+    this->variables = std::map<std::string, ScopeValue*>();
 }
 
 ScopeFrame::ScopeFrame(ScopeFrame* prev) {
     this->prev_frame = prev;
     this->next_frame = nullptr;
-    this->variables = std::map<std::string, Expression*>();
+    this->variables = std::map<std::string, ScopeValue*>();
 }
 
 ScopeFrame* ScopeFrame::new_scope() {
@@ -70,38 +75,36 @@ ScopeFrame* ScopeFrame::new_scope() {
     return next;
 }
 
-void ScopeFrame::push_value(std::string identifier, Expression* expression) {
-    this->variables[identifier] = expression;
-    std::cout << "PUSH" << std::endl;
-    for (std::map<std::string, Expression*>::iterator it=this->variables.begin(); it!=this->variables.end(); ++it) {
-        std::cout << it->first << " => ";
-        it->second->debug(5);
-    }
+void ScopeFrame::push_value(std::string identifier, ScopeValue* value) {
+    this->variables[identifier] = value;
 }
 
-void ScopeFrame::update_value(AST* ast, std::string identifier, Expression* expression) {
+void ScopeFrame::update_value(AST* ast, std::string identifier, ScopeValue* value) {
     ScopeFrame* scope = this;
-    std::cout << "find :'" << identifier << "'" << std::endl;
     while (scope != nullptr) {
-        for (std::map<std::string, Expression*>::iterator it=scope->variables.begin(); it!=scope->variables.end(); ++it) {
-            std::cout << it->first << " => ";
-            it->second->debug(5);
-        }
         auto iter = scope->variables.find(identifier);
         if (iter != scope->variables.end() ) {
-            scope->variables[identifier] = expression;
+            if (!scope->variables[identifier]->mut) {
+                ast->push_err("Attempted to assign to non mutable variable");
+                break;
+            }
+            if (((ExpressionAtomic*)scope->variables[identifier]->value)->type != ((ExpressionAtomic*)value->value)->type) {
+                ast->push_err("Attempted to mutate variable to incorrect type");
+                break;
+            }
+            scope->variables[identifier] = value;
             break;
         }
         scope = scope->prev_frame;
     }
-    if (scope != nullptr)
+    if (scope == nullptr)
         ast->push_err("Undeclared variable found.");
 }
 
 Expression* ScopeFrame::get_value(std::string identifier) {
     auto iter = this->variables.find(identifier);
     if (iter != this->variables.end() ) {
-        return iter->second;
+        return iter->second->value;
     }
     if (this->prev_frame == nullptr)
         return nullptr;

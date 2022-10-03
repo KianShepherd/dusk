@@ -4,6 +4,7 @@
 #include <vector>
 
 class AST;
+class ScopeValue;
 
 enum Type {
     t_bool,

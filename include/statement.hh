@@ -5,6 +5,7 @@
 #include "expression.hh"
 
 class AST;
+class ScopeValue;
 
 class Statement {
 public:

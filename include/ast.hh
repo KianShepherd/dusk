@@ -10,6 +10,13 @@
 
 class AST;
 
+class ScopeValue {
+public:
+    ScopeValue(Expression* value, bool mut);
+    Expression* value;
+    bool mut;
+};
+
 class ScopeFrame {
 public:
     ScopeFrame();
@@ -17,13 +24,13 @@ public:
     ScopeFrame* new_scope();
 
     Expression* get_value(std::string identifier);
-    void push_value(std::string identifier, Expression* expression);
-    void update_value(AST* ast, std::string identifier, Expression* expression);
+    void push_value(std::string identifier, ScopeValue* value);
+    void update_value(AST* ast, std::string identifier, ScopeValue* value);
 
     ScopeFrame* prev_frame;
     ScopeFrame* next_frame;
 private:
-    std::map<std::string, Expression*> variables;
+    std::map<std::string, ScopeValue*> variables;
 };
 
 class AST {

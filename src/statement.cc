@@ -70,7 +70,9 @@ void AssignmentStatement::debug(size_t depth) {
 
 void AssignmentStatement::fold(AST* ast) {
     this->value = this->value->fold(ast);
-    ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, this->value);
+    if (((ExpressionAtomic*)this->value)->type != this->type)
+        ast->push_err("Attempted to assign incorrect type to variable");
+    ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->value, this->mut));
 }
 
 IfStatement::IfStatement(Expression* condition, Statement* block1, Statement* block2) {

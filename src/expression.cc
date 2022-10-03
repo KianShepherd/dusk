@@ -173,7 +173,7 @@ void AssignmentExpression::debug(size_t depth) {
 
 Expression* AssignmentExpression::fold(AST* ast) {
     this->value = this->value->fold(ast);
-    ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, this->value);
+    ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->value, true));
     return (Expression*)this;
 }
 
