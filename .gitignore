@@ -6,3 +6,4 @@ dusk
 CMake/*
 
 .ccls
+compile_commands.json
