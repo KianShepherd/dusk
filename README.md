@@ -34,6 +34,8 @@ Ensure you have flex and bison
 
 `brew install bison flex cmake`
 
+An old version of bison is the default version so you must relink a newer version to build Dusk
+
 `brew unlink bison`
 
 `brew link bison --force`
@@ -41,6 +43,10 @@ Ensure you have flex and bison
 `echo 'export PATH="/opt/homebrew/opt/bison/bin:$PATH"'>> ~/.zshrc`
 
 ## Building
+
+To generate a `compile_commands.json` file for use with `ccls` run
+
+`./ccls_file_gen.sh`
 
 Then run the build script
 
@@ -51,7 +57,10 @@ To run the binary
 `./dusk`
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+
+To use Dusk simply run the built executable and pass in the name of the file you would like to compile.
+
+`./dusk test.ds`
 
 ## License
 For open source projects, say how it is licensed.
