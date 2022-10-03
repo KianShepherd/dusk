@@ -22,7 +22,16 @@ Uses bison as a parser generator.
 
 Ensure you have flex and bison
 
-`sudo apt install flex libfl-dev bison libbison-dev`
+`sudo apt install cmake flex libfl-dev bison libbison-dev`
+
+### Mac OS
+
+Ensure you have flex and bison
+
+`brew install bison flex cmake`
+`brew unlink bison`
+`brew link bison --force`
+`echo 'export PATH="/opt/homebrew/opt/bison/bin:$PATH"'>> ~/.zshrc`
 
 ## Building
 
