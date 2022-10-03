@@ -8,6 +8,8 @@
 #include "statement.hh"
 #include "function.hh"
 
+class AST;
+
 class ScopeFrame {
 public:
     ScopeFrame();
@@ -16,6 +18,7 @@ public:
 
     Expression* get_value(std::string identifier);
     void push_value(std::string identifier, Expression* expression);
+    void update_value(AST* ast, std::string identifier, Expression* expression);
 
     ScopeFrame* prev_frame;
     ScopeFrame* next_frame;
@@ -36,10 +39,10 @@ public:
     bool check_error(std::string stage);
     void debug();
     void fold_const_expressions();
+
+    ScopeFrame* scope;
 private:
     std::vector<Function*> functions;
     bool error;
     std::stringstream err;
-
-    ScopeFrame* scope;
 };

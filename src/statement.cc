@@ -1,4 +1,5 @@
 #include "statement.hh"
+#include "ast.hh"
 
 ExpressionStatement::ExpressionStatement(Expression* expr) {
     this->expr = expr;
@@ -26,9 +27,11 @@ void StatementBlock::debug(size_t depth) {
 }
 
 void StatementBlock::fold(AST* ast) {
+    ast->push_scope();
     for (size_t i = 0; i < this->statements.size(); i++) {
         this->statements[i]->fold(ast);
     }
+    ast->pop_scope();
 }
 
 ReturnStatement::ReturnStatement(Expression* expr) {
@@ -67,6 +70,7 @@ void AssignmentStatement::debug(size_t depth) {
 
 void AssignmentStatement::fold(AST* ast) {
     this->value = this->value->fold(ast);
+    ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, this->value);
 }
 
 IfStatement::IfStatement(Expression* condition, Statement* block1, Statement* block2) {

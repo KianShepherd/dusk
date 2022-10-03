@@ -45,6 +45,14 @@ void ExpressionAtomic::debug(size_t depth) {
 }
 
 Expression* ExpressionAtomic::fold(AST* ast) {
+    if (this->type == t_identifier) {
+        Expression* value = ast->scope->get_value(this->str);
+        if (value == nullptr) {
+            ast->push_err("Attempted to lookup unknown identifier.");
+        } else if (value->get_type() == t_atomic) {
+            return (Expression*)value;
+        }
+    }
     return (Expression*)this;
 }
 
@@ -165,6 +173,7 @@ void AssignmentExpression::debug(size_t depth) {
 
 Expression* AssignmentExpression::fold(AST* ast) {
     this->value = this->value->fold(ast);
+    ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, this->value);
     return (Expression*)this;
 }
 

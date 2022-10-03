@@ -48,6 +48,7 @@ void AST::pop_scope() {
     } else {
         this->scope = this->scope->prev_frame;
         delete this->scope->next_frame;
+        this->scope->next_frame = nullptr;
     }
 }
 
@@ -71,6 +72,30 @@ ScopeFrame* ScopeFrame::new_scope() {
 
 void ScopeFrame::push_value(std::string identifier, Expression* expression) {
     this->variables[identifier] = expression;
+    std::cout << "PUSH" << std::endl;
+    for (std::map<std::string, Expression*>::iterator it=this->variables.begin(); it!=this->variables.end(); ++it) {
+        std::cout << it->first << " => ";
+        it->second->debug(5);
+    }
+}
+
+void ScopeFrame::update_value(AST* ast, std::string identifier, Expression* expression) {
+    ScopeFrame* scope = this;
+    std::cout << "find :'" << identifier << "'" << std::endl;
+    while (scope != nullptr) {
+        for (std::map<std::string, Expression*>::iterator it=scope->variables.begin(); it!=scope->variables.end(); ++it) {
+            std::cout << it->first << " => ";
+            it->second->debug(5);
+        }
+        auto iter = scope->variables.find(identifier);
+        if (iter != scope->variables.end() ) {
+            scope->variables[identifier] = expression;
+            break;
+        }
+        scope = scope->prev_frame;
+    }
+    if (scope != nullptr)
+        ast->push_err("Undeclared variable found.");
 }
 
 Expression* ScopeFrame::get_value(std::string identifier) {
