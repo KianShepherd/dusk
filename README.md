@@ -16,6 +16,10 @@ Uses flex as a tokenizer.
 
 Uses bison as a parser generator.
 
+The AST is generated with C++
+
+LLVM is used as a backend
+
 ## Installation
 
 ### Ubuntu:
