@@ -122,6 +122,14 @@ Expression* BinaryExpression::fold(AST* ast) {
                 case op_and:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating && ((ExpressionAtomic*)this->rhs)->floating); break;
                 case op_or:             return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating || ((ExpressionAtomic*)this->rhs)->floating); break;
             }
+        } else if (((ExpressionAtomic*)this->lhs)->type == t_string) {
+            std::string s1 = ((ExpressionAtomic*)this->lhs)->str;
+            std::string s2 = ((ExpressionAtomic*)this->rhs)->str;
+            std::cout << s1 << ":" << s2 << std::endl;
+            switch (this->type) {
+                case op_add: return new ExpressionAtomic(std::string("\"").append(s1).append(s2).append(std::string("\"")), false); break;
+                default: ast->push_err("Unknown binary operation applied to strings."); break;
+            }
         }
     }
     return this;

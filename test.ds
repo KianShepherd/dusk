@@ -1,4 +1,4 @@
 fn main(argc: int, argv:string) -> int {
-    let mut a: int = 1;
-    a;
+    let a: string = "hello";
+    return a + " world!";
 }
