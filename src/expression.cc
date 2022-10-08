@@ -58,7 +58,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
 
 llvm::Value* ExpressionAtomic::codegen(AST* ast) {
     switch (this->type) {
-        case t_number: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, (double)this->number, true));
+        case t_number: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, this->number, true));
         case t_float: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat(this->floating));
         case t_string: return nullptr;
         case t_identifier: {
@@ -69,7 +69,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
             return V;
         }
         case t_null: return nullptr;
-        case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), true));
+        case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), false));
         case t_function_call: {
             llvm::Function *CalleeF = ast->TheModule->getFunction(this->str);
             if (!CalleeF)
@@ -239,19 +239,19 @@ void UnaryExpression::debug(size_t depth) {
 Expression* UnaryExpression::fold(AST* ast) {
     this->operand = this->operand->fold(ast);
     if (this->operand->get_type() == t_atomic){
-        if (this->op.compare("()")) {
+        if (this->op.compare("()") == 0) {
             return this->operand;
         }
         if (((ExpressionAtomic*)this->operand)->type == t_number) {
-            if (this->op.compare("-")){
+            if (this->op.compare("-") == 0){
                 return new ExpressionAtomic(-((ExpressionAtomic*)this->operand)->number);
             }
         } else if (((ExpressionAtomic*)this->operand)->type == t_float) {
-            if (this->op.compare("-")){
+            if (this->op.compare("-") == 0){
                 return new ExpressionAtomic(-((ExpressionAtomic*)this->operand)->floating);
             }
         } else if (((ExpressionAtomic*)this->operand)->type == t_bool) {
-            if (this->op.compare("!")){
+            if (this->op.compare("!") == 0){
                 return new ExpressionAtomic(!((ExpressionAtomic*)this->operand)->boolean);
             }
         }
@@ -260,6 +260,24 @@ Expression* UnaryExpression::fold(AST* ast) {
 }
 
 llvm::Value* UnaryExpression::codegen(AST* ast) {
+    llvm::Value *L = this->operand->codegen(ast);
+
+    if (this->op.compare("()") == 0) {
+        return L;
+    }
+    if (L->getType() == llvm::Type::getDoubleTy(*(ast->TheContext))) {
+        if (this->op.compare("-") == 0) {
+            return ast->Builder->CreateFMul(L, llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat(-1.0)));
+        }
+    } else if (L->getType() == llvm::Type::getInt64Ty(*(ast->TheContext))) {
+        if (this->op.compare("-") == 0) {
+            return ast->Builder->CreateMul(L, llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, -1, true)));
+        }
+    } else if (L->getType() == llvm::Type::getInt1Ty(*(ast->TheContext))) {
+        if (this->op.compare("!") == 0) {
+            return ast->Builder->CreateXor(L, llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 1, false)));
+        }
+    }
     return nullptr;
 }
 
