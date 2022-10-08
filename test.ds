@@ -1,3 +1,7 @@
+fn foo(a: int) -> int {
+    return a + 5;
+}
+
 fn main(argc: int, argv:string) -> int {
-    return 2 * 3 + 1 * 9;
+    return foo(15);
 }

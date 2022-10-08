@@ -188,8 +188,8 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
             case op_less:           return ast->Builder->CreateFCmpOLT(L, R);
             case op_greater_equal:  return ast->Builder->CreateFCmpOGE(L, R);
             case op_less_equal:     return ast->Builder->CreateFCmpOLE(L, R);
-            case op_and:            return ast->Builder->CreateLogicalAnd(L, R);
-            case op_or:             return ast->Builder->CreateLogicalOr(L, R);
+            case op_and:            return nullptr;
+            case op_or:             return nullptr;
         }
     } else if (L->getType() == llvm::Type::getInt64Ty(*(ast->TheContext))) {
         switch (this->type) {
@@ -203,6 +203,21 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
             case op_less:           return ast->Builder->CreateICmpSLT(L, R);
             case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
             case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
+            case op_and:            return nullptr;
+            case op_or:             return nullptr;
+        }
+    } else if (L->getType() == llvm::Type::getInt1Ty(*(ast->TheContext))) {
+        switch (this->type) {
+            case op_add:            return nullptr;
+            case op_sub:            return nullptr;
+            case op_mul:            return nullptr;
+            case op_div:            return nullptr;
+            case op_equal:          return nullptr;
+            case op_not_equal:      return nullptr;
+            case op_greater:        return nullptr;
+            case op_less:           return nullptr;
+            case op_greater_equal:  return nullptr;
+            case op_less_equal:     return nullptr;
             case op_and:            return ast->Builder->CreateLogicalAnd(L, R);
             case op_or:             return ast->Builder->CreateLogicalOr(L, R);
         }
