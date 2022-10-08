@@ -22,6 +22,8 @@ add_definitions(${LLVM_DEFINITIONS_LIST})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
+
 set(SOURCES
     src/dusk.cc
     src/scanner.cc
@@ -43,5 +45,10 @@ add_executable(Dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Sc
 
 llvm_map_components_to_libnames(all)
 
+execute_process(COMMAND llvm-config --system-libs --libs all
+                OUTPUT_VARIABLE llvm_libraries)
+string(STRIP ${llvm_libraries} llvm_libraries)
+string(REPLACE "\n" " " llvm_libraries ${llvm_libraries})
+
 # Link against LLVM libraries
-target_link_libraries(Dusk ${llvm_libs})
+target_link_libraries(Dusk ${llvm_libraries})
