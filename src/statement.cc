@@ -47,7 +47,7 @@ void ReturnStatement::fold(AST* ast) {
     this->expr = this->expr->fold(ast);
 }
 
-AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* value, bool mut, Type type) {
+AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type) {
     this->identifier = identifier;
     this->value = value;
     this->mut = mut;

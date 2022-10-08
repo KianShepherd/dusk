@@ -1,4 +1,15 @@
 #pragma once
+#include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Verifier.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -6,7 +17,7 @@
 class AST;
 class ScopeValue;
 
-enum Type {
+enum AtomType {
     t_bool,
     t_number,
     t_float,
@@ -59,14 +70,14 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_atomic; };
-    Type get_atomic_type() { return this->type; };
+    AtomType get_atomic_type() { return this->type; };
     uintptr_t get_value();
     std::string str;
 
     double floating;
     long long number;
     bool boolean;
-    Type type;
+    AtomType type;
     std::vector<Expression*> args;
 };
 

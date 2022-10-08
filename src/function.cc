@@ -1,12 +1,12 @@
 #include "function.hh"
 
-Function::Function(std::string name, Statement* statements, Type type, std::vector<std::vector<std::string>> args) {
+Function::Function(std::string name, Statement* statements, AtomType type, std::vector<std::vector<std::string>> args) {
     this->name = name;
     this->statements = statements;
     this->type = type;
     this->arg_count = args.size();
     this->indentifiers = std::vector<Expression*>();
-    this->indentifier_type = std::vector<Type>();
+    this->indentifier_type = std::vector<AtomType>();
     for (size_t i = 0; i < this->arg_count; i++) {
         this->indentifiers.push_back(new ExpressionAtomic(std::string(args[i][0]), true));
         if (args[i][0].compare("int")) {
