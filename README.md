@@ -26,7 +26,23 @@ LLVM is used as a backend
 
 Ensure you have flex and bison
 
-`sudo apt install cmake flex libfl-dev bison libbison-dev`
+`sudo apt install cmake ninja-build flex libfl-dev bison libbison-dev`
+
+Build LLVM 
+
+`git clone https://github.com/llvm/llvm-project.git`
+
+`cd llvm-project`
+
+`mkdir build`
+
+`cd build`
+
+`cmake -G Ninja -DLLVM_ENABLE_ASSERTIONS=On -DCMAKE_BUILD_TYPE=Release ../llvm`
+
+`ninja`
+
+`ninja install`
 
 ### Mac OS
 
