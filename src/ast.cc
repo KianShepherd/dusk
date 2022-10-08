@@ -58,6 +58,11 @@ void AST::pop_scope() {
     }
 }
 
+llvm::Value* AST::LogErrorV(const char *Str) {
+    this->push_err(std::string(Str));
+    return nullptr;
+}
+
 ScopeValue::ScopeValue(Expression* value, bool mut) {
     this->value = value;
     this->mut = mut;

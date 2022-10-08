@@ -57,7 +57,39 @@ Expression* ExpressionAtomic::fold(AST* ast) {
 }
 
 llvm::Value* ExpressionAtomic::codegen(AST* ast) {
-    return nullptr;
+    switch (this->type) {
+        case t_number: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, this->number, true));
+        case t_float: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat(this->floating));
+        case t_string: return nullptr;
+        case t_identifier: {
+            // Look this variable up in the function.
+            llvm::Value *V = ast->NamedValues[this->str];
+            if (!V)
+                return ast->LogErrorV("Unknown variable name");
+            return V;
+        }
+        case t_null: return nullptr;
+        case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), false));
+        case t_function_call: {
+            llvm::Function *CalleeF = ast->TheModule->getFunction(this->str);
+            if (!CalleeF)
+            return ast->LogErrorV("Unknown function referenced");
+
+            // If argument mismatch error.
+            if (CalleeF->arg_size() != this->args.size())
+                return ast->LogErrorV("Incorrect # arguments passed");
+
+            std::vector<llvm::Value*> ArgsV;
+            for (unsigned i = 0, e = this->args.size(); i != e; ++i) {
+                ArgsV.push_back(this->args[i]->codegen(ast));
+                if (!ArgsV.back())
+                    return nullptr;
+            }
+
+            return ast->Builder->CreateCall(CalleeF, ArgsV, "calltmp");
+        }
+        default: return nullptr; break;
+    }
 }
 
 BinaryExpression::BinaryExpression(Expression* l, Expression* r, Operators t) {

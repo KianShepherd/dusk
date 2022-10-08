@@ -57,6 +57,7 @@ public:
     bool check_error(std::string stage);
     void debug();
     void fold_const_expressions();
+    llvm::Value* LogErrorV(const char *Str);
 
     ScopeFrame* scope;
     std::unique_ptr<llvm::LLVMContext> TheContext;
