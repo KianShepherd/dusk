@@ -29,10 +29,12 @@ int main(int argc, char** argv) {
         return 1;
     }
     ast.debug();
-    ast.fold_const_expressions();
+    //ast.fold_const_expressions();
     if (ast.check_error(std::string("Logic Error: "))) {
         return 2;
     }
     ast.debug();
+    std::cout << "==================================" << std::endl;
+    ast.codegen();
     return rc;
 }

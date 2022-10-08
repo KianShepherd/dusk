@@ -1,4 +1,5 @@
 #include "function.hh"
+#include "ast.hh"
 
 Function::Function(std::string name, Statement* statements, AtomType type, std::vector<std::vector<std::string>> args) {
     this->name = name;
@@ -53,5 +54,64 @@ void Function::fold(AST* ast) {
 }
 
 llvm::Function* Function::codegen(AST* ast) {
+    // First, check for an existing function from a previous 'extern' declaration.
+    llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);
+
+    if (!TheFunction) {
+        // Make the function type:  double(double,double) etc.
+        std::vector<llvm::Type*> func_args = std::vector<llvm::Type*>();
+        for (size_t i = 0; i < this->arg_count; i++) {
+            switch (this->indentifier_type[i]) {
+                case t_number: func_args.push_back(llvm::Type::getInt64Ty(*(ast->TheContext))); break;
+                case t_float: func_args.push_back(llvm::Type::getFloatTy(*(ast->TheContext))); break;
+                case t_bool: func_args.push_back(llvm::Type::getInt1Ty(*(ast->TheContext))); break;
+                case t_string: return nullptr; break;
+                default: break;
+            }
+        }
+        llvm::FunctionType *FT = nullptr;
+        switch (this->type) {
+            case t_number: FT = llvm::FunctionType::get(llvm::Type::getInt64Ty(*(ast->TheContext)), func_args, false); break;
+            case t_float: FT = llvm::FunctionType::get(llvm::Type::getFloatTy(*(ast->TheContext)), func_args, false); break;
+            case t_string: FT = nullptr; break;
+            case t_null: FT = llvm::FunctionType::get(llvm::Type::getVoidTy(*(ast->TheContext)), func_args, false); break;
+            case t_bool: FT = llvm::FunctionType::get(llvm::Type::getInt1Ty(*(ast->TheContext)), func_args, false); break;
+            default: FT = nullptr; break;
+        }
+
+        llvm::Function *F =
+            llvm::Function::Create(FT, llvm::Function::ExternalLinkage, this->name, ast->TheModule.get());
+
+        // Set names for all arguments.
+        unsigned Idx = 0;
+        for (auto &Arg : F->args())
+            Arg.setName(((ExpressionAtomic*)this->indentifiers[Idx++])->str);
+        TheFunction = F;
+    }
+
+    if (!TheFunction)
+        return nullptr;
+
+    // Create a new basic block to start insertion into.
+    llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(ast->TheContext), "entry", TheFunction);
+    ast->Builder->SetInsertPoint(BB);
+
+    // Record the function arguments in the NamedValues map.
+    ast->NamedValues.clear();
+    for (auto &Arg : TheFunction->args())
+        ast->NamedValues[std::string(Arg.getName())] = &Arg;
+
+    if (llvm::Value *RetVal = this->statements->codegen(ast)) {
+        // Finish off the function.
+        ast->Builder->CreateRet(RetVal);
+
+        // Validate the generated code, checking for consistency.
+        llvm::verifyFunction(*TheFunction);
+
+        return TheFunction;
+    }
+
+    // Error reading body, remove function.
+    TheFunction->eraseFromParent();
     return nullptr;
 }

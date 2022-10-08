@@ -14,7 +14,7 @@ void ExpressionStatement::fold(AST* ast) {
 }
 
 llvm::Value* ExpressionStatement::codegen(AST* ast) {
-    return nullptr;
+    return this->expr->codegen(ast);
 }
 
 StatementBlock::StatementBlock(std::vector<Statement*> statements) {
@@ -39,7 +39,12 @@ void StatementBlock::fold(AST* ast) {
 }
 
 llvm::Value* StatementBlock::codegen(AST* ast) {
-    return nullptr;
+    for (long unsigned int i = 0; i < this->statements.size() - 1; i++) {
+        std::cout << "BLOCK INSERT" << std::endl;
+        ast->Builder->Insert(this->statements[i]->codegen(ast));
+    }
+    std::cout << "RETURN INSERT" << std::endl;
+    return this->statements[this->statements.size() - 1]->codegen(ast);
 }
 
 ReturnStatement::ReturnStatement(Expression* expr) {
@@ -56,7 +61,7 @@ void ReturnStatement::fold(AST* ast) {
 }
 
 llvm::Value* ReturnStatement::codegen(AST* ast) {
-    return nullptr;
+    return this->expr->codegen(ast);
 }
 
 AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type) {

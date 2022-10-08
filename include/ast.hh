@@ -59,6 +59,8 @@ public:
     void fold_const_expressions();
     llvm::Value* LogErrorV(const char *Str);
 
+    void codegen();
+
     ScopeFrame* scope;
     std::unique_ptr<llvm::LLVMContext> TheContext;
     std::unique_ptr<llvm::Module> TheModule;

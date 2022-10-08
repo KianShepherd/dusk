@@ -58,6 +58,13 @@ void AST::pop_scope() {
     }
 }
 
+void AST::codegen() {
+    for (int i = 0; i < (int)this->functions.size(); i++) {
+        this->functions[i]->codegen(this);
+    }
+    this->TheModule->dump();
+}
+
 llvm::Value* AST::LogErrorV(const char *Str) {
     this->push_err(std::string(Str));
     return nullptr;

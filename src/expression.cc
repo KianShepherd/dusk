@@ -58,7 +58,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
 
 llvm::Value* ExpressionAtomic::codegen(AST* ast) {
     switch (this->type) {
-        case t_number: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, this->number, true));
+        case t_number: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat((double)this->number));
         case t_float: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat(this->floating));
         case t_string: return nullptr;
         case t_identifier: {
@@ -69,7 +69,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
             return V;
         }
         case t_null: return nullptr;
-        case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), false));
+        case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), true));
         case t_function_call: {
             llvm::Function *CalleeF = ast->TheModule->getFunction(this->str);
             if (!CalleeF)
@@ -171,6 +171,25 @@ Expression* BinaryExpression::fold(AST* ast) {
 }
 
 llvm::Value* BinaryExpression::codegen(AST* ast) {
+    llvm::Value *L = this->lhs->codegen(ast);
+    llvm::Value *R = this->rhs->codegen(ast);
+    if (!L || !R)
+        return nullptr;
+
+    switch (this->type) {
+        case op_add:            return ast->Builder->CreateFAdd(L, R);
+        case op_sub:            return ast->Builder->CreateFSub(L, R);
+        case op_mul:            return ast->Builder->CreateFMul(L, R);
+        case op_div:            return ast->Builder->CreateFDiv(L, R);
+        case op_equal:          return ast->Builder->CreateICmpEQ(L, R);
+        case op_not_equal:      return ast->Builder->CreateICmpNE(L, R);
+        case op_greater:        return ast->Builder->CreateICmpSGT(L, R);
+        case op_less:           return ast->Builder->CreateICmpSLT(L, R);
+        case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
+        case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
+        case op_and:            return ast->Builder->CreateLogicalAnd(L, R);
+        case op_or:             return ast->Builder->CreateLogicalOr(L, R);
+    }
     return nullptr;
 }
 
