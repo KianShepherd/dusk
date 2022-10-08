@@ -58,7 +58,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
 
 llvm::Value* ExpressionAtomic::codegen(AST* ast) {
     switch (this->type) {
-        case t_number: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat((double)this->number));
+        case t_number: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, (double)this->number, true));
         case t_float: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat(this->floating));
         case t_string: return nullptr;
         case t_identifier: {
@@ -175,20 +175,37 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
     llvm::Value *R = this->rhs->codegen(ast);
     if (!L || !R)
         return nullptr;
-
-    switch (this->type) {
-        case op_add:            return ast->Builder->CreateFAdd(L, R);
-        case op_sub:            return ast->Builder->CreateFSub(L, R);
-        case op_mul:            return ast->Builder->CreateFMul(L, R);
-        case op_div:            return ast->Builder->CreateFDiv(L, R);
-        case op_equal:          return ast->Builder->CreateICmpEQ(L, R);
-        case op_not_equal:      return ast->Builder->CreateICmpNE(L, R);
-        case op_greater:        return ast->Builder->CreateICmpSGT(L, R);
-        case op_less:           return ast->Builder->CreateICmpSLT(L, R);
-        case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
-        case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
-        case op_and:            return ast->Builder->CreateLogicalAnd(L, R);
-        case op_or:             return ast->Builder->CreateLogicalOr(L, R);
+    
+    if (L->getType() == llvm::Type::getDoubleTy(*(ast->TheContext))) {
+        switch (this->type) {
+            case op_add:            return ast->Builder->CreateFAdd(L, R);
+            case op_sub:            return ast->Builder->CreateFSub(L, R);
+            case op_mul:            return ast->Builder->CreateFMul(L, R);
+            case op_div:            return ast->Builder->CreateFDiv(L, R);
+            case op_equal:          return ast->Builder->CreateFCmpOEQ(L, R);
+            case op_not_equal:      return ast->Builder->CreateFCmpONE(L, R);
+            case op_greater:        return ast->Builder->CreateFCmpOGT(L, R);
+            case op_less:           return ast->Builder->CreateFCmpOLT(L, R);
+            case op_greater_equal:  return ast->Builder->CreateFCmpOGE(L, R);
+            case op_less_equal:     return ast->Builder->CreateFCmpOLE(L, R);
+            case op_and:            return ast->Builder->CreateLogicalAnd(L, R);
+            case op_or:             return ast->Builder->CreateLogicalOr(L, R);
+        }
+    } else if (L->getType() == llvm::Type::getInt64Ty(*(ast->TheContext))) {
+        switch (this->type) {
+            case op_add:            return ast->Builder->CreateAdd(L, R);
+            case op_sub:            return ast->Builder->CreateSub(L, R);
+            case op_mul:            return ast->Builder->CreateMul(L, R);
+            case op_div:            return ast->Builder->CreateSDiv(L, R);
+            case op_equal:          return ast->Builder->CreateICmpEQ(L, R);
+            case op_not_equal:      return ast->Builder->CreateICmpNE(L, R);
+            case op_greater:        return ast->Builder->CreateICmpSGT(L, R);
+            case op_less:           return ast->Builder->CreateICmpSLT(L, R);
+            case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
+            case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
+            case op_and:            return ast->Builder->CreateLogicalAnd(L, R);
+            case op_or:             return ast->Builder->CreateLogicalOr(L, R);
+        }
     }
     return nullptr;
 }

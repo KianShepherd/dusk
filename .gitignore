@@ -4,6 +4,8 @@ src/scanner.cc
 src/parser.output
 dusk
 CMake/*
+output.o
+out
 
 .ccls
 compile_commands.json
