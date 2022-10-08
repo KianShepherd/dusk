@@ -13,6 +13,10 @@ void ExpressionStatement::fold(AST* ast) {
     this->expr = this->expr->fold(ast);
 }
 
+llvm::Value* ExpressionStatement::codegen() {
+    return nullptr;
+}
+
 StatementBlock::StatementBlock(std::vector<Statement*> statements) {
     this->statements = statements;
 }
@@ -34,6 +38,10 @@ void StatementBlock::fold(AST* ast) {
     ast->pop_scope();
 }
 
+llvm::Value* StatementBlock::codegen() {
+    return nullptr;
+}
+
 ReturnStatement::ReturnStatement(Expression* expr) {
     this->expr = expr;
 }
@@ -45,6 +53,10 @@ void ReturnStatement::debug(size_t depth) {
 
 void ReturnStatement::fold(AST* ast) {
     this->expr = this->expr->fold(ast);
+}
+
+llvm::Value* ReturnStatement::codegen() {
+    return nullptr;
 }
 
 AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type) {
@@ -75,6 +87,10 @@ void AssignmentStatement::fold(AST* ast) {
     ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->value, this->mut));
 }
 
+llvm::Value* AssignmentStatement::codegen() {
+    return nullptr;
+}
+
 IfStatement::IfStatement(Expression* condition, Statement* block1, Statement* block2) {
     this->condition = condition;
     this->block1 = block1;
@@ -98,6 +114,10 @@ void IfStatement::fold(AST* ast) {
     this->block2->fold(ast);
 }
 
+llvm::Value* IfStatement::codegen() {
+    return nullptr;
+}
+
 WhileStatement::WhileStatement(Expression* cond, Statement* block) {
     this->condition = cond;
     this->block = block;
@@ -113,4 +133,8 @@ void WhileStatement::debug(size_t depth) {
 void WhileStatement::fold(AST* ast) {
     this->condition = this->condition->fold(ast);
     this->block->fold(ast);
+}
+
+llvm::Value* WhileStatement::codegen() {
+    return nullptr;
 }

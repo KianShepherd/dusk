@@ -56,6 +56,8 @@ public:
     virtual void debug(size_t depth) {};
     virtual Expression* fold(AST* ast) { return nullptr; };
     virtual ExpType get_type() { return t_undef; };
+
+    virtual llvm::Value* codegen() = 0;
 };
 
 class ExpressionAtomic : public Expression {
@@ -72,8 +74,10 @@ public:
     ExpType get_type() override { return t_atomic; };
     AtomType get_atomic_type() { return this->type; };
     uintptr_t get_value();
-    std::string str;
 
+    llvm::Value* codegen() override;
+
+    std::string str;
     double floating;
     long long number;
     bool boolean;
@@ -88,6 +92,8 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_binary; };
+
+    llvm::Value* codegen() override;
 private:
     Expression* lhs;
     Expression* rhs;
@@ -101,6 +107,8 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_unary; };
+
+    llvm::Value* codegen() override;
 private:
     Expression* operand;
     std::string op;
@@ -113,6 +121,8 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_assignment; };
+
+    llvm::Value* codegen() override;
 private:
     class Expression* identifier;
     class Expression* value;
@@ -125,4 +135,6 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_break; };
+
+    llvm::Value* codegen() override;
 };

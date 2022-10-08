@@ -1,4 +1,15 @@
 #pragma once
+#include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Verifier.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -11,6 +22,7 @@ class Statement {
 public:
     virtual void debug(size_t depth) {};
     virtual void fold(AST* ast) {};
+    virtual llvm::Value* codegen() = 0;
 };
 
 
@@ -20,6 +32,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
+    llvm::Value* codegen() override;
 private:
     Expression* expr;
 };
@@ -30,6 +43,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
+    llvm::Value* codegen() override;
 
     std::vector<Statement*> statements;
 };
@@ -40,6 +54,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
+    llvm::Value* codegen() override;
 private:
     Expression* expr;
 };
@@ -50,6 +65,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
+    llvm::Value* codegen() override;
 private:
     Expression* identifier;
     Expression* value;
@@ -63,6 +79,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
+    llvm::Value* codegen() override;
 private:
     Expression* condition;
     Statement* block1;
@@ -75,6 +92,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
+    llvm::Value* codegen() override;
 private:
     Expression* condition;
     Statement* block;

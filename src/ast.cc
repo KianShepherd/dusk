@@ -5,6 +5,12 @@ AST::AST() {
     this->error = false;
     this->err = std::stringstream();
     this->scope = new ScopeFrame();
+
+    this->TheContext = std::make_unique<llvm::LLVMContext>();
+    this->TheModule = std::make_unique<llvm::Module>("dusk", *(this->TheContext));
+
+    // Create a new builder for the module.
+    this->Builder = std::make_unique<llvm::IRBuilder<>>(*(this->TheContext));
 }
 
 void AST::push_function(Function* function) {

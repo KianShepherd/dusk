@@ -51,3 +51,7 @@ void Function::debug() {
 void Function::fold(AST* ast) {
     this->statements->fold(ast);
 }
+
+llvm::Function* Function::codegen() {
+    return nullptr;
+}

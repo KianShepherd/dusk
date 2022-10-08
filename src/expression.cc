@@ -56,6 +56,10 @@ Expression* ExpressionAtomic::fold(AST* ast) {
     return (Expression*)this;
 }
 
+llvm::Value* ExpressionAtomic::codegen() {
+    return nullptr;
+}
+
 BinaryExpression::BinaryExpression(Expression* l, Expression* r, Operators t) {
     this->lhs = l;
     this->rhs = r;
@@ -134,6 +138,10 @@ Expression* BinaryExpression::fold(AST* ast) {
     return this;
 }
 
+llvm::Value* BinaryExpression::codegen() {
+    return nullptr;
+}
+
 UnaryExpression::UnaryExpression(Expression* expr, std::string op) {
     this->operand = expr;
     this->op = op;
@@ -168,6 +176,10 @@ Expression* UnaryExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
+llvm::Value* UnaryExpression::codegen() {
+    return nullptr;
+}
+
 AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* value) {
     this->identifier = identifier;
     this->value = value;
@@ -184,6 +196,10 @@ Expression* AssignmentExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
+llvm::Value* AssignmentExpression::codegen() {
+    return nullptr;
+}
+
 BreakExpression::BreakExpression() {
 
 }
@@ -194,4 +210,8 @@ void BreakExpression::debug(size_t depth) {
 
 Expression* BreakExpression::fold(AST* ast) {
     return (Expression*)this;
+}
+
+llvm::Value* BreakExpression::codegen() {
+    return nullptr;
 }
