@@ -22,7 +22,7 @@ class Statement {
 public:
     virtual void debug(size_t depth) {};
     virtual void fold(AST* ast) {};
-    virtual llvm::Value* codegen() = 0;
+    virtual llvm::Value* codegen(AST* ast) = 0;
 };
 
 
@@ -32,7 +32,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 private:
     Expression* expr;
 };
@@ -43,7 +43,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 
     std::vector<Statement*> statements;
 };
@@ -54,7 +54,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 private:
     Expression* expr;
 };
@@ -65,7 +65,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 private:
     Expression* identifier;
     Expression* value;
@@ -79,7 +79,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 private:
     Expression* condition;
     Statement* block1;
@@ -92,7 +92,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 private:
     Expression* condition;
     Statement* block;

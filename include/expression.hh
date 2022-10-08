@@ -57,7 +57,7 @@ public:
     virtual Expression* fold(AST* ast) { return nullptr; };
     virtual ExpType get_type() { return t_undef; };
 
-    virtual llvm::Value* codegen() = 0;
+    virtual llvm::Value* codegen(AST* ast) = 0;
 };
 
 class ExpressionAtomic : public Expression {
@@ -75,7 +75,7 @@ public:
     AtomType get_atomic_type() { return this->type; };
     uintptr_t get_value();
 
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 
     std::string str;
     double floating;
@@ -93,7 +93,7 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_binary; };
 
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 private:
     Expression* lhs;
     Expression* rhs;
@@ -108,7 +108,7 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_unary; };
 
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 private:
     Expression* operand;
     std::string op;
@@ -122,7 +122,7 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_assignment; };
 
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 private:
     class Expression* identifier;
     class Expression* value;
@@ -136,5 +136,5 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_break; };
 
-    llvm::Value* codegen() override;
+    llvm::Value* codegen(AST* ast) override;
 };

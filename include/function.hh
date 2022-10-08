@@ -24,7 +24,7 @@ public:
     void debug();
     void fold(AST* ast);
 
-    llvm::Function* codegen();
+    llvm::Function* codegen(AST* ast);
 private:
     std::string name;
     Statement* statements;

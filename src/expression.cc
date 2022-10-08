@@ -56,7 +56,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* ExpressionAtomic::codegen() {
+llvm::Value* ExpressionAtomic::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -138,7 +138,7 @@ Expression* BinaryExpression::fold(AST* ast) {
     return this;
 }
 
-llvm::Value* BinaryExpression::codegen() {
+llvm::Value* BinaryExpression::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -176,7 +176,7 @@ Expression* UnaryExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* UnaryExpression::codegen() {
+llvm::Value* UnaryExpression::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -196,7 +196,7 @@ Expression* AssignmentExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* AssignmentExpression::codegen() {
+llvm::Value* AssignmentExpression::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -212,6 +212,6 @@ Expression* BreakExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* BreakExpression::codegen() {
+llvm::Value* BreakExpression::codegen(AST* ast) {
     return nullptr;
 }

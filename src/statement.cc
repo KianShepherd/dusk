@@ -13,7 +13,7 @@ void ExpressionStatement::fold(AST* ast) {
     this->expr = this->expr->fold(ast);
 }
 
-llvm::Value* ExpressionStatement::codegen() {
+llvm::Value* ExpressionStatement::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -38,7 +38,7 @@ void StatementBlock::fold(AST* ast) {
     ast->pop_scope();
 }
 
-llvm::Value* StatementBlock::codegen() {
+llvm::Value* StatementBlock::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -55,7 +55,7 @@ void ReturnStatement::fold(AST* ast) {
     this->expr = this->expr->fold(ast);
 }
 
-llvm::Value* ReturnStatement::codegen() {
+llvm::Value* ReturnStatement::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -87,7 +87,7 @@ void AssignmentStatement::fold(AST* ast) {
     ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->value, this->mut));
 }
 
-llvm::Value* AssignmentStatement::codegen() {
+llvm::Value* AssignmentStatement::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -114,7 +114,7 @@ void IfStatement::fold(AST* ast) {
     this->block2->fold(ast);
 }
 
-llvm::Value* IfStatement::codegen() {
+llvm::Value* IfStatement::codegen(AST* ast) {
     return nullptr;
 }
 
@@ -135,6 +135,6 @@ void WhileStatement::fold(AST* ast) {
     this->block->fold(ast);
 }
 
-llvm::Value* WhileStatement::codegen() {
+llvm::Value* WhileStatement::codegen(AST* ast) {
     return nullptr;
 }
