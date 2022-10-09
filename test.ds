@@ -1,4 +1,4 @@
 fn main(argc: int, argv:string) -> int {
-    1 + 1;
-    2+2;
+    return 1 + 1;
+    return 2+2;
 }

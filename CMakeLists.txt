@@ -41,7 +41,7 @@ set(HEADER_FILES
 
 add_executable(Dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
 
-llvm_map_components_to_libnames(llvm_libs support core remarks demangle BinaryFormat BitstreamReader)
+llvm_map_components_to_libnames(all)
 
 # Link against LLVM libraries
 target_link_libraries(Dusk ${llvm_libs})

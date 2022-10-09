@@ -101,17 +101,10 @@ llvm::Function* Function::codegen(AST* ast) {
     for (auto &Arg : TheFunction->args())
         ast->NamedValues[std::string(Arg.getName())] = &Arg;
 
-    if (llvm::Value *RetVal = this->statements->codegen(ast)) {
-        // Finish off the function.
-        ast->Builder->CreateRet(RetVal);
+    this->statements->codegen(ast);
 
-        // Validate the generated code, checking for consistency.
-        llvm::verifyFunction(*TheFunction);
+    // Validate the generated code, checking for consistency.
+    llvm::verifyFunction(*TheFunction);
 
-        return TheFunction;
-    }
-
-    // Error reading body, remove function.
-    TheFunction->eraseFromParent();
-    return nullptr;
+    return TheFunction;
 }
