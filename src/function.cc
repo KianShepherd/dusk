@@ -98,13 +98,18 @@ llvm::Function* Function::codegen(AST* ast) {
 
     // Record the function arguments in the NamedValues map.
     ast->NamedValues.clear();
-    for (auto &Arg : TheFunction->args())
-        ast->NamedValues[std::string(Arg.getName())] = &Arg;
+    for (auto &Arg : TheFunction->args()) {
+        Arg.dump();
+        llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg.getName()), Arg.getType());
+        ast->Builder->CreateStore(&Arg, Alloca);
+
+    // Add arguments to variable symbol table.
+        ast->NamedValues[std::string(Arg.getName())] = Alloca;
+    }
 
     this->statements->codegen(ast);
 
     // Validate the generated code, checking for consistency.
     llvm::verifyFunction(*TheFunction);
-
     return TheFunction;
 }

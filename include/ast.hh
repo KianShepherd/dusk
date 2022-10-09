@@ -20,6 +20,10 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Transforms/Utils.h"
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -75,7 +79,8 @@ public:
     std::unique_ptr<llvm::LLVMContext> TheContext;
     std::unique_ptr<llvm::Module> TheModule;
     std::unique_ptr<llvm::IRBuilder<>> Builder;
-    std::map<std::string, llvm::Value*> NamedValues;
+    std::unique_ptr<llvm::legacy::FunctionPassManager> TheFPM;
+    std::map<std::string, llvm::AllocaInst*> NamedValues;
 private:
     std::vector<Function*> functions;
     bool error;

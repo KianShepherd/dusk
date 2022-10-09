@@ -93,20 +93,17 @@ void AST::codegen() {
     auto Filename = "output.o";
     std::error_code EC;
     llvm::raw_fd_ostream dest(Filename, EC, llvm::sys::fs::OF_None);
-
     if (EC) {
         llvm::errs() << "Could not open file: " << EC.message();
         return;
     }
     llvm::legacy::PassManager pass;
     auto FileType = llvm::CGFT_ObjectFile;
-
     if (TargetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
         llvm::errs() << "TargetMachine can't emit a file of this type";
         return;
     }
-
-    pass.run(*TheModule);
+    pass.run(*(this->TheModule));
     dest.flush();
 }
 

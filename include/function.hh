@@ -15,6 +15,7 @@
 #include <vector>
 #include "expression.hh"
 #include "statement.hh"
+#include "helpers.hh"
 
 class AST;
 

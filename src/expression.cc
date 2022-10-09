@@ -66,7 +66,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
             llvm::Value *V = ast->NamedValues[this->str];
             if (!V)
                 return ast->LogErrorV("Unknown variable name");
-            return V;
+            return ast->Builder->CreateLoad(V->getType(), V, this->str.c_str());
         }
         case t_null: return nullptr;
         case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), false));
@@ -175,8 +175,10 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
     llvm::Value *R = this->rhs->codegen(ast);
     if (!L || !R)
         return nullptr;
+    L->dump();
+    R->dump();
     
-    if (L->getType() == llvm::Type::getDoubleTy(*(ast->TheContext))) {
+    if (L->getType() == llvm::Type::getDoubleTy(*(ast->TheContext)) || R->getType() == llvm::Type::getDoubleTy(*(ast->TheContext))) {
         switch (this->type) {
             case op_add:            return ast->Builder->CreateFAdd(L, R);
             case op_sub:            return ast->Builder->CreateFSub(L, R);
@@ -191,7 +193,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
-    } else if (L->getType() == llvm::Type::getInt64Ty(*(ast->TheContext))) {
+    } else if (L->getType() == llvm::Type::getInt64Ty(*(ast->TheContext)) || R->getType() == llvm::Type::getInt64Ty(*(ast->TheContext))) {
         switch (this->type) {
             case op_add:            return ast->Builder->CreateAdd(L, R);
             case op_sub:            return ast->Builder->CreateSub(L, R);
@@ -206,7 +208,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
-    } else if (L->getType() == llvm::Type::getInt1Ty(*(ast->TheContext))) {
+    } else if (L->getType() == llvm::Type::getInt1Ty(*(ast->TheContext)) || R->getType() == llvm::Type::getInt1Ty(*(ast->TheContext))) {
         switch (this->type) {
             case op_add:            return nullptr;
             case op_sub:            return nullptr;
@@ -298,7 +300,16 @@ Expression* AssignmentExpression::fold(AST* ast) {
 }
 
 llvm::Value* AssignmentExpression::codegen(AST* ast) {
-    return nullptr;
+    llvm::Value *Val = this->value->codegen(ast);
+    if (!Val)
+        return nullptr;
+
+    llvm::Value *Variable = ast->NamedValues[((ExpressionAtomic*)this->identifier)->str];
+    if (!Variable)
+        return ast->LogErrorV("Unknown variable name");
+
+    ast->Builder->CreateStore(Val, Variable);
+    return Val;
 }
 
 BreakExpression::BreakExpression() {
