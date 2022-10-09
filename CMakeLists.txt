@@ -31,6 +31,7 @@ set(SOURCES
     src/expression.cc
     src/statement.cc
     src/function.cc
+    src/helpers.cc
 )
 
 include_directories(include)
@@ -39,6 +40,7 @@ set(HEADER_FILES
     include/expression.hh
     include/function.hh
     include/statement.hh
+    include/helpers.hh
 )
 
 add_executable(Dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
