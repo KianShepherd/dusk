@@ -92,7 +92,29 @@ void AssignmentStatement::fold(AST* ast) {
 }
 
 llvm::Value* AssignmentStatement::codegen(AST* ast) {
-    return nullptr;
+    auto OldBindings = ast->NamedValues;
+
+    llvm::Function *TheFunction = ast->Builder->GetInsertBlock()->getParent();
+
+    // Register all variables and emit their initializer.
+    const std::string VarName = ((ExpressionAtomic*)this->identifier)->str;
+    Expression* Init = this->value;
+
+    // Emit the initializer before adding the variable to scope, this prevents
+    // the initializer from referencing the variable itself, and permits stuff
+    // like this:
+    //  var a = 1 in
+    //    var a = a in ...   # refers to outer 'a'.
+    llvm::Value* InitVal = Init->codegen(ast);
+
+    llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, VarName, InitVal->getType());
+    ast->Builder->CreateStore(InitVal, Alloca);
+
+    // Remember this binding.
+    ast->NamedValues[VarName] = Alloca;
+
+    // Return the body computation.
+    return InitVal;
 }
 
 IfStatement::IfStatement(Expression* condition, Statement* block1, Statement* block2) {

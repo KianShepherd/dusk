@@ -1,6 +1,7 @@
 fn foo(n: int) -> int {
-    n = n + 1;
-    return n;
+    let mut a:int = n;
+    a = a + 1;
+    return a;
 }
 
 fn main(argc: int, argv:string) -> int {

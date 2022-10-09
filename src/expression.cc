@@ -175,8 +175,6 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
     llvm::Value *R = this->rhs->codegen(ast);
     if (!L || !R)
         return nullptr;
-    L->dump();
-    R->dump();
     
     if (L->getType() == llvm::Type::getDoubleTy(*(ast->TheContext)) || R->getType() == llvm::Type::getDoubleTy(*(ast->TheContext))) {
         switch (this->type) {

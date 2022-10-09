@@ -14,6 +14,7 @@
 #include <iostream>
 #include <vector>
 #include "expression.hh"
+#include "helpers.hh"
 
 class AST;
 class ScopeValue;
