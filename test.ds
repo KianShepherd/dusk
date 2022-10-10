@@ -1,9 +1,13 @@
 fn foo(n: int) -> int {
-    let mut a:int = n;
-    a = a + 1;
+    let mut a: int = 1;
+    if n <= 1 {
+        a = 1;
+    } else {
+        a = foo(n - 1) * n;
+    }
     return a;
 }
 
 fn main(argc: float, argv: float) -> int {
-    return foo(3);
+    return foo(5);
 }
