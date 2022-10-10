@@ -7,10 +7,11 @@ Use the built-in continuous integration in GitLab.
 - [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
 - [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
 
-
 ## Description
 
 A simple programming language built from scratch.
+
+The build scripts use CMake and Ninja to find dependencies and build the project.
 
 Uses flex as a tokenizer.
 
@@ -18,45 +19,41 @@ Uses bison as a parser generator.
 
 The AST is generated with C++
 
-LLVM is used as a backend
+LLVM is used as a backend to generate machine specific object files which can be compiled with a c compiler into executables.
 
 ## Installation
 
+Build LLVM 
+
+```
+git clone https://github.com/llvm/llvm-project.git
+cd llvm-project
+mkdir build
+cd build
+cmake -G Ninja -DLLVM_ENABLE_ASSERTIONS=On -DCMAKE_BUILD_TYPE=Release ../llvm
+ninja
+ninja install
+```
+
 ### Ubuntu:
 
-Ensure you have flex and bison
+Ensure you have flex and bison and build tools 
 
 `sudo apt install cmake ninja-build flex libfl-dev bison libbison-dev`
 
-Build LLVM 
-
-`git clone https://github.com/llvm/llvm-project.git`
-
-`cd llvm-project`
-
-`mkdir build`
-
-`cd build`
-
-`cmake -G Ninja -DLLVM_ENABLE_ASSERTIONS=On -DCMAKE_BUILD_TYPE=Release ../llvm`
-
-`ninja`
-
-`ninja install`
-
 ### Mac OS
 
-Ensure you have flex and bison
+Ensure you have flex and bison and build tools
 
-`brew install bison flex cmake`
+`brew install bison flex cmake ninja`
 
 An old version of bison is the default version so you must relink a newer version to build Dusk
 
-`brew unlink bison`
-
-`brew link bison --force`
-
-`echo 'export PATH="/opt/homebrew/opt/bison/bin:$PATH"'>> ~/.zshrc`
+```
+brew unlink bison
+brew link bison --force
+echo 'export PATH="/opt/homebrew/opt/bison/bin:$PATH"'>> ~/.zshrc
+```
 
 ## Building
 
