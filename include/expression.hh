@@ -1,6 +1,6 @@
 #pragma once
 #include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/APSInt.h"
+#include "llvm/ADT/APInt.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
@@ -73,7 +73,7 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_atomic; };
-    AtomType get_atomic_type() { return this->type; };
+    AtomType get_atomic_type(AST* ast);
     uintptr_t get_value();
 
     llvm::Value* codegen(AST* ast) override;

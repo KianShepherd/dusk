@@ -44,15 +44,17 @@ void ExpressionAtomic::debug(size_t depth) {
     }
 }
 
-Expression* ExpressionAtomic::fold(AST* ast) {
+AtomType ExpressionAtomic::get_atomic_type(AST* ast) {
     if (this->type == t_identifier) {
         Expression* value = ast->scope->get_value(this->str);
-        if (value == nullptr) {
+        if (value == nullptr)
             ast->push_err("Attempted to lookup unknown identifier.");
-        } else if (value->get_type() == t_atomic) {
-            return (Expression*)value;
-        }
+        return ((ExpressionAtomic*)value)->get_atomic_type(ast);
     }
+    return this->type;
+}
+
+Expression* ExpressionAtomic::fold(AST* ast) {
     return (Expression*)this;
 }
 
@@ -121,53 +123,7 @@ void BinaryExpression::debug(size_t depth) {
 }
 
 Expression* BinaryExpression::fold(AST* ast) {
-    this->lhs = this->lhs->fold(ast);
-    this->rhs = this->rhs->fold(ast);
-    if (this->lhs->get_type() == t_atomic && this->rhs->get_type() == t_atomic) {
-        if (((ExpressionAtomic*)this->lhs)->get_atomic_type() != ((ExpressionAtomic*)this->rhs)->get_atomic_type()) {
-            ast->push_err("Can not apply binary expression to atomics of two different types.");
-            return this;
-        }
-        if (((ExpressionAtomic*)this->lhs)->type == t_number) {
-            switch (this->type) {
-                case op_add:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number +  ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_sub:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number -  ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_mul:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number *  ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_div:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number /  ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_equal:          return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number == ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_not_equal:      return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number != ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_greater:        return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number >  ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_less:           return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number <  ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_greater_equal:  return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number >= ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_less_equal:     return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number <= ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_and:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number && ((ExpressionAtomic*)this->rhs)->number); break;
-                case op_or:             return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->number || ((ExpressionAtomic*)this->rhs)->number); break;
-            }
-        } else if (((ExpressionAtomic*)this->lhs)->type == t_float) {
-            switch (this->type) {
-                case op_add:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating +  ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_sub:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating -  ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_mul:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating *  ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_div:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating /  ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_equal:          return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating == ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_not_equal:      return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating != ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_greater:        return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating >  ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_less:           return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating <  ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_greater_equal:  return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating >= ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_less_equal:     return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating <= ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_and:            return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating && ((ExpressionAtomic*)this->rhs)->floating); break;
-                case op_or:             return new ExpressionAtomic(((ExpressionAtomic*)this->lhs)->floating || ((ExpressionAtomic*)this->rhs)->floating); break;
-            }
-        } else if (((ExpressionAtomic*)this->lhs)->type == t_string) {
-            std::string s1 = ((ExpressionAtomic*)this->lhs)->str;
-            std::string s2 = ((ExpressionAtomic*)this->rhs)->str;
-            switch (this->type) {
-                case op_add: return new ExpressionAtomic(std::string("\"").append(s1).append(s2).append(std::string("\"")), false); break;
-                default: ast->push_err("Unknown binary operation applied to strings."); break;
-            }
-        }
-    }
-    return this;
+    return (Expression*)this;
 }
 
 llvm::Value* BinaryExpression::codegen(AST* ast) {
@@ -237,25 +193,6 @@ void UnaryExpression::debug(size_t depth) {
 }
 
 Expression* UnaryExpression::fold(AST* ast) {
-    this->operand = this->operand->fold(ast);
-    if (this->operand->get_type() == t_atomic){
-        if (this->op.compare("()") == 0) {
-            return this->operand;
-        }
-        if (((ExpressionAtomic*)this->operand)->type == t_number) {
-            if (this->op.compare("-") == 0){
-                return new ExpressionAtomic(-((ExpressionAtomic*)this->operand)->number);
-            }
-        } else if (((ExpressionAtomic*)this->operand)->type == t_float) {
-            if (this->op.compare("-") == 0){
-                return new ExpressionAtomic(-((ExpressionAtomic*)this->operand)->floating);
-            }
-        } else if (((ExpressionAtomic*)this->operand)->type == t_bool) {
-            if (this->op.compare("!") == 0){
-                return new ExpressionAtomic(!((ExpressionAtomic*)this->operand)->boolean);
-            }
-        }
-    }
     return (Expression*)this;
 }
 

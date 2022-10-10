@@ -144,14 +144,6 @@ void ScopeFrame::update_value(AST* ast, std::string identifier, ScopeValue* valu
     while (scope != nullptr) {
         auto iter = scope->variables.find(identifier);
         if (iter != scope->variables.end() ) {
-            if (!scope->variables[identifier]->mut) {
-                ast->push_err("Attempted to assign to non mutable variable");
-                break;
-            }
-            if (((ExpressionAtomic*)scope->variables[identifier]->value)->type != ((ExpressionAtomic*)value->value)->type) {
-                ast->push_err("Attempted to mutate variable to incorrect type");
-                break;
-            }
             scope->variables[identifier] = value;
             break;
         }

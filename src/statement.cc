@@ -187,7 +187,6 @@ llvm::Value* IfStatement::codegen(AST* ast) {
 
     PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 0, false)), ThenBB);
     PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 1, false)), ElseBB);
-    ast->TheModule->dump();
     return PN;
 }
 
