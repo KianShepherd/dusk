@@ -9,3 +9,4 @@ out
 
 .ccls
 compile_commands.json
+.cache/*

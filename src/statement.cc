@@ -106,8 +106,14 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
     //  var a = 1 in
     //    var a = a in ...   # refers to outer 'a'.
     llvm::Value* InitVal = Init->codegen(ast);
-
-    llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, VarName, InitVal->getType());
+    llvm::Type* init_type;
+    switch (this->type) {
+        case t_bool: init_type = llvm::Type::getInt1Ty(*(ast->TheContext)); break;
+        case t_number: init_type = llvm::Type::getInt64Ty(*(ast->TheContext)); break;
+        case t_float: init_type = llvm::Type::getDoubleTy(*(ast->TheContext)); break;
+        default: return nullptr; break;
+    }
+    llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, VarName, init_type);
     ast->Builder->CreateStore(InitVal, Alloca);
 
     // Remember this binding.

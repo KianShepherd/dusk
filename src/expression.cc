@@ -66,7 +66,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
             llvm::Value *V = ast->NamedValues[this->str];
             if (!V)
                 return ast->LogErrorV("Unknown variable name");
-            return ast->Builder->CreateLoad(V->getType(), V, this->str.c_str());
+            return ast->Builder->CreateLoad(llvm::Type::getInt64Ty(*(ast->TheContext)), V, this->str.c_str());
         }
         case t_null: return nullptr;
         case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), false));
@@ -175,6 +175,9 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
     llvm::Value *R = this->rhs->codegen(ast);
     if (!L || !R)
         return nullptr;
+    L->dump();
+    R->dump();
+    ast->TheModule->dump();
     
     if (L->getType() == llvm::Type::getDoubleTy(*(ast->TheContext)) || R->getType() == llvm::Type::getDoubleTy(*(ast->TheContext))) {
         switch (this->type) {
