@@ -117,7 +117,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
     ast->Builder->CreateStore(InitVal, Alloca);
 
     // Remember this binding.
-    ast->NamedValues[VarName] = Alloca;
+    ast->NamedValues[VarName] = std::make_pair(Alloca, init_type);
 
     // Return the body computation.
     return InitVal;

@@ -4,6 +4,6 @@ fn foo(n: int) -> int {
     return a;
 }
 
-fn main(argc: int, argv:string) -> int {
+fn main(argc: float, argv: float) -> int {
     return foo(3);
 }

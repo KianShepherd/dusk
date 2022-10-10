@@ -80,7 +80,7 @@ public:
     std::unique_ptr<llvm::Module> TheModule;
     std::unique_ptr<llvm::IRBuilder<>> Builder;
     std::unique_ptr<llvm::legacy::FunctionPassManager> TheFPM;
-    std::map<std::string, llvm::AllocaInst*> NamedValues;
+    std::map<std::string, std::pair<llvm::AllocaInst*, llvm::Type*>> NamedValues;
 private:
     std::vector<Function*> functions;
     bool error;

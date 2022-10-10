@@ -10,13 +10,14 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
     this->indentifier_type = std::vector<AtomType>();
     for (size_t i = 0; i < this->arg_count; i++) {
         this->indentifiers.push_back(new ExpressionAtomic(std::string(args[i][0]), true));
-        if (args[i][0].compare("int")) {
+        std::cout << "'" << args[i][1] << "'" << std::endl;
+        if (args[i][1].compare("int") == 0) {
             this->indentifier_type.push_back(t_number);
-        } else if (args[i][0].compare("float")) {
+        } else if (args[i][1].compare("float") == 0) {
             this->indentifier_type.push_back(t_float);
-        } else if (args[i][0].compare("bool")) {
+        } else if (args[i][1].compare("bool") == 0) {
             this->indentifier_type.push_back(t_bool);
-        } else if (args[i][0].compare("string")) {
+        } else if (args[i][1].compare("string") == 0) {
             this->indentifier_type.push_back(t_string);
         }
     }
@@ -63,7 +64,7 @@ llvm::Function* Function::codegen(AST* ast) {
         for (size_t i = 0; i < this->arg_count; i++) {
             switch (this->indentifier_type[i]) {
                 case t_number: func_args.push_back(llvm::Type::getInt64Ty(*(ast->TheContext))); break;
-                case t_float: func_args.push_back(llvm::Type::getFloatTy(*(ast->TheContext))); break;
+                case t_float: func_args.push_back(llvm::Type::getDoubleTy(*(ast->TheContext))); break;
                 case t_bool: func_args.push_back(llvm::Type::getInt1Ty(*(ast->TheContext))); break;
                 case t_string: return nullptr; break;
                 default: break;
@@ -72,7 +73,7 @@ llvm::Function* Function::codegen(AST* ast) {
         llvm::FunctionType *FT = nullptr;
         switch (this->type) {
             case t_number: FT = llvm::FunctionType::get(llvm::Type::getInt64Ty(*(ast->TheContext)), func_args, false); break;
-            case t_float: FT = llvm::FunctionType::get(llvm::Type::getFloatTy(*(ast->TheContext)), func_args, false); break;
+            case t_float: FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*(ast->TheContext)), func_args, false); break;
             case t_string: FT = nullptr; break;
             case t_null: FT = llvm::FunctionType::get(llvm::Type::getVoidTy(*(ast->TheContext)), func_args, false); break;
             case t_bool: FT = llvm::FunctionType::get(llvm::Type::getInt1Ty(*(ast->TheContext)), func_args, false); break;
@@ -84,8 +85,10 @@ llvm::Function* Function::codegen(AST* ast) {
 
         // Set names for all arguments.
         unsigned Idx = 0;
-        for (auto &Arg : F->args())
+        for (auto &Arg : F->args()) {
             Arg.setName(((ExpressionAtomic*)this->indentifiers[Idx++])->str);
+        }
+            
         TheFunction = F;
     }
 
@@ -99,12 +102,11 @@ llvm::Function* Function::codegen(AST* ast) {
     // Record the function arguments in the NamedValues map.
     ast->NamedValues.clear();
     for (auto &Arg : TheFunction->args()) {
-        Arg.dump();
         llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg.getName()), Arg.getType());
         ast->Builder->CreateStore(&Arg, Alloca);
 
-    // Add arguments to variable symbol table.
-        ast->NamedValues[std::string(Arg.getName())] = Alloca;
+        // Add arguments to variable symbol table.
+        ast->NamedValues[std::string(Arg.getName())] = std::make_pair(Alloca, Arg.getType());
     }
 
     this->statements->codegen(ast);

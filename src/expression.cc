@@ -63,10 +63,10 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
         case t_string: return nullptr;
         case t_identifier: {
             // Look this variable up in the function.
-            llvm::Value *V = ast->NamedValues[this->str];
+            llvm::Value *V = ast->NamedValues[this->str].first;
             if (!V)
                 return ast->LogErrorV("Unknown variable name");
-            return ast->Builder->CreateLoad(llvm::Type::getInt64Ty(*(ast->TheContext)), V, this->str.c_str());
+            return ast->Builder->CreateLoad(ast->NamedValues[this->str].second, V, this->str.c_str());
         }
         case t_null: return nullptr;
         case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), false));
@@ -175,9 +175,6 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
     llvm::Value *R = this->rhs->codegen(ast);
     if (!L || !R)
         return nullptr;
-    L->dump();
-    R->dump();
-    ast->TheModule->dump();
     
     if (L->getType() == llvm::Type::getDoubleTy(*(ast->TheContext)) || R->getType() == llvm::Type::getDoubleTy(*(ast->TheContext))) {
         switch (this->type) {
@@ -305,7 +302,7 @@ llvm::Value* AssignmentExpression::codegen(AST* ast) {
     if (!Val)
         return nullptr;
 
-    llvm::Value *Variable = ast->NamedValues[((ExpressionAtomic*)this->identifier)->str];
+    llvm::Value *Variable = ast->NamedValues[((ExpressionAtomic*)this->identifier)->str].first;
     if (!Variable)
         return ast->LogErrorV("Unknown variable name");
 
