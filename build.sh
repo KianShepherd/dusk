@@ -5,7 +5,7 @@ ninja -C CMake
 mv CMake/Dusk dusk
 
 ./dusk test.ds
-g++ output.o -o out
+g++ CMake/libdusk.so output.o -o out
 rm output.o
 ./out
 echo $?
