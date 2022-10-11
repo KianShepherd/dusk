@@ -1,28 +1,16 @@
-fn foo(n: int) -> int {
-    let mut a: int = 1;
+fn fact(n :int) -> int {
+    let mut a :int = 1;
     if n <= 1 {
         a = 1;
     } else {
-        a = foo(n - 1) * n;
+        a = n * fact(n - 1);
     }
     return a;
 }
 
-fn bar(n: int) -> int {
-    let mut res: int = 1;
-    if (n <= 2) {
-        res = 1;
-    } else {
-        res = bar(n - 1) + bar(n - 2);
-    }
-
-    return res;
-}
-
 fn main(argc: float, argv: float) -> int {
-    printi(foo(5));
-    printi(foo(10));
-    printi(foo(15));
-    printi(foo(20));
+    for (let mut a: int = 1; a < 10; a = a +1) {
+        printi(fact(a));
+    }
     return 1;
 }

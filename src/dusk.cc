@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
         std::cout << "==================================" << std::endl;
     ast.codegen((char)debuging);
 
-    system("g++ output.o -lstddusk -o out");
-    system("rm -f output.o");
+    rc = system("g++ output.o -lstddusk -o out");
+    rc = system("rm -f output.o");
     return 0;
 }

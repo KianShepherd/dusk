@@ -208,5 +208,55 @@ void WhileStatement::fold(AST* ast) {
 }
 
 llvm::Value* WhileStatement::codegen(AST* ast) {
-    return nullptr;
+    llvm::Value *StartVal = this->condition->codegen(ast);
+    if (!StartVal)
+        return nullptr;
+
+    // Make the new basic block for the loop header, inserting after current
+    // block.
+    llvm::Function *TheFunction = ast->Builder->GetInsertBlock()->getParent();
+    llvm::BasicBlock *PreheaderBB = ast->Builder->GetInsertBlock();
+    llvm::BasicBlock *LoopBB = llvm::BasicBlock::Create(*(ast->TheContext), "loop", TheFunction);
+
+    // Create the "after loop" block and insert it.
+    llvm::BasicBlock *LoopEndBB = ast->Builder->GetInsertBlock();
+    llvm::BasicBlock *AfterBB = llvm::BasicBlock::Create(*(ast->TheContext), "afterloop", TheFunction);
+
+    // Insert an explicit fall through from the current block to the LoopBB.
+    //ast->Builder->CreateBr(LoopBB);
+    ast->Builder->CreateCondBr(StartVal, LoopBB, AfterBB);
+
+    // Start insertion in LoopBB.
+    ast->Builder->SetInsertPoint(LoopBB);
+
+    // Start the PHI node with an entry for Start.
+    llvm::PHINode *Variable = ast->Builder->CreatePHI(llvm::Type::getInt1Ty(*(ast->TheContext)), 2, "looptmp");
+    Variable->addIncoming(StartVal, PreheaderBB);
+
+    // Within the loop, the variable is defined equal to the PHI node.  If it
+    // shadows an existing variable, we have to restore it, so save it now.
+    //Value *OldVal = NamedValues[VarName];
+    //NamedValues[VarName] = Variable;
+
+    // Emit the body of the loop.  This, like any other expr, can change the
+    // current BB.  Note that we ignore the value computed by the body, but don't
+    // allow an error.
+    this->block->codegen(ast);
+
+    // Compute the end condition.
+    llvm::Value *EndCond = this->condition->codegen(ast);
+    if (!EndCond)
+        return nullptr;
+
+
+    // Insert the conditional branch into the end of LoopEndBB.
+    ast->Builder->CreateCondBr(EndCond, LoopBB, AfterBB);
+
+    // Any new code will be inserted in AfterBB.
+    ast->Builder->SetInsertPoint(AfterBB);
+
+    // Add a new entry to the PHI node for the backedge.
+    Variable->addIncoming(StartVal, LoopEndBB);
+
+    return llvm::Constant::getNullValue(llvm::Type::getInt64Ty(*(ast->TheContext)));
 }

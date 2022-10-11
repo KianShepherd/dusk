@@ -22,7 +22,7 @@ AST::AST() {
     // Eliminate Common SubExpressions.
     TheFPM->add(llvm::createGVNPass());
     // Simplify the control flow graph (deleting unreachable blocks, etc).
-    TheFPM->add(llvm::createCFGSimplificationPass());
+    //TheFPM->add(llvm::createCFGSimplificationPass());
 
     TheFPM->doInitialization();
 }
