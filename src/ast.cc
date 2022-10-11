@@ -72,6 +72,34 @@ void AST::pop_scope() {
     }
 }
 
+void AST::stdlib() {
+    std::vector<std::tuple<std::string, llvm::FunctionType*, std::vector<std::string>>> functions;
+    functions.push_back(
+        std::make_tuple(
+            std::string("printi"),
+            llvm::FunctionType::get(llvm::Type::getInt64Ty(*(this->TheContext)), std::vector<llvm::Type*>{llvm::Type::getInt64Ty(*(this->TheContext))}, false),
+            std::vector<std::string>{std::string("a")}
+        )
+    );
+    functions.push_back(
+        std::make_tuple(
+            std::string("printd"),
+            llvm::FunctionType::get(llvm::Type::getInt64Ty(*(this->TheContext)), std::vector<llvm::Type*>{llvm::Type::getDoubleTy(*(this->TheContext))}, false),
+            std::vector<std::string>{std::string("a")}
+        )
+    );
+
+    for (auto &func : functions) {
+
+        llvm::Function *F = llvm::Function::Create(std::get<1>(func), llvm::Function::ExternalLinkage, std::get<0>(func), TheModule.get());
+
+        unsigned Idx = 0;
+        for (auto &Arg : F->args()) {
+            Arg.setName(std::get<2>(func)[Idx++]);
+        }
+    }
+}
+
 void AST::codegen() {
     auto TargetTriple = llvm::sys::getDefaultTargetTriple();
     llvm::InitializeAllTargetInfos();
@@ -99,6 +127,7 @@ void AST::codegen() {
     auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
     this->TheModule->setDataLayout(TargetMachine->createDataLayout());
     this->TheModule->setTargetTriple(TargetTriple);
+    this->stdlib();
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }

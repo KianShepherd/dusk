@@ -5,14 +5,12 @@
 #define DLLEXPORT
 #endif
 
-/// printd - printf that takes a double prints it as "%f\n", returning 0.
-extern "C" DLLEXPORT int printd(double X) {
+extern "C" DLLEXPORT long printd(double X) {
   printf("%f\n", X);
   return 0;
 }
 
-/// printi - printf that takes a double prints it as "%f\n", returning 0.
-extern "C" DLLEXPORT int printi(int X) {
-  printf("%d\n", X);
+extern "C" DLLEXPORT long printi(long X) {
+  printf("%ld\n", X);
   return 0;
 }

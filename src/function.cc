@@ -55,7 +55,6 @@ void Function::fold(AST* ast) {
 }
 
 llvm::Function* Function::codegen(AST* ast) {
-    // First, check for an existing function from a previous 'extern' declaration.
     llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);
 
     if (!TheFunction) {

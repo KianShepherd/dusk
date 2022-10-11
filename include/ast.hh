@@ -74,6 +74,7 @@ public:
     llvm::Value* LogErrorV(const char *Str);
 
     void codegen();
+    void stdlib();
 
     ScopeFrame* scope;
     std::unique_ptr<llvm::LLVMContext> TheContext;

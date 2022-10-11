@@ -9,5 +9,6 @@ fn foo(n: int) -> int {
 }
 
 fn main(argc: float, argv: float) -> int {
-    return foo(7);
+    printi(foo(7));
+    return 1;
 }

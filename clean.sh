@@ -5,4 +5,5 @@ rm src/parser.output
 rm dusk
 rm output.o
 rm out
+rm libdusk.so
 rm -rf CMake
