@@ -43,7 +43,7 @@ set(HEADER_FILES
     include/helpers.hh
 )
 
-add_library(dusk SHARED src/stdlib.cc)
+add_library(dusk src/stdlib.cc)
 add_executable(Dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
 
 llvm_map_components_to_libnames(all)

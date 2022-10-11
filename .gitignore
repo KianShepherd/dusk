@@ -6,7 +6,7 @@ dusk
 CMake/*
 output.o
 out
-libdusk.so
+libdusk.a
 
 .ccls
 compile_commands.json
