@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(Dusk VERSION 0.1)
+project(dusk VERSION 0.1)
 
 find_package(FLEX)
 find_package(BISON)
@@ -43,8 +43,8 @@ set(HEADER_FILES
     include/helpers.hh
 )
 
-add_library(dusk src/stdlib.cc)
-add_executable(Dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
+add_library(stddusk src/stdlib.cc)
+add_executable(dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
 
 llvm_map_components_to_libnames(all)
 
@@ -54,4 +54,8 @@ string(STRIP ${llvm_libraries} llvm_libraries)
 string(REPLACE "\n" " " llvm_libraries ${llvm_libraries})
 
 # Link against LLVM libraries
-target_link_libraries(Dusk ${llvm_libraries})
+target_link_libraries(dusk ${llvm_libraries})
+
+install(TARGETS stddusk dusk
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib)

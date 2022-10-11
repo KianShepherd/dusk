@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     }
     int rc = yyparse(ast);
     if (ast.check_error(std::string("Parse Error: "))) {
-        return 1;
+        return rc;
     }
     if (debuging)
         ast.debug();
@@ -41,5 +41,8 @@ int main(int argc, char** argv) {
     if (debuging)
         std::cout << "==================================" << std::endl;
     ast.codegen((char)debuging);
-    return rc;
+
+    system("g++ output.o -lstddusk -o out");
+    system("rm -f output.o");
+    return 0;
 }
