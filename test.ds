@@ -8,7 +8,32 @@ fn foo(n: int) -> int {
     return a;
 }
 
+fn bar(n: int) -> int {
+    let mut res: int = 1;
+    if (n <= 2) {
+        res = 1;
+    } else {
+        res = bar(n - 1) + bar(n - 2);
+    }
+
+    return res;
+}
+
 fn main(argc: float, argv: float) -> int {
-    printi(foo(9));
+    printi(foo(5));
+    printi(foo(10));
+    printi(foo(15));
+    printi(foo(20));
+    printi(bar(1));
+    printi(bar(2));
+    printi(bar(3));
+    printi(bar(4));
+    printi(bar(5));
+    printi(bar(6));
+    printi(bar(7));
+    printi(bar(8));
+    printi(bar(9));
+    printi(bar(10));
+    printi(bar(50));
     return 1;
 }
