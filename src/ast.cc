@@ -100,7 +100,7 @@ void AST::stdlib() {
     }
 }
 
-void AST::codegen() {
+void AST::codegen(char debug) {
     auto TargetTriple = llvm::sys::getDefaultTargetTriple();
     llvm::InitializeAllTargetInfos();
     llvm::InitializeAllTargets();
@@ -131,7 +131,8 @@ void AST::codegen() {
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }
-    this->TheModule->dump();
+    if (debug)
+        this->TheModule->dump();
 
     auto Filename = "output.o";
     std::error_code EC;

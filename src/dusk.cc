@@ -3,6 +3,8 @@
 #include "expression.hh"
 #include <string>
 
+#define debuging 0
+
 void yyerror(AST& ast, const char* msg) {
     std::string err_msg = std::string(msg);
     err_msg.append(" at line ");
@@ -28,13 +30,16 @@ int main(int argc, char** argv) {
     if (ast.check_error(std::string("Parse Error: "))) {
         return 1;
     }
-    ast.debug();
+    if (debuging)
+        ast.debug();
     ast.fold_const_expressions();
     if (ast.check_error(std::string("Logic Error: "))) {
         return 2;
     }
-    ast.debug();
-    std::cout << "==================================" << std::endl;
-    ast.codegen();
+    if (debuging)
+        ast.debug();
+    if (debuging)
+        std::cout << "==================================" << std::endl;
+    ast.codegen((char)debuging);
     return rc;
 }

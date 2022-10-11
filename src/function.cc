@@ -10,7 +10,6 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
     this->indentifier_type = std::vector<AtomType>();
     for (size_t i = 0; i < this->arg_count; i++) {
         this->indentifiers.push_back(new ExpressionAtomic(std::string(args[i][0]), true));
-        std::cout << "'" << args[i][1] << "'" << std::endl;
         if (args[i][1].compare("int") == 0) {
             this->indentifier_type.push_back(t_number);
         } else if (args[i][1].compare("float") == 0) {

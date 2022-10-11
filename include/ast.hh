@@ -73,7 +73,7 @@ public:
     void fold_const_expressions();
     llvm::Value* LogErrorV(const char *Str);
 
-    void codegen();
+    void codegen(char debug);
     void stdlib();
 
     ScopeFrame* scope;
