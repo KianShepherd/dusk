@@ -50,6 +50,11 @@ AtomType ExpressionAtomic::get_atomic_type(AST* ast) {
         if (value == t_null)
             ast->push_err("Attempted to lookup unknown identifier.");
         return value;
+    } else if (this->type == t_function_call) {
+        for (auto &func : ast->func_definitions) {
+            if (this->str.compare(std::get<0>(func)) == 0)
+                return std::get<1>(func);
+        }
     }
     return this->type;
 }
