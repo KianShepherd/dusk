@@ -186,6 +186,14 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
     return nullptr;
 }
 
+
+AtomType BinaryExpression::get_atomic_type(AST* ast) {
+    if (this->lhs->get_atomic_type(ast) != this->rhs->get_atomic_type(ast)) {
+        ast->push_err("Both operands of a binary operator must be of same type");
+    }
+    return this->lhs->get_atomic_type(ast);
+}
+
 UnaryExpression::UnaryExpression(Expression* expr, std::string op) {
     this->operand = expr;
     this->op = op;
@@ -223,6 +231,10 @@ llvm::Value* UnaryExpression::codegen(AST* ast) {
     return nullptr;
 }
 
+AtomType UnaryExpression::get_atomic_type(AST* ast) {
+    return this->operand->get_atomic_type(ast);
+}
+
 AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* value) {
     this->identifier = identifier;
     this->value = value;
@@ -252,6 +264,10 @@ llvm::Value* AssignmentExpression::codegen(AST* ast) {
     return Val;
 }
 
+AtomType AssignmentExpression::get_atomic_type(AST* ast) {
+    return this->value->get_atomic_type(ast);
+}
+
 BreakExpression::BreakExpression() {
 
 }
@@ -266,4 +282,8 @@ Expression* BreakExpression::fold(AST* ast) {
 
 llvm::Value* BreakExpression::codegen(AST* ast) {
     return nullptr;
+}
+
+AtomType BreakExpression::get_atomic_type(AST* ast) {
+    return t_null;
 }

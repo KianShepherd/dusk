@@ -57,6 +57,7 @@ public:
     virtual void debug(size_t depth) {};
     virtual Expression* fold(AST* ast) { return nullptr; };
     virtual ExpType get_type() { return t_undef; };
+    virtual AtomType get_atomic_type(AST* ast) { return t_null; };
 
     virtual llvm::Value* codegen(AST* ast) = 0;
 };
@@ -73,7 +74,7 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_atomic; };
-    AtomType get_atomic_type(AST* ast);
+    AtomType get_atomic_type(AST* ast) override;
     uintptr_t get_value();
 
     llvm::Value* codegen(AST* ast) override;
@@ -93,6 +94,7 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_binary; };
+    AtomType get_atomic_type(AST* ast) override;
 
     llvm::Value* codegen(AST* ast) override;
 private:
@@ -108,6 +110,7 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_unary; };
+    AtomType get_atomic_type(AST* ast) override;
 
     llvm::Value* codegen(AST* ast) override;
 private:
@@ -122,6 +125,7 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_assignment; };
+    AtomType get_atomic_type(AST* ast) override;
 
     llvm::Value* codegen(AST* ast) override;
 private:
@@ -136,6 +140,7 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_break; };
+    AtomType get_atomic_type(AST* ast) override;
 
     llvm::Value* codegen(AST* ast) override;
 };
