@@ -149,9 +149,9 @@ llvm::Value* AST::LogErrorV(const char *Str) {
     return nullptr;
 }
 
-ScopeValue::ScopeValue(Expression* value, bool mut) {
-    this->value = value;
+ScopeValue::ScopeValue(bool mut, AtomType type) {
     this->mut = mut;
+    this->type = type;
 }
 
 ScopeFrame::ScopeFrame() {
@@ -180,8 +180,15 @@ void ScopeFrame::update_value(AST* ast, std::string identifier, ScopeValue* valu
     ScopeFrame* scope = this;
     while (scope != nullptr) {
         auto iter = scope->variables.find(identifier);
-        if (iter != scope->variables.end() ) {
-            scope->variables[identifier] = value;
+        if (iter != scope->variables.end()) {
+            if (scope->variables[identifier]->mut) {
+                if (scope->variables[identifier]->type != value->type){
+                    std::cout << identifier<< std::endl;
+                    ast->push_err("Attempted to assign incorrect type.");
+                }
+            } else {
+                ast->push_err("Attempted to mutata static variable.");
+            }
             break;
         }
         scope = scope->prev_frame;
@@ -190,12 +197,12 @@ void ScopeFrame::update_value(AST* ast, std::string identifier, ScopeValue* valu
         ast->push_err("Undeclared variable found.");
 }
 
-Expression* ScopeFrame::get_value(std::string identifier) {
+AtomType ScopeFrame::get_value(std::string identifier) {
     auto iter = this->variables.find(identifier);
     if (iter != this->variables.end() ) {
-        return iter->second->value;
+        return iter->second->type;
     }
     if (this->prev_frame == nullptr)
-        return nullptr;
+        return t_null;
     return this->prev_frame->get_value(identifier);
 }

@@ -46,10 +46,10 @@ void ExpressionAtomic::debug(size_t depth) {
 
 AtomType ExpressionAtomic::get_atomic_type(AST* ast) {
     if (this->type == t_identifier) {
-        Expression* value = ast->scope->get_value(this->str);
-        if (value == nullptr)
+        AtomType value = ast->scope->get_value(this->str);
+        if (value == t_null)
             ast->push_err("Attempted to lookup unknown identifier.");
-        return ((ExpressionAtomic*)value)->get_atomic_type(ast);
+        return value;
     }
     return this->type;
 }
@@ -75,7 +75,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
         case t_function_call: {
             llvm::Function *CalleeF = ast->TheModule->getFunction(this->str);
             if (!CalleeF)
-            return ast->LogErrorV("Unknown function referenced");
+                return ast->LogErrorV("Unknown function referenced");
 
             // If argument mismatch error.
             if (CalleeF->arg_size() != this->args.size())
@@ -230,7 +230,7 @@ void AssignmentExpression::debug(size_t depth) {
 
 Expression* AssignmentExpression::fold(AST* ast) {
     this->value = this->value->fold(ast);
-    ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->value, true));
+    ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast)));
     return (Expression*)this;
 }
 

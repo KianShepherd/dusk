@@ -37,9 +37,9 @@ class AST;
 
 class ScopeValue {
 public:
-    ScopeValue(Expression* value, bool mut);
-    Expression* value;
+    ScopeValue(bool mut, AtomType type);
     bool mut;
+    AtomType type;
 };
 
 class ScopeFrame {
@@ -48,7 +48,7 @@ public:
     ScopeFrame(ScopeFrame* prev);
     ScopeFrame* new_scope();
 
-    Expression* get_value(std::string identifier);
+    AtomType get_value(std::string identifier);
     void push_value(std::string identifier, ScopeValue* value);
     void update_value(AST* ast, std::string identifier, ScopeValue* value);
 
