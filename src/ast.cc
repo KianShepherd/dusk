@@ -51,7 +51,10 @@ void AST::debug() {
     std::cout << "-----DEBUG-----" << std::endl;
 }
 
-void AST::fold_const_expressions() {
+void AST::static_checking() {
+    for (int i = 0; i < (int)this->functions.size(); i++) {
+        this->func_definitions.push_back(this->functions[i]->get_meta());
+    }
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->fold(this);
     }
@@ -73,31 +76,22 @@ void AST::pop_scope() {
 }
 
 void AST::stdlib() {
-    std::vector<std::tuple<std::string, llvm::FunctionType*, std::vector<std::string>>> functions;
-    functions.push_back(
-        std::make_tuple(
+    this->functions.push_back(
+        new Function(
             std::string("printi"),
-            llvm::FunctionType::get(llvm::Type::getInt64Ty(*(this->TheContext)), std::vector<llvm::Type*>{llvm::Type::getInt64Ty(*(this->TheContext))}, false),
-            std::vector<std::string>{std::string("a")}
+            nullptr,
+            t_number,
+            std::vector<std::vector<std::string>> {{std::string("a"), std::string("int")}}
         )
     );
-    functions.push_back(
-        std::make_tuple(
+    this->functions.push_back(
+        new Function(
             std::string("printd"),
-            llvm::FunctionType::get(llvm::Type::getInt64Ty(*(this->TheContext)), std::vector<llvm::Type*>{llvm::Type::getDoubleTy(*(this->TheContext))}, false),
-            std::vector<std::string>{std::string("a")}
+            nullptr,
+            t_number,
+            std::vector<std::vector<std::string>> {{std::string("a"), std::string("float")}}
         )
     );
-
-    for (auto &func : functions) {
-
-        llvm::Function *F = llvm::Function::Create(std::get<1>(func), llvm::Function::ExternalLinkage, std::get<0>(func), TheModule.get());
-
-        unsigned Idx = 0;
-        for (auto &Arg : F->args()) {
-            Arg.setName(std::get<2>(func)[Idx++]);
-        }
-    }
 }
 
 void AST::codegen(char debug) {
@@ -127,7 +121,6 @@ void AST::codegen(char debug) {
     auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
     this->TheModule->setDataLayout(TargetMachine->createDataLayout());
     this->TheModule->setTargetTriple(TargetTriple);
-    this->stdlib();
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }

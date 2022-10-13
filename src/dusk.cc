@@ -3,7 +3,7 @@
 #include "expression.hh"
 #include <string>
 
-#define debuging 0
+#define debuging 1
 
 void yyerror(AST& ast, const char* msg) {
     std::string err_msg = std::string(msg);
@@ -17,6 +17,7 @@ int main(int argc, char** argv) {
     yydebug = 1;
 #endif
     AST ast = AST();
+    ast.stdlib();
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         if (!yyin) {
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
     }
     if (debuging)
         ast.debug();
-    ast.fold_const_expressions();
+    ast.static_checking();
     if (ast.check_error(std::string("Logic Error: "))) {
         return 2;
     }

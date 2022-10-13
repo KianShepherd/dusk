@@ -70,7 +70,7 @@ public:
 
     bool check_error(std::string stage);
     void debug();
-    void fold_const_expressions();
+    void static_checking();
     llvm::Value* LogErrorV(const char *Str);
 
     void codegen(char debug);
@@ -82,6 +82,8 @@ public:
     std::unique_ptr<llvm::IRBuilder<>> Builder;
     std::unique_ptr<llvm::legacy::FunctionPassManager> TheFPM;
     std::map<std::string, std::pair<llvm::AllocaInst*, llvm::Type*>> NamedValues;
+
+    std::vector<std::tuple<std::string, AtomType, std::vector<AtomType>>> func_definitions;
 private:
     std::vector<Function*> functions;
     bool error;

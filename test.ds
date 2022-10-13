@@ -8,9 +8,22 @@ fn fact(n :int) -> int {
     return a;
 }
 
+fn bar(n :float) -> float {
+    let mut a :float = 1.0;
+    if n <= 1.0 {
+        a = 1.0;
+    } else {
+        a = n * bar(n - 1.0);
+    }
+    return a;
+}
+
 fn main(argc: float, argv: float) -> int {
     for (let mut a: int = 1; a < 10; a = a +1) {
         printi(fact(a));
+    }
+    for (let mut a: float= 1.0; a < 10.0; a = a +1.0) {
+        printd(bar(a));
     }
     return 1;
 }

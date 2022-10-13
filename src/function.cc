@@ -22,6 +22,9 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
     }
 }
 
+std::tuple<std::string, AtomType, std::vector<AtomType>> Function::get_meta() {
+    return std::make_tuple(this->name, this->type, this->indentifier_type);
+}
 void Function::debug() {
     switch (this->type) {
         case t_number: std::cout << "int"; break;
@@ -46,11 +49,16 @@ void Function::debug() {
         }
     }
     std::cout << std::endl;
-    this->statements->debug(0);
+    if (this->statements) {
+        this->statements->debug(0);
+    } else {
+        std::cout << "PROTO\n";
+    }
 }
 
 void Function::fold(AST* ast) {
-    this->statements->fold(ast);
+    if (this->statements)
+        this->statements->fold(ast);
 }
 
 llvm::Function* Function::codegen(AST* ast) {
@@ -92,6 +100,8 @@ llvm::Function* Function::codegen(AST* ast) {
 
     if (!TheFunction)
         return nullptr;
+    if (!this->statements)
+        return TheFunction;
 
     // Create a new basic block to start insertion into.
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(ast->TheContext), "entry", TheFunction);
@@ -108,7 +118,6 @@ llvm::Function* Function::codegen(AST* ast) {
     }
 
     this->statements->codegen(ast);
-
     // Validate the generated code, checking for consistency.
     llvm::verifyFunction(*TheFunction);
     ast->TheFPM->run(*TheFunction);
