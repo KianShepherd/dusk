@@ -1,11 +1,11 @@
 fn fact(n :int) -> int {
-    let mut y :int = 1;
+    let mut x :int = 1;
     if n <= 1 {
-        y = 1;
+        x = 1;
     } else {
-        y = n * fact(n - 1);
+        x = n * fact(n - 1);
     }
-    return y;
+    return x;
 }
 
 fn bar(n :float) -> float {
@@ -22,8 +22,8 @@ fn main(argc: float, argv: float) -> int {
     for (let mut a: int = 1; a < 10; a = a +1) {
         printi(fact(a));
     }
-    for (let mut b: float= 1.0; b < 10.0; b = b +1.0) {
-        printd(bar(b));
+    for (let mut a: float= 1.0; a < 10.0; a = a +1.0) {
+        printd(bar(a));
     }
     return 1;
 }
