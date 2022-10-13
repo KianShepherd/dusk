@@ -57,6 +57,10 @@ void Function::debug() {
 }
 
 void Function::fold(AST* ast) {
+    ast->scope->new_scope();
+    for (auto i = 0; i < this->arg_count; i++) {
+        ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(false, this->indentifier_type[i]));
+    }
     if (this->statements)
         this->statements->fold(ast);
 }

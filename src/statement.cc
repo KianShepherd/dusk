@@ -88,7 +88,7 @@ void AssignmentStatement::fold(AST* ast) {
     this->value = this->value->fold(ast);
     if (((ExpressionAtomic*)this->value)->type != this->type)
         ast->push_err("Attempted to assign incorrect type to variable");
-    ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, ((ExpressionAtomic*)this->value)->type));
+    ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->value->get_atomic_type(ast)));
 }
 
 llvm::Value* AssignmentStatement::codegen(AST* ast) {

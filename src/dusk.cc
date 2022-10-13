@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     }
     if (debuging)
         ast.debug();
-    //ast.static_checking();
+    ast.static_checking();
     if (ast.check_error(std::string("Logic Error: "))) {
         return 2;
     }
