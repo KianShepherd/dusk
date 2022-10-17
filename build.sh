@@ -1,5 +1,7 @@
-sudo ./clean.sh
+./clean.sh
 
 cmake -G Ninja -S . -B CMake
 ninja -C CMake
-sudo ninja -C CMake install
+
+./CMake/dusk test.ds
+./out

@@ -34,6 +34,13 @@ set(SOURCES
     src/helpers.cc
 )
 
+if(APPLE)
+    include_directories(/usr/local/include/llvm/include)
+    include_directories(/opt/homebrew/include)
+    link_directories(/usr/local/lib)
+    link_directories(/opt/homebrew/lib)
+endif()
+
 include_directories(include)
 set(HEADER_FILES
     include/ast.hh

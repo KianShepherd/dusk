@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
         std::cout << "==================================" << std::endl;
     ast.codegen((char)debuging);
 
-    rc = system("g++ output.o -lstddusk -o out");
+    rc = system("g++ output.o -L./CMake -lstddusk -o out");
     rc = system("rm -f output.o");
     return 0;
 }
