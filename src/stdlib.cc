@@ -16,3 +16,7 @@ extern "C" DLLEXPORT long printi(long X) {
   return 0;
 }
 
+extern "C" DLLEXPORT long printc(char X) {
+  printf("%d\n", X);
+  return 0;
+}

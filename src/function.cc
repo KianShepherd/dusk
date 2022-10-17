@@ -12,6 +12,8 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
         this->indentifiers.push_back(new ExpressionAtomic(std::string(args[i][0]), true));
         if (args[i][1].compare("int") == 0) {
             this->indentifier_type.push_back(t_number);
+        } else if (args[i][1].compare("char") == 0) {
+            this->indentifier_type.push_back(t_char);
         } else if (args[i][1].compare("float") == 0) {
             this->indentifier_type.push_back(t_float);
         } else if (args[i][1].compare("bool") == 0) {
@@ -28,6 +30,7 @@ std::tuple<std::string, AtomType, std::vector<AtomType>> Function::get_meta() {
 void Function::debug() {
     switch (this->type) {
         case t_number: std::cout << "int"; break;
+        case t_char: std::cout << "char"; break;
         case t_float: std::cout << "float"; break;
         case t_string: std::cout << "str"; break;
         case t_null: std::cout << "void"; break;
@@ -42,6 +45,7 @@ void Function::debug() {
         std::cout << ((ExpressionAtomic*)this->indentifiers[i])->str << " :";
         switch (this->indentifier_type[i]) {
             case t_number: std::cout << " int"; break;
+            case t_char: std::cout << " char"; break;
             case t_float: std::cout << " float"; break;
             case t_bool: std::cout << " bool"; break;
             case t_string: std::cout << " string"; break;
@@ -74,6 +78,7 @@ llvm::Function* Function::codegen(AST* ast) {
         for (size_t i = 0; i < this->arg_count; i++) {
             switch (this->indentifier_type[i]) {
                 case t_number: func_args.push_back(llvm::Type::getInt64Ty(*(ast->TheContext))); break;
+                case t_char: func_args.push_back(llvm::Type::getInt8Ty(*(ast->TheContext))); break;
                 case t_float: func_args.push_back(llvm::Type::getDoubleTy(*(ast->TheContext))); break;
                 case t_bool: func_args.push_back(llvm::Type::getInt1Ty(*(ast->TheContext))); break;
                 case t_string: return nullptr; break;
@@ -83,6 +88,7 @@ llvm::Function* Function::codegen(AST* ast) {
         llvm::FunctionType *FT = nullptr;
         switch (this->type) {
             case t_number: FT = llvm::FunctionType::get(llvm::Type::getInt64Ty(*(ast->TheContext)), func_args, false); break;
+            case t_char: FT = llvm::FunctionType::get(llvm::Type::getInt8Ty(*(ast->TheContext)), func_args, false); break;
             case t_float: FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*(ast->TheContext)), func_args, false); break;
             case t_string: FT = nullptr; break;
             case t_null: FT = llvm::FunctionType::get(llvm::Type::getVoidTy(*(ast->TheContext)), func_args, false); break;

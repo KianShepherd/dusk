@@ -86,6 +86,14 @@ void AST::stdlib() {
     );
     this->functions.push_back(
         new Function(
+            std::string("printc"),
+            nullptr,
+            t_number,
+            std::vector<std::vector<std::string>> {{std::string("a"), std::string("char")}}
+        )
+    );
+    this->functions.push_back(
+        new Function(
             std::string("printd"),
             nullptr,
             t_number,

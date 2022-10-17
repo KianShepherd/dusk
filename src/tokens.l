@@ -14,6 +14,7 @@
 %option outfile="src/scanner.cc"
 %%
 [0-9]+                  { yylval.str = new std::string(yytext, yyleng); return NUMBER;  }
+c[0-9]+                 { yylval.str = new std::string(yytext, yyleng); return CNUMBER;  }
 [0-9]+\.[0-9]+          { yylval.str = new std::string(yytext, yyleng); return DOUBLE;  }
 \"([^\\\"]|\\.)*\"      { yylval.str = new std::string(yytext, yyleng); return STRING;  }
 True                    { yylval.str = new std::string(yytext, yyleng); return TRUE;    }
@@ -48,6 +49,7 @@ int                     { return INT;      }
 void                    { return VOID;     }
 float                   { return FLOAT;    }
 bool                    { return BOOL;     }
+char                    { return CHAR;     }
 string                  { return STR;      }
 fn                      { return FUNCTION; }
 if                      { return IF;       }

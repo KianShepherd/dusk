@@ -24,6 +24,7 @@ enum AtomType {
     t_float,
     t_identifier,
     t_string,
+    t_char,
     t_null,
     t_function_call,
 };
@@ -68,6 +69,7 @@ public:
     ExpressionAtomic(double num);
     ExpressionAtomic(std::string str, bool is_identifier);
     ExpressionAtomic(bool b);
+    ExpressionAtomic(char c);
     ExpressionAtomic(std::string str, std::vector<Expression*> args);
     ExpressionAtomic();
 
@@ -81,6 +83,7 @@ public:
 
     std::string str;
     double floating;
+    char character;
     long long number;
     bool boolean;
     AtomType type;

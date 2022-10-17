@@ -76,6 +76,7 @@ void AssignmentStatement::debug(size_t depth) {
     switch (this->type) {
         case t_bool: std::cout << "bool "; break;
         case t_number: std::cout << "int "; break;
+        case t_char: std::cout << "char "; break;
         case t_float: std::cout << "float "; break;
         case t_string: std::cout << "string "; break;
         default: std::cerr << "Unknown type for assignment"; break;
@@ -111,6 +112,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
         case t_bool: init_type = llvm::Type::getInt1Ty(*(ast->TheContext)); break;
         case t_number: init_type = llvm::Type::getInt64Ty(*(ast->TheContext)); break;
         case t_float: init_type = llvm::Type::getDoubleTy(*(ast->TheContext)); break;
+        case t_char: init_type = llvm::Type::getInt8Ty(*(ast->TheContext)); break;
         default: return nullptr; break;
     }
     llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, VarName, init_type);

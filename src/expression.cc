@@ -16,6 +16,11 @@ ExpressionAtomic::ExpressionAtomic(std::string str, bool is_identifier) {
     this->type = (is_identifier)?t_identifier:t_string;
 }
 
+ExpressionAtomic::ExpressionAtomic(char character) {
+    this->character = character;
+    this->type = t_char;
+}
+
 ExpressionAtomic::ExpressionAtomic(bool b) {
     this->boolean = b;
     this->type = t_bool;
@@ -35,6 +40,7 @@ void ExpressionAtomic::debug(size_t depth) {
     switch (this->type) {
         case t_number: std::cout << std::string(depth * 4, ' ') << this->number << " : int"<< std::endl; break;
         case t_float: std::cout << std::string(depth * 4, ' ') << this->floating << " : float" << std::endl; break;
+        case t_char: std::cout << std::string(depth * 4, ' ') << this->character << " : char" << std::endl; break;
         case t_string: std::cout << std::string(depth * 4, ' ') << this->str << " - len = " << this->str.length() << " : str" << std::endl; break;
         case t_identifier: std::cout << std::string(depth * 4, ' ') << this->str << " - len = " << this->str.length() << " : identifier" << std::endl; break;
         case t_null: std::cout << std::string(depth * 4, ' ') << "null : null" << std::endl; break;
@@ -66,6 +72,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
 llvm::Value* ExpressionAtomic::codegen(AST* ast) {
     switch (this->type) {
         case t_number: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, this->number, true));
+        case t_char: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->character, true));
         case t_float: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat(this->floating));
         case t_string: return nullptr;
         case t_identifier: {
@@ -167,6 +174,21 @@ llvm::Value* BinaryExpression::codegen(AST* ast) {
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
+    } else if (L->getType() == llvm::Type::getInt8Ty(*(ast->TheContext)) || R->getType() == llvm::Type::getInt8Ty(*(ast->TheContext))) {
+        switch (this->type) {
+            case op_add:            return ast->Builder->CreateAdd(L, R);
+            case op_sub:            return ast->Builder->CreateSub(L, R);
+            case op_mul:            return ast->Builder->CreateMul(L, R);
+            case op_div:            return ast->Builder->CreateSDiv(L, R);
+            case op_equal:          return ast->Builder->CreateICmpEQ(L, R);
+            case op_not_equal:      return ast->Builder->CreateICmpNE(L, R);
+            case op_greater:        return ast->Builder->CreateICmpSGT(L, R);
+            case op_less:           return ast->Builder->CreateICmpSLT(L, R);
+            case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
+            case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
+            case op_and:            return nullptr;
+            case op_or:             return nullptr;
+        }
     } else if (L->getType() == llvm::Type::getInt1Ty(*(ast->TheContext)) || R->getType() == llvm::Type::getInt1Ty(*(ast->TheContext))) {
         switch (this->type) {
             case op_add:            return nullptr;
@@ -222,6 +244,10 @@ llvm::Value* UnaryExpression::codegen(AST* ast) {
     } else if (L->getType() == llvm::Type::getInt64Ty(*(ast->TheContext))) {
         if (this->op.compare("-") == 0) {
             return ast->Builder->CreateMul(L, llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, -1, true)));
+        }
+    } else if (L->getType() == llvm::Type::getInt8Ty(*(ast->TheContext))) {
+        if (this->op.compare("-") == 0) {
+            return ast->Builder->CreateMul(L, llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, -1, true)));
         }
     } else if (L->getType() == llvm::Type::getInt1Ty(*(ast->TheContext))) {
         if (this->op.compare("!") == 0) {

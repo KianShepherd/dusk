@@ -1,3 +1,13 @@
+fn factc(n: char) -> char {
+    let mut x :char= c1;
+    if n <= c1 {
+        x = c1;
+    } else {
+        x = n * factc(n - c1);
+    }
+    return x;
+}
+
 fn fact(n :int) -> int {
     let mut x :int = 1;
     if n <= 1 {
@@ -24,6 +34,9 @@ fn main(argc: float, argv: float) -> int {
     }
     for (let mut a: float= 1.0; a < 10.0; a = a +1.0) {
         printd(bar(a));
+    }
+    for (let mut a: char= c1; a < c6; a = a + c1) {
+        printc(factc(a));
     }
     return 1;
 }
