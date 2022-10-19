@@ -81,7 +81,7 @@ llvm::Function* Function::codegen(AST* ast) {
                 case t_char: func_args.push_back(llvm::Type::getInt8Ty(*(ast->TheContext))); break;
                 case t_float: func_args.push_back(llvm::Type::getDoubleTy(*(ast->TheContext))); break;
                 case t_bool: func_args.push_back(llvm::Type::getInt1Ty(*(ast->TheContext))); break;
-                case t_string: return nullptr; break;
+                case t_string: func_args.push_back(llvm::Type::getInt8PtrTy(*(ast->TheContext))); break;
                 default: break;
             }
         }

@@ -113,6 +113,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
         case t_number: init_type = llvm::Type::getInt64Ty(*(ast->TheContext)); break;
         case t_float: init_type = llvm::Type::getDoubleTy(*(ast->TheContext)); break;
         case t_char: init_type = llvm::Type::getInt8Ty(*(ast->TheContext)); break;
+        case t_string: init_type = llvm::Type::getInt8PtrTy(*(ast->TheContext)); break;
         default: return nullptr; break;
     }
     llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, VarName, init_type);

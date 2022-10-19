@@ -76,6 +76,7 @@ void AST::pop_scope() {
 }
 
 void AST::stdlib() {
+    /* Example for later
     this->functions.push_back(
         new Function(
             std::string("printi"),
@@ -84,21 +85,14 @@ void AST::stdlib() {
             std::vector<std::vector<std::string>> {{std::string("a"), std::string("int")}}
         )
     );
-    this->functions.push_back(
-        new Function(
-            std::string("printc"),
-            nullptr,
-            t_number,
-            std::vector<std::vector<std::string>> {{std::string("a"), std::string("char")}}
-        )
-    );
-    this->functions.push_back(
-        new Function(
-            std::string("printd"),
-            nullptr,
-            t_number,
-            std::vector<std::vector<std::string>> {{std::string("a"), std::string("float")}}
-        )
+    */
+    std::vector<llvm::Type*> func_args = std::vector<llvm::Type*>();
+    func_args.push_back(llvm::Type::getInt8PtrTy(*(this->TheContext)));
+    llvm::Function::Create(
+        llvm::FunctionType::get(llvm::Type::getInt64Ty(*(this->TheContext)), func_args, true),
+        llvm::Function::ExternalLinkage,
+        "print",
+        this->TheModule.get()
     );
 }
 

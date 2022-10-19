@@ -74,7 +74,29 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
         case t_number: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, this->number, true));
         case t_char: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->character, true));
         case t_float: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat(this->floating));
-        case t_string: return nullptr;
+        case t_string: {
+            char c ;
+            std::stringstream s(this->str);
+            std::stringstream s2;
+
+            while (s.good()) {
+                c = s.get() ;
+                if (!s.good()) break ;
+                if (c == '\\' && s.get() == 'n') c = '\n' ;
+                s2 << c ;
+            }
+            this->str = s2.str();
+            auto atom_type = llvm::Type::getInt8Ty(*(ast->TheContext));
+            auto type = llvm::ArrayType::get(atom_type, this->str.size());
+            auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), this->str.size() + 1), llvm::Twine("s"), ast->Builder->GetInsertBlock());
+            for (auto i = 0; i < this->str.size(); i++) {
+                auto ptr = ast->Builder->CreateConstGEP1_32(atom_type, array, i);
+                ast->Builder->CreateStore(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->str.data()[i],true)), ptr);
+            }
+            auto ptr = ast->Builder->CreateConstGEP1_32(atom_type, array, this->str.size());
+            ast->Builder->CreateStore(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, 0,true)), ptr);
+            return array;
+        }
         case t_identifier: {
             // Look this variable up in the function.
             llvm::Value *V = ast->NamedValues[this->str].first;
@@ -90,7 +112,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
                 return ast->LogErrorV("Unknown function referenced");
 
             // If argument mismatch error.
-            if (CalleeF->arg_size() != this->args.size())
+            if (CalleeF->arg_size() != this->args.size() && !CalleeF->isVarArg())
                 return ast->LogErrorV("Incorrect # arguments passed");
 
             std::vector<llvm::Value*> ArgsV;
@@ -99,8 +121,8 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
                 if (!ArgsV.back())
                     return nullptr;
             }
-
-            return ast->Builder->CreateCall(CalleeF, ArgsV, "calltmp");
+            auto ret = ast->Builder->CreateCall(CalleeF, ArgsV, "calltmp");
+            return ret;
         }
         default: return nullptr; break;
     }

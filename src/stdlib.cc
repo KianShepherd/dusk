@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
@@ -5,18 +6,10 @@
 #define DLLEXPORT
 #endif
 
-
-extern "C" DLLEXPORT long printd(double X) {
-  printf("%f\n", X);
-  return 0;
-}
-
-extern "C" DLLEXPORT long printi(long X) {
-  printf("%ld\n", X);
-  return 0;
-}
-
-extern "C" DLLEXPORT long printc(char X) {
-  printf("%d\n", X);
+extern "C" DLLEXPORT long print(char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
   return 0;
 }
