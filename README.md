@@ -12,7 +12,7 @@ Uses bison as a parser generator.
 
 The AST is generated with C++
 
-LLVM is used as a backend to generate machine specific object files which can be compiled with a c compiler into executables.
+LLVM is used as a backend to generate machine specific object files which are then compiled with a c compiler into an executable.
 
 ## Dependencies
 
