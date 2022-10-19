@@ -86,8 +86,10 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
                 s2 << c ;
             }
             this->str = s2.str();
+
             auto atom_type = llvm::Type::getInt8Ty(*(ast->TheContext));
             auto type = llvm::ArrayType::get(atom_type, this->str.size());
+
             auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), this->str.size() + 1), llvm::Twine("s"), ast->Builder->GetInsertBlock());
             for (auto i = 0; i < this->str.size(); i++) {
                 auto ptr = ast->Builder->CreateConstGEP1_32(atom_type, array, i);
