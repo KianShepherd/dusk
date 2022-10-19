@@ -4,6 +4,7 @@
 #include <string>
 
 #define debuging 1
+#define development 1
 
 void yyerror(AST& ast, const char* msg) {
     std::string err_msg = std::string(msg);
@@ -42,8 +43,11 @@ int main(int argc, char** argv) {
     ast.codegen((char)debuging);
     if (debuging)
         std::cout << "===== DEBUG IR ======" << std::endl;
-
-    rc = system("g++ output.o -L./CMake -lstddusk -o out");
+    if (development) {
+        rc = system("g++ output.o -L./CMake -lstddusk -o out");
+    } else {
+        rc = system("g++ output.o -lstddusk -o out");
+    }
     rc = system("rm -f output.o");
     return 0;
 }

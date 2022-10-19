@@ -1,11 +1,5 @@
 # Dusk
 
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-
 ## Description
 
 A simple programming language built from scratch.
@@ -19,6 +13,12 @@ Uses bison as a parser generator.
 The AST is generated with C++
 
 LLVM is used as a backend to generate machine specific object files which can be compiled with a c compiler into executables.
+
+## Dependencies
+
+This project requires `cmake`, `flex`, `bison`, `llvm` and a `c`/`c++` compiler.
+
+The examples for building this project also include `ninja`, but that is an optional dependency.
 
 ## Installation
 
@@ -38,13 +38,17 @@ ninja install
 
 Ensure you have flex and bison and build tools 
 
-`sudo apt install cmake ninja-build flex libfl-dev bison libbison-dev`
+```
+sudo apt install cmake ninja-build flex libfl-dev bison libbison-dev
+```
 
 ### Mac OS
 
 Ensure you have flex and bison and build tools
 
-`brew install bison flex cmake ninja`
+```
+brew install bison flex cmake ninja
+```
 
 An old version of bison is the default version so you must relink a newer version to build Dusk
 
@@ -58,7 +62,9 @@ echo 'export PATH="/opt/homebrew/opt/bison/bin:$PATH"'>> ~/.zshrc
 
 To generate a `compile_commands.json` file for use with `ccls` run
 
-`./ccls_file_gen.sh`
+```
+./ccls_file_gen.sh
+```
 
 ## Building
 
@@ -77,9 +83,15 @@ ninja -C CMake install
 
 ## Usage
 
-Once it is installed you can run, where x is the name of the file you wish to compile.
+Once it is installed you can run `dusk x`, where x is the name of the file you wish to compile.
 
-`dusk x`
+For example
+
+```
+dusk test.ds
+```
+
+Would compile a file named `test.ds` into an executable.
 
 ## License
 
