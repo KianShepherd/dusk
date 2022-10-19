@@ -95,5 +95,5 @@ Would compile a file named `test.ds` into an executable.
 
 ## License
 
-For open source projects, say how it is licensed.
+This project is licensed under GNU GPLv3, as this project depends on `bison`.
 
