@@ -54,26 +54,34 @@ brew link bison --force
 echo 'export PATH="/opt/homebrew/opt/bison/bin:$PATH"'>> ~/.zshrc
 ```
 
-## Building
+## Development
 
 To generate a `compile_commands.json` file for use with `ccls` run
 
 `./ccls_file_gen.sh`
 
-Then run the build script
+## Building
 
-`./build.sh`
+To build the project run.
 
-To run the binary
+```
+cmake -G Ninja -S . -B CMake
+ninja -C CMake
+```
 
-`./dusk`
+To install the binary run.
+
+```
+ninja -C CMake install
+```
 
 ## Usage
 
-To use Dusk simply run the built executable and pass in the name of the file you would like to compile.
+Once it is installed you can run, where x is the name of the file you wish to compile.
 
-`./dusk test.ds`
+`dusk x`
 
 ## License
+
 For open source projects, say how it is licensed.
 
