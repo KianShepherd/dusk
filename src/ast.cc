@@ -44,11 +44,11 @@ bool AST::check_error(std::string stage) {
 }
 
 void AST::debug() {
-    std::cout << "-----DEBUG-----" << std::endl;
+    std::cout << "----- DEBUG AST -----" << std::endl;
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->debug();
     }
-    std::cout << "-----DEBUG-----" << std::endl;
+    std::cout << "----- DEBUG AST -----" << std::endl;
 }
 
 void AST::static_checking() {

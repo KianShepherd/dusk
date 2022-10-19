@@ -31,17 +31,17 @@ int main(int argc, char** argv) {
     if (ast.check_error(std::string("Parse Error: "))) {
         return rc;
     }
-    if (debuging)
-        ast.debug();
-    //ast.static_checking();
+    ast.static_checking();
     if (ast.check_error(std::string("Logic Error: "))) {
         return 2;
     }
     if (debuging)
         ast.debug();
     if (debuging)
-        std::cout << "==================================" << std::endl;
+        std::cout << "===== DEBUG IR ======" << std::endl;
     ast.codegen((char)debuging);
+    if (debuging)
+        std::cout << "===== DEBUG IR ======" << std::endl;
 
     rc = system("g++ output.o -L./CMake -lstddusk -o out");
     rc = system("rm -f output.o");
