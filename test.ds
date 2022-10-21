@@ -1,11 +1,8 @@
 fn fact_tail(acc: int, n: int) -> int {
-    let mut a: int = 1;
     if (n < 2) {
-        a = acc;
-    } else {
-        a = fact_tail(acc * n, n - 1);
+        return acc;
     }
-    return a;
+    return fact_tail(acc * n, n - 1);
 }
 
 fn fact(n: int) -> int {

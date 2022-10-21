@@ -99,9 +99,6 @@ llvm::Function* Function::codegen(AST* ast) {
         llvm::Function *F =
             llvm::Function::Create(FT, llvm::Function::ExternalLinkage, this->name, ast->TheModule.get());
 
-        //if (this->name.find("tail") != std::string::npos)
-        //    F->setCallingConv(llvm::CallingConv::SwiftTail);
-
         // Set names for all arguments.
         unsigned Idx = 0;
         for (auto &Arg : F->args()) {

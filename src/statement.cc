@@ -155,6 +155,7 @@ llvm::Value* IfStatement::codegen(AST* ast) {
     if (!CondV)
         return nullptr;
 
+    llvm::BasicBlock* EntryBB = ast->Builder->GetInsertBlock();
     llvm::Function *TheFunction = ast->Builder->GetInsertBlock()->getParent();
 
     // Create blocks for the then and else cases.  Insert the 'then' block at the
@@ -163,35 +164,56 @@ llvm::Value* IfStatement::codegen(AST* ast) {
     llvm::BasicBlock *ElseBB = llvm::BasicBlock::Create(*(ast->TheContext), "else");
     llvm::BasicBlock *MergeBB = llvm::BasicBlock::Create(*(ast->TheContext), "ifcont");
 
-    ast->Builder->CreateCondBr(CondV, ThenBB, ElseBB);
+    if (this->block2) {
+        ast->Builder->CreateCondBr(CondV, ThenBB, ElseBB);
+    } else {
+        ast->Builder->CreateCondBr(CondV, ThenBB, MergeBB);
+    }
 
     // Emit then value.
     ast->Builder->SetInsertPoint(ThenBB);
 
-    this->block1->codegen(ast);
+    auto b1 = this->block1->codegen(ast);
 
-    ast->Builder->CreateBr(MergeBB);
+    if (b1)
+        ast->Builder->CreateBr(MergeBB);
     // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
     ThenBB = ast->Builder->GetInsertBlock();
+    llvm::Value* b2 = nullptr;
+    if (this->block2) {
+        // Emit else block.
+        TheFunction->getBasicBlockList().push_back(ElseBB);
+        ast->Builder->SetInsertPoint(ElseBB);
 
-    // Emit else block.
-    TheFunction->getBasicBlockList().push_back(ElseBB);
-    ast->Builder->SetInsertPoint(ElseBB);
+        b2 = this->block2->codegen(ast);
+    }
 
-    this->block2->codegen(ast);
-
-    ast->Builder->CreateBr(MergeBB);
+    if (b2)
+        ast->Builder->CreateBr(MergeBB);
     // Codegen of 'Else' can change the current block, update ElseBB for the PHI.
     ElseBB = ast->Builder->GetInsertBlock();
 
-    // Emit merge block.
-    TheFunction->getBasicBlockList().push_back(MergeBB);
-    ast->Builder->SetInsertPoint(MergeBB);
-    llvm::PHINode *PN = ast->Builder->CreatePHI(llvm::Type::getInt1Ty(*(ast->TheContext)), 2, "iftmp");
+    unsigned int incoming = 0;
+    if (b1)
+        incoming++;
+    if (b2)
+        incoming++;
+    if (b1 || b2 || !this->block2) {
+        // Emit merge block.
+        TheFunction->getBasicBlockList().push_back(MergeBB);
+        ast->Builder->SetInsertPoint(MergeBB);
 
-    PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 0, false)), ThenBB);
-    PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 1, false)), ElseBB);
-    return PN;
+        llvm::PHINode *PN = ast->Builder->CreatePHI(llvm::Type::getInt1Ty(*(ast->TheContext)), incoming, "iftmp");
+
+        PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 0, false)), ThenBB);
+        if (this->block2) {
+            PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 1, false)), ElseBB);
+        } else {
+            PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 1, false)), EntryBB);
+        }
+        return PN;
+    }
+    return nullptr;
 }
 
 WhileStatement::WhileStatement(Expression* cond, Statement* block) {
@@ -223,7 +245,6 @@ llvm::Value* WhileStatement::codegen(AST* ast) {
     llvm::BasicBlock *LoopBB = llvm::BasicBlock::Create(*(ast->TheContext), "loop", TheFunction);
 
     // Create the "after loop" block and insert it.
-    llvm::BasicBlock *LoopEndBB = ast->Builder->GetInsertBlock();
     llvm::BasicBlock *AfterBB = llvm::BasicBlock::Create(*(ast->TheContext), "afterloop", TheFunction);
 
     // Insert an explicit fall through from the current block to the LoopBB.
