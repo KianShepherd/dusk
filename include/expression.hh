@@ -21,6 +21,7 @@ class ScopeValue;
 enum AtomType {
     t_bool,
     t_number,
+    t_long,
     t_float,
     t_identifier,
     t_string,
@@ -65,6 +66,7 @@ public:
 
 class ExpressionAtomic : public Expression {
 public:
+    ExpressionAtomic(long num);
     ExpressionAtomic(long long num);
     ExpressionAtomic(double num);
     ExpressionAtomic(std::string str, bool is_identifier);

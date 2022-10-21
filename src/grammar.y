@@ -33,10 +33,10 @@ void yyerror(AST&, const char*);
     std::vector<Expression*>* exprs;
 }
 
-%token<str> NUMBER CNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
+%token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
-%token INT VOID FLOAT BOOL STR CHAR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE BREAK
+%token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE BREAK
 
 %type<expr>  exp;
 %type<stat>  statement statementblock mutassign;
@@ -72,6 +72,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($7), t_number, std::vector<std::vector<std::string>>()));
     }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW LONG statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($7), t_long, std::vector<std::vector<std::string>>()));
+    }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW CHAR statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($7), t_char, std::vector<std::vector<std::string>>()));
@@ -95,6 +99,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW INT statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($8), t_number, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW LONG statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_long, std::move(*($4))));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW CHAR statementblock
     {
@@ -141,6 +149,10 @@ statement: exp SEMICOLON
     | LET exp COLON INT EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_number);
+    }
+    | LET exp COLON LONG EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_long);
     }
     | LET exp COLON CHAR EQUAL exp SEMICOLON
     {
@@ -194,6 +206,11 @@ mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_number);
     }
+    | LET MUTABLE exp COLON LONG EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_long);
+    }
+
     | LET MUTABLE exp COLON FLOAT EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_float);
@@ -237,6 +254,14 @@ typedarg: IDENTIFIER COLON INT
         $$->push_back(std::string("int"));
         delete $1;
     }
+    | IDENTIFIER COLON LONG
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("long"));
+        delete $1;
+    }
+
     | IDENTIFIER COLON FLOAT
     {
         $$ = new std::vector<std::string>();
@@ -287,6 +312,11 @@ exprlist: %empty
 
 
 exp: NUMBER
+    {
+        $$ = new ExpressionAtomic(std::stol(*($1)));
+        free($1);
+    }
+    | LNUMBER
     {
         $$ = new ExpressionAtomic(std::stoll(*($1)));
         free($1);

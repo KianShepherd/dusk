@@ -14,7 +14,8 @@
 %option outfile="src/scanner.cc"
 %%
 [0-9]+                  { yylval.str = new std::string(yytext, yyleng); return NUMBER;  }
-c[0-9]+                 { yylval.str = new std::string(yytext, yyleng); return CNUMBER;  }
+[0-9]+c                 { yylval.str = new std::string(yytext, yyleng); return CNUMBER;  }
+[0-9]+l                 { yylval.str = new std::string(yytext, yyleng); return LNUMBER;  }
 [0-9]+\.[0-9]+          { yylval.str = new std::string(yytext, yyleng); return DOUBLE;  }
 \"([^\\\"]|\\.)*\"      { yylval.str = new std::string(yytext, yyleng); return STRING;  }
 True                    { yylval.str = new std::string(yytext, yyleng); return TRUE;    }
@@ -46,6 +47,7 @@ Null                    { yylval.str = new std::string(yytext, yyleng); return N
 ->                      { return ARROW;     }
 
 int                     { return INT;      }
+long                    { return LONG;     }
 void                    { return VOID;     }
 float                   { return FLOAT;    }
 bool                    { return BOOL;     }
@@ -61,7 +63,7 @@ mut                     { return MUTABLE;  }
 return                  { return RETURN;   }
 break                   { return BREAK;    }
 
-[a-zA-Z_][a-zA-Z0-9_]*   { yylval.str = new std::string(yytext, yyleng); return IDENTIFIER; }
+[a-zA-Z_][a-zA-Z0-9_]*  { yylval.str = new std::string(yytext, yyleng); return IDENTIFIER; }
 
 [[:space:]]             ; /* Ignore whitespace */
 .                       { std::stringstream ss; ss << "bad input character '" << yytext << "' at line " << yylineno << std::endl; yylval.str = new std::string(ss.str()); return LEXERROR; }

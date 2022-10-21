@@ -77,6 +77,7 @@ void AssignmentStatement::debug(size_t depth) {
     switch (this->type) {
         case t_bool: std::cout << "bool "; break;
         case t_number: std::cout << "int "; break;
+        case t_long: std::cout << "long "; break;
         case t_char: std::cout << "char "; break;
         case t_float: std::cout << "float "; break;
         case t_string: std::cout << "string "; break;
@@ -112,6 +113,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
     switch (this->type) {
         case t_bool: init_type = llvm::Type::getInt1Ty(*(ast->TheContext)); break;
         case t_number: init_type = llvm::Type::getInt64Ty(*(ast->TheContext)); break;
+        case t_long: init_type = llvm::Type::getInt128Ty(*(ast->TheContext)); break;
         case t_float: init_type = llvm::Type::getDoubleTy(*(ast->TheContext)); break;
         case t_char: init_type = llvm::Type::getInt8Ty(*(ast->TheContext)); break;
         case t_string: init_type = llvm::Type::getInt8PtrTy(*(ast->TheContext)); break;
