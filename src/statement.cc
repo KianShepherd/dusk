@@ -14,7 +14,7 @@ void ExpressionStatement::fold(AST* ast) {
 }
 
 llvm::Value* ExpressionStatement::codegen(AST* ast) {
-    return this->expr->codegen(ast);
+    return this->expr->codegen(ast, t_null);
 }
 
 StatementBlock::StatementBlock(std::vector<Statement*> statements) {
@@ -60,7 +60,7 @@ void ReturnStatement::fold(AST* ast) {
 }
 
 llvm::Value* ReturnStatement::codegen(AST* ast) {
-    ast->Builder->CreateRet(this->expr->codegen(ast));
+    ast->Builder->CreateRet(this->expr->codegen(ast, t_null));
     return nullptr;
 }
 
@@ -108,7 +108,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
     // like this:
     //  var a = 1 in
     //    var a = a in ...   # refers to outer 'a'.
-    llvm::Value* InitVal = Init->codegen(ast);
+    llvm::Value* InitVal = Init->codegen(ast, this->type);
     llvm::Type* init_type;
     switch (this->type) {
         case t_bool: init_type = llvm::Type::getInt1Ty(*(ast->TheContext)); break;
@@ -153,7 +153,7 @@ void IfStatement::fold(AST* ast) {
 }
 
 llvm::Value* IfStatement::codegen(AST* ast) {
-    llvm::Value *CondV = this->condition->codegen(ast);
+    llvm::Value *CondV = this->condition->codegen(ast, t_bool);
     if (!CondV)
         return nullptr;
 
@@ -236,7 +236,7 @@ void WhileStatement::fold(AST* ast) {
 }
 
 llvm::Value* WhileStatement::codegen(AST* ast) {
-    llvm::Value *StartVal = this->condition->codegen(ast);
+    llvm::Value *StartVal = this->condition->codegen(ast, t_null);
     if (!StartVal)
         return nullptr;
 
@@ -271,7 +271,7 @@ llvm::Value* WhileStatement::codegen(AST* ast) {
     this->block->codegen(ast);
 
     // Compute the end condition.
-    llvm::Value *EndCond = this->condition->codegen(ast);
+    llvm::Value *EndCond = this->condition->codegen(ast, t_null);
     if (!EndCond)
         return nullptr;
 

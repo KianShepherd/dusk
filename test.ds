@@ -1,17 +1,17 @@
 fn fact_tail(acc: long, n: long) -> long {
-    if (n < 2l) {
+    if (n < 2) {
         return acc;
     }
-    return fact_tail(acc * n, n - 1l);
+    return fact_tail(acc * n, n - 1);
 }
 
 fn fact(n: long) -> long {
-    return fact_tail(1l, n);
+    return fact_tail(1, n);
 }
 
 fn main(argc: float, argv: float) -> int {
     let str: string = "%ld\n";
-    for (let mut i: long = 1l; i < 21l; i = i + 1l) {
+    for (let mut i: long = 1; i < 21; i = i + 1) {
         print(str, fact(i));
     }
     return 1;

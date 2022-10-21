@@ -71,13 +71,30 @@ AtomType ExpressionAtomic::get_atomic_type(AST* ast) {
     return this->type;
 }
 
+AtomType ExpressionAtomic::get_atomic_type_keep_identifier(AST* ast) {
+    if (this->type == t_function_call) {
+        for (auto &func : ast->func_definitions) {
+            if (this->str.compare(std::get<0>(func)) == 0)
+                return std::get<1>(func);
+        }
+    }
+    return this->type;
+}
+
 Expression* ExpressionAtomic::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* ExpressionAtomic::codegen(AST* ast) {
+llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
     switch (this->type) {
-        case t_number: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, this->number, true));
+        case t_number: {
+            if (type == t_long) {
+                return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(128, this->number, true));
+            } else if (type == t_char) {
+                return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->character, true));
+            }
+            return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, this->number, true));
+        }
         case t_long: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(128, this->number, true));
         case t_char: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->character, true));
         case t_float: return llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat(this->floating));
@@ -124,9 +141,21 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast) {
             if (CalleeF->arg_size() != this->args.size() && !CalleeF->isVarArg())
                 return ast->LogErrorV("Incorrect # arguments passed");
 
+            std::vector<AtomType> arg_type;
+            for (auto &func : ast->func_definitions) {
+                if (this->str.compare(std::get<0>(func)) == 0) {
+                    arg_type = std::get<2>(func);
+                    break;
+                }
+            }
+
             std::vector<llvm::Value*> ArgsV;
             for (unsigned i = 0, e = this->args.size(); i != e; ++i) {
-                ArgsV.push_back(this->args[i]->codegen(ast));
+                if (this->str.compare("print") != 0) {
+                    ArgsV.push_back(this->args[i]->codegen(ast, arg_type[i]));
+                } else {
+                    ArgsV.push_back(this->args[i]->codegen(ast, t_null));
+                }
                 if (!ArgsV.back())
                     return nullptr;
             }
@@ -169,9 +198,27 @@ Expression* BinaryExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* BinaryExpression::codegen(AST* ast) {
-    llvm::Value *L = this->lhs->codegen(ast);
-    llvm::Value *R = this->rhs->codegen(ast);
+llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
+    if (this->lhs->get_atomic_type_keep_identifier(ast) == t_identifier) {
+        if (ast->NamedValues[((ExpressionAtomic*)this->lhs)->str].second->isIntegerTy(8)) {
+            type = t_char;
+        } else if (ast->NamedValues[((ExpressionAtomic*)this->lhs)->str].second->isIntegerTy(64)) {
+            type = t_number;
+        } else if (ast->NamedValues[((ExpressionAtomic*)this->lhs)->str].second->isIntegerTy(128)) {
+            type = t_long;
+        }
+    } else if (this->rhs->get_atomic_type_keep_identifier(ast) == t_identifier) {
+        if (ast->NamedValues[((ExpressionAtomic*)this->rhs)->str].second->isIntegerTy(8)) {
+            type = t_char;
+        } else if (ast->NamedValues[((ExpressionAtomic*)this->rhs)->str].second->isIntegerTy(64)) {
+            type = t_number;
+        } else if (ast->NamedValues[((ExpressionAtomic*)this->rhs)->str].second->isIntegerTy(128)) {
+            type = t_long;
+        }
+    }
+    llvm::Value *L = this->lhs->codegen(ast, type);
+    llvm::Value *R = this->rhs->codegen(ast, type);
+
     if (!L || !R)
         return nullptr;
     
@@ -262,6 +309,13 @@ AtomType BinaryExpression::get_atomic_type(AST* ast) {
     return this->lhs->get_atomic_type(ast);
 }
 
+AtomType BinaryExpression::get_atomic_type_keep_identifier(AST* ast) {
+    if (this->lhs->get_atomic_type(ast) != this->rhs->get_atomic_type(ast)) {
+        ast->push_err("Both operands of a binary operator must be of same type");
+    }
+    return this->lhs->get_atomic_type(ast);
+}
+
 UnaryExpression::UnaryExpression(Expression* expr, std::string op) {
     this->operand = expr;
     this->op = op;
@@ -277,8 +331,8 @@ Expression* UnaryExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* UnaryExpression::codegen(AST* ast) {
-    llvm::Value *L = this->operand->codegen(ast);
+llvm::Value* UnaryExpression::codegen(AST* ast, AtomType type) {
+    llvm::Value *L = this->operand->codegen(ast, type);
 
     if (this->op.compare("()") == 0) {
         return L;
@@ -311,6 +365,10 @@ AtomType UnaryExpression::get_atomic_type(AST* ast) {
     return this->operand->get_atomic_type(ast);
 }
 
+AtomType UnaryExpression::get_atomic_type_keep_identifier(AST* ast) {
+    return this->operand->get_atomic_type(ast);
+}
+
 AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* value) {
     this->identifier = identifier;
     this->value = value;
@@ -327,8 +385,16 @@ Expression* AssignmentExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* AssignmentExpression::codegen(AST* ast) {
-    llvm::Value *Val = this->value->codegen(ast);
+llvm::Value* AssignmentExpression::codegen(AST* ast, AtomType type) {
+    AtomType t = t_null;
+    if (ast->NamedValues[((ExpressionAtomic*)this->identifier)->str].second->isIntegerTy(8)) {
+        t = t_char;
+    } else if (ast->NamedValues[((ExpressionAtomic*)this->identifier)->str].second->isIntegerTy(64)) {
+        t = t_number;
+    } else if (ast->NamedValues[((ExpressionAtomic*)this->identifier)->str].second->isIntegerTy(128)) {
+        t = t_long;
+    }
+    llvm::Value *Val = this->value->codegen(ast, t);
     if (!Val)
         return nullptr;
 
@@ -344,6 +410,10 @@ AtomType AssignmentExpression::get_atomic_type(AST* ast) {
     return this->value->get_atomic_type(ast);
 }
 
+AtomType AssignmentExpression::get_atomic_type_keep_identifier(AST* ast) {
+    return this->value->get_atomic_type(ast);
+}
+
 BreakExpression::BreakExpression() {
 
 }
@@ -356,10 +426,14 @@ Expression* BreakExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
-llvm::Value* BreakExpression::codegen(AST* ast) {
+llvm::Value* BreakExpression::codegen(AST* ast, AtomType type) {
     return nullptr;
 }
 
 AtomType BreakExpression::get_atomic_type(AST* ast) {
+    return t_null;
+}
+
+AtomType BreakExpression::get_atomic_type_keep_identifier(AST* ast) {
     return t_null;
 }

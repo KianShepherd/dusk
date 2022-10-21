@@ -136,6 +136,6 @@ llvm::Function* Function::codegen(AST* ast) {
     this->statements->codegen(ast);
     // Validate the generated code, checking for consistency.
     llvm::verifyFunction(*TheFunction);
-    //ast->TheFPM->run(*TheFunction);
+
     return TheFunction;
 }

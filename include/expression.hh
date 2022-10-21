@@ -60,8 +60,9 @@ public:
     virtual Expression* fold(AST* ast) { return nullptr; };
     virtual ExpType get_type() { return t_undef; };
     virtual AtomType get_atomic_type(AST* ast) { return t_null; };
+    virtual AtomType get_atomic_type_keep_identifier(AST* ast) { return t_null; };
 
-    virtual llvm::Value* codegen(AST* ast) = 0;
+    virtual llvm::Value* codegen(AST* ast, AtomType type) = 0;
 };
 
 class ExpressionAtomic : public Expression {
@@ -79,9 +80,10 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_atomic; };
     AtomType get_atomic_type(AST* ast) override;
+    AtomType get_atomic_type_keep_identifier(AST* ast) override;
     uintptr_t get_value();
 
-    llvm::Value* codegen(AST* ast) override;
+    llvm::Value* codegen(AST* ast, AtomType type) override;
 
     std::string str;
     double floating;
@@ -100,8 +102,9 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_binary; };
     AtomType get_atomic_type(AST* ast) override;
+    AtomType get_atomic_type_keep_identifier(AST* ast) override;
 
-    llvm::Value* codegen(AST* ast) override;
+    llvm::Value* codegen(AST* ast, AtomType type) override;
 private:
     Expression* lhs;
     Expression* rhs;
@@ -116,8 +119,9 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_unary; };
     AtomType get_atomic_type(AST* ast) override;
+    AtomType get_atomic_type_keep_identifier(AST* ast) override;
 
-    llvm::Value* codegen(AST* ast) override;
+    llvm::Value* codegen(AST* ast, AtomType type) override;
 private:
     Expression* operand;
     std::string op;
@@ -131,8 +135,9 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_assignment; };
     AtomType get_atomic_type(AST* ast) override;
+    AtomType get_atomic_type_keep_identifier(AST* ast) override;
 
-    llvm::Value* codegen(AST* ast) override;
+    llvm::Value* codegen(AST* ast, AtomType type) override;
 private:
     class Expression* identifier;
     class Expression* value;
@@ -146,6 +151,7 @@ public:
     Expression* fold(AST* ast) override;
     ExpType get_type() override { return t_break; };
     AtomType get_atomic_type(AST* ast) override;
+    AtomType get_atomic_type_keep_identifier(AST* ast) override;
 
-    llvm::Value* codegen(AST* ast) override;
+    llvm::Value* codegen(AST* ast, AtomType type) override;
 };

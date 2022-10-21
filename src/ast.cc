@@ -131,6 +131,9 @@ void AST::codegen(char debug) {
     this->TheModule->setDataLayout(TargetMachine->createDataLayout());
     this->TheModule->setTargetTriple(TargetTriple);
     for (int i = 0; i < (int)this->functions.size(); i++) {
+        this->func_definitions.push_back(this->functions[i]->get_meta());
+    }
+    for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }
     if (debug)
