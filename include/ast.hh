@@ -24,6 +24,39 @@
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
 #include "llvm/Transforms/Utils.h"
+#include "llvm/IR/DataLayout.h"
+#include "llvm/IR/DebugInfo.h"
+#include "llvm/IR/IRPrintingPasses.h"
+#include "llvm/IR/LegacyPassNameParser.h"
+#include "llvm/IRReader/IRReader.h"
+#include "llvm/MC/SubtargetFeature.h"
+#include "llvm/InitializePasses.h"
+#include "llvm/LinkAllIR.h"
+#include "llvm/LinkAllPasses.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Analysis/CallGraph.h"
+#include "llvm/Analysis/CallGraphSCCPass.h"
+#include "llvm/Analysis/LoopPass.h"
+#include "llvm/Analysis/RegionPass.h"
+#include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/Analysis/LoopAnalysisManager.h"
+#include "llvm/Bitcode/BitcodeWriterPass.h"
+#include "llvm/CodeGen/TargetPassConfig.h"
+#include "llvm/Config/llvm-config.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Transforms/IPO/AlwaysInliner.h"
+#include "llvm/Transforms/IPO/PassManagerBuilder.h"
+#include "llvm/Transforms/Utils/Cloning.h"
+#include "llvm/ADT/Triple.h"
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/InitLLVM.h"
+#include "llvm/Support/ToolOutputFile.h"
+#include "llvm/Support/YAMLTraits.h"
+#include "llvm/Support/SystemUtils.h"
+#include "llvm/Support/SourceMgr.h"
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -80,7 +113,6 @@ public:
     std::unique_ptr<llvm::LLVMContext> TheContext;
     std::unique_ptr<llvm::Module> TheModule;
     std::unique_ptr<llvm::IRBuilder<>> Builder;
-    std::unique_ptr<llvm::legacy::FunctionPassManager> TheFPM;
     std::map<std::string, std::pair<llvm::AllocaInst*, llvm::Type*>> NamedValues;
 
     std::vector<std::tuple<std::string, AtomType, std::vector<AtomType>>> func_definitions;

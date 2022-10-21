@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     if (ast.check_error(std::string("Parse Error: "))) {
         return rc;
     }
-    ast.static_checking();
+    //ast.static_checking();
     if (ast.check_error(std::string("Logic Error: "))) {
         return 2;
     }

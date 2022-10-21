@@ -1,17 +1,21 @@
-fn fib(n: int) -> int {
-    let mut a: int = 0;
-    if (n <= 2) {
-        a = 1;
+fn fact_tail(acc: int, n: int) -> int {
+    let mut a: int = 1;
+    if (n < 2) {
+        a = acc;
     } else {
-        a = fib(n - 1) + fib(n - 2);
+        a = fact_tail(acc * n, n - 1);
     }
     return a;
 }
 
+fn fact(n: int) -> int {
+    return fact_tail(1, n);
+}
+
 fn main(argc: float, argv: float) -> int {
     let str: string = "%d\n";
-    for (let mut i: int = 1; i < 40; i = i + 1) {
-        print(str, fib(i));
+    for (let mut i: int = 1; i < 14; i = i + 1) {
+        print(str, fact(i));
     }
     return 1;
 }

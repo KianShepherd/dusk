@@ -11,20 +11,6 @@ AST::AST() {
 
     // Create a new builder for the module.
     this->Builder = std::make_unique<llvm::IRBuilder<>>(*(this->TheContext));
-    TheFPM = std::make_unique<llvm::legacy::FunctionPassManager>(this->TheModule.get());
-
-    // Promote allocas to registers.
-    TheFPM->add(llvm::createPromoteMemoryToRegisterPass());
-    // Do simple "peephole" optimizations and bit-twiddling optzns.
-    TheFPM->add(llvm::createInstructionCombiningPass());
-    // Reassociate expressions.
-    TheFPM->add(llvm::createReassociatePass());
-    // Eliminate Common SubExpressions.
-    TheFPM->add(llvm::createGVNPass());
-    // Simplify the control flow graph (deleting unreachable blocks, etc).
-    //TheFPM->add(llvm::createCFGSimplificationPass());
-
-    TheFPM->doInitialization();
 }
 
 void AST::push_function(Function* function) {
@@ -117,6 +103,27 @@ void AST::codegen(char debug) {
 
     auto CPU = "generic";
     auto Features = "";
+    // Create the analysis managers.
+    llvm::LoopAnalysisManager LAM;
+    llvm::FunctionAnalysisManager FAM;
+    llvm::CGSCCAnalysisManager CGAM;
+    llvm::ModuleAnalysisManager MAM;
+
+    // Create the new pass manager builder.
+    // Take a look at the PassBuilder constructor parameters for more
+    // customization, e.g. specifying a TargetMachine or various debugging
+    // options.
+    llvm::PassBuilder PB;
+
+    // Register all the basic analyses with the managers.
+    PB.registerModuleAnalyses(MAM);
+    PB.registerCGSCCAnalyses(CGAM);
+    PB.registerFunctionAnalyses(FAM);
+    PB.registerLoopAnalyses(LAM);
+    PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
+
+    // Create the pass manager.
+    llvm::ModulePassManager MPM = PB.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O3);
 
     llvm::TargetOptions opt;
     auto RM = llvm::Optional<llvm::Reloc::Model>();
@@ -126,6 +133,12 @@ void AST::codegen(char debug) {
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }
+    if (debug)
+        this->TheModule->dump();
+
+    // Optimize the IR!
+    MPM.run(*(this->TheModule), MAM);
+
     if (debug)
         this->TheModule->dump();
 

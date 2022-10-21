@@ -39,10 +39,11 @@ void StatementBlock::fold(AST* ast) {
 }
 
 llvm::Value* StatementBlock::codegen(AST* ast) {
+    llvm::Value* last = nullptr;
     for (long unsigned int i = 0; i < this->statements.size(); i++) {
-        this->statements[i]->codegen(ast);
+        last = this->statements[i]->codegen(ast);
     }
-    return nullptr;
+    return last;
 }
 
 ReturnStatement::ReturnStatement(Expression* expr) {
@@ -259,7 +260,7 @@ llvm::Value* WhileStatement::codegen(AST* ast) {
     ast->Builder->SetInsertPoint(AfterBB);
 
     // Add a new entry to the PHI node for the backedge.
-    Variable->addIncoming(StartVal, LoopEndBB);
+    Variable->addIncoming(EndCond, LoopBB);
 
     return llvm::Constant::getNullValue(llvm::Type::getInt64Ty(*(ast->TheContext)));
 }
