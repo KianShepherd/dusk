@@ -33,6 +33,5 @@ fn main(argc: float, argv: float) -> int {
     for (let mut i: int = 0; i < n; i = i + 1) {
         print(strf, facts2[i]);
     }
-    del(facts2);
     return 1;
 }

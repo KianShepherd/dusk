@@ -80,7 +80,7 @@ void AST::stdlib() {
     );
     this->functions.push_back(
         new Function(
-            std::string("freei"),
+            std::string("del"),
             nullptr,
             t_number,
             std::vector<std::vector<std::string>> {{std::string("arr"), std::string("intarr")}}
