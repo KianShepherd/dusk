@@ -185,7 +185,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
             } else {
 
                 llvm::Type* atom_type = nullptr;
-                AtomType vec_type = ast->NamedValueTypes[this->str];
+                AtomType vec_type = ast->NamedValueTypes[this->str].first;
                 if (vec_type == t_float_arr) {
                     atom_type = llvm::Type::getDoubleTy(*(ast->TheContext));
                 } else if (vec_type == t_number_arr) {
@@ -526,7 +526,7 @@ llvm::Value* AssignmentExpression::codegen(AST* ast, AtomType type) {
         ast->Builder->CreateStore(Val, Variable);
     } else {
         llvm::Type* atom_type = nullptr;
-        AtomType vec_type = ast->NamedValueTypes[((ExpressionAtomic*)this->identifier)->str];
+        AtomType vec_type = ast->NamedValueTypes[((ExpressionAtomic*)this->identifier)->str].first;
         if (vec_type == t_float_arr) {
             atom_type = llvm::Type::getDoubleTy(*(ast->TheContext));
         } else if (vec_type == t_number_arr) {

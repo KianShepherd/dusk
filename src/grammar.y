@@ -278,6 +278,18 @@ mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($8), true, t_bool_arr);
     }
+    | LET MUTABLE exp COLON INT LSQUARE NUMBER RSQUARE SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), nullptr, true, t_number_arr, std::stol(*($7)));
+    }
+    | LET MUTABLE exp COLON FLOAT LSQUARE NUMBER RSQUARE SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), nullptr, true, t_float_arr, std::stol(*($7)));
+    }
+    | LET MUTABLE exp COLON BOOL LSQUARE NUMBER RSQUARE SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), nullptr, true, t_bool_arr, std::stol(*($7)));
+    }
     ;
 
 typedargs: %empty

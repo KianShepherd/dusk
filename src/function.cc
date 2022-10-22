@@ -151,7 +151,7 @@ llvm::Function* Function::codegen(AST* ast) {
 
         // Add arguments to variable symbol table.
         ast->NamedValues[std::string(Arg->getName())] = std::make_pair(Alloca, Arg->getType());
-        ast->NamedValueTypes[std::string(Arg->getName())] = this->indentifier_type[i];
+        ast->NamedValueTypes[std::string(Arg->getName())] = std::make_pair(this->indentifier_type[i], 1);
         Arg = std::next(Arg);
     }
 

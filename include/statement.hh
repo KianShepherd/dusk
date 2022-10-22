@@ -62,7 +62,7 @@ private:
 
 class AssignmentStatement : public Statement {
 public:
-    AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type);
+    AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type, long length=0);
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
@@ -72,6 +72,7 @@ private:
     Expression* value;
     bool mut;
     AtomType type;
+    long length;
 };
 
 class IfStatement : public Statement {

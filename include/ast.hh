@@ -114,7 +114,7 @@ public:
     std::unique_ptr<llvm::Module> TheModule;
     std::unique_ptr<llvm::IRBuilder<>> Builder;
     std::map<std::string, std::pair<llvm::AllocaInst*, llvm::Type*>> NamedValues;
-    std::map<std::string, AtomType> NamedValueTypes;
+    std::map<std::string, std::pair<AtomType, long>> NamedValueTypes;
 
     std::vector<std::tuple<std::string, AtomType, std::vector<AtomType>>> func_definitions;
 private:

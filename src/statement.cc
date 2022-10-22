@@ -61,15 +61,40 @@ void ReturnStatement::fold(AST* ast) {
 
 llvm::Value* ReturnStatement::codegen(AST* ast) {
     auto retval = this->expr->codegen(ast, t_null);
+    auto type = this->expr->get_atomic_type_keep_identifier(ast);
+    if (type == t_identifier) {
+        type = ast->NamedValueTypes[((ExpressionAtomic*) this->expr)->str].first;
+        long length = ast->NamedValueTypes[((ExpressionAtomic*) this->expr)->str].second;
+        if (type == t_float_arr) {
+            llvm::Function *CalleeF = ast->TheModule->getFunction("copyd");
+            if (!CalleeF)
+                return ast->LogErrorV("Unknown function referenced");
+
+            std::vector<llvm::Value*> ArgsV;
+            ArgsV.push_back(retval);
+            ArgsV.push_back(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, length, true)));
+            retval = ast->Builder->CreateCall(CalleeF, ArgsV, "copytmp");
+        } else if (type == t_number_arr) {
+            llvm::Function *CalleeF = ast->TheModule->getFunction("copyi");
+            if (!CalleeF)
+                return ast->LogErrorV("Unknown function referenced");
+
+            std::vector<llvm::Value*> ArgsV;
+            ArgsV.push_back(retval);
+            ArgsV.push_back(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, length, true)));
+            retval = ast->Builder->CreateCall(CalleeF, ArgsV, "copytmp");
+        }
+    }
     ast->Builder->CreateRet(retval);
     return nullptr;
 }
 
-AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type) {
+AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type, long length) {
     this->identifier = identifier;
     this->value = value;
     this->mut = mut;
     this->type = type;
+    this->length = length;
 }
 
 void AssignmentStatement::debug(size_t depth) {
@@ -88,7 +113,11 @@ void AssignmentStatement::debug(size_t depth) {
         default: std::cerr << "Unknown type for assignment"; break;
     }
     std::cout << " = " << std::endl;
-    this->value->debug(depth + 1);
+    if (this->value) {
+        this->value->debug(depth + 1);
+    } else {
+        std::cout << std::string(' ', (depth + 1) * 4) << "len : " << this->length << std::endl;
+    }
 }
 
 void AssignmentStatement::fold(AST* ast) {
@@ -105,7 +134,26 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
 
     // Register all variables and emit their initializer.
     const std::string VarName = ((ExpressionAtomic*)this->identifier)->str;
-    Expression* Init = this->value;
+    Expression* Init;
+    if (this->value) {
+        Init = this->value;
+        if (this->type == t_float_arr || this->type == t_number_arr || this->type == t_bool_arr)
+            this->length = ((ExpressionAtomic*)this->value)->length;
+    } else {
+        if (this->type != t_float_arr) {
+            std::vector<long long> vals;
+            for (int i = 0; i < this->length; i++) {
+                vals.push_back(0);
+            }
+            Init = new ExpressionAtomic(this->type, this->length, vals);
+        } else {
+            std::vector<double> vals;
+            for (int i = 0; i < this->length; i++) {
+                vals.push_back(0.0);
+            }
+            Init = new ExpressionAtomic(this->type, this->length, vals);
+        }
+    }
 
     // Emit the initializer before adding the variable to scope, this prevents
     // the initializer from referencing the variable itself, and permits stuff
@@ -131,7 +179,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
 
     // Remember this binding.
     ast->NamedValues[VarName] = std::make_pair(Alloca, init_type);
-    ast->NamedValueTypes[VarName] = this->type;
+    ast->NamedValueTypes[VarName] = std::make_pair(this->type, this->length);
 
     // Return the body computation.
     return InitVal;
