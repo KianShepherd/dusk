@@ -26,6 +26,30 @@ extern "C" DLLEXPORT long del(void* arr) {
     return 1;
 }
 
+extern "C" DLLEXPORT long long ftol(double a) {
+    return static_cast<long long>(a);
+}
+
+extern "C" DLLEXPORT long ftoi(double a) {
+    return static_cast<long>(a);
+}
+
+extern "C" DLLEXPORT double itof(long a) {
+    return static_cast<double>(a);
+}
+
+extern "C" DLLEXPORT double ltof(long long a) {
+    return static_cast<double>(a);
+}
+
+extern "C" DLLEXPORT long ltoi(long long a) {
+    return static_cast<long>(a);
+}
+
+extern "C" DLLEXPORT long long itol(long a) {
+    return static_cast<long long>(a);
+}
+
 extern "C" DLLEXPORT long print(char* fmt, ...) {
     va_list args;
     va_start(args, fmt);

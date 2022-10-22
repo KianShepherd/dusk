@@ -8,14 +8,13 @@ fn modify() -> int* {
     return fact;
 }
 
-fn modifyd() -> float* {
+fn modifyd(fact: float*) -> int {
     let str: string = "%f\n";
     let n: int = 10;
-    let mut fact: float[10];
     for (let mut i: int = 0; i < n; i = i + 1) {
-        fact[i] = 2.0;
+        fact[i] = 2.0 * itof(i);
     }
-    return fact;
+    return 1;
 }
 
 fn main(argc: float, argv: float) -> int {
@@ -30,7 +29,7 @@ fn main(argc: float, argv: float) -> int {
     del(facts2);
 
     let mut facts2: float[10];
-    facts2 = modifyd();
+    modifyd(facts2);
     for (let mut i: int = 0; i < n; i = i + 1) {
         print(strf, facts2[i]);
     }

@@ -86,6 +86,54 @@ void AST::stdlib() {
             std::vector<std::vector<std::string>> {{std::string("arr"), std::string("intarr")}}
         )
     );
+    this->functions.push_back(
+        new Function(
+            std::string("ftoi"),
+            nullptr,
+            t_number,
+            std::vector<std::vector<std::string>> {{std::string("f"), std::string("float")}}
+        )
+    );
+    this->functions.push_back(
+        new Function(
+            std::string("ftol"),
+            nullptr,
+            t_long,
+            std::vector<std::vector<std::string>> {{std::string("f"), std::string("float")}}
+        )
+    );
+    this->functions.push_back(
+        new Function(
+            std::string("itof"),
+            nullptr,
+            t_float,
+            std::vector<std::vector<std::string>> {{std::string("i"), std::string("int")}}
+        )
+    );
+    this->functions.push_back(
+        new Function(
+            std::string("ltof"),
+            nullptr,
+            t_float,
+            std::vector<std::vector<std::string>> {{std::string("i"), std::string("long")}}
+        )
+    );
+    this->functions.push_back(
+        new Function(
+            std::string("itol"),
+            nullptr,
+            t_long,
+            std::vector<std::vector<std::string>> {{std::string("i"), std::string("int")}}
+        )
+    );
+    this->functions.push_back(
+        new Function(
+            std::string("ltoi"),
+            nullptr,
+            t_number,
+            std::vector<std::vector<std::string>> {{std::string("i"), std::string("long")}}
+        )
+    );
     std::vector<llvm::Type*> func_args = std::vector<llvm::Type*>();
     func_args.push_back(llvm::Type::getInt8PtrTy(*(this->TheContext)));
     llvm::Function::Create(
