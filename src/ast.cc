@@ -62,16 +62,30 @@ void AST::pop_scope() {
 }
 
 void AST::stdlib() {
-    /* Example for later
     this->functions.push_back(
         new Function(
-            std::string("printi"),
+            std::string("copyi"),
             nullptr,
-            t_number,
-            std::vector<std::vector<std::string>> {{std::string("a"), std::string("int")}}
+            t_number_arr,
+            std::vector<std::vector<std::string>> {{std::string("arr"), std::string("intarr")}, {std::string("n"), std::string("int")}}
         )
     );
-    */
+    this->functions.push_back(
+        new Function(
+            std::string("copyd"),
+            nullptr,
+            t_float_arr,
+            std::vector<std::vector<std::string>> {{std::string("arr"), std::string("floatarr")}, {std::string("n"), std::string("int")}}
+        )
+    );
+    this->functions.push_back(
+        new Function(
+            std::string("freei"),
+            nullptr,
+            t_number,
+            std::vector<std::vector<std::string>> {{std::string("arr"), std::string("intarr")}}
+        )
+    );
     std::vector<llvm::Type*> func_args = std::vector<llvm::Type*>();
     func_args.push_back(llvm::Type::getInt8PtrTy(*(this->TheContext)));
     llvm::Function::Create(

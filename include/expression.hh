@@ -28,6 +28,9 @@ enum AtomType {
     t_char,
     t_null,
     t_function_call,
+    t_number_arr,
+    t_float_arr,
+    t_bool_arr
 };
 
 enum ExpType {
@@ -71,10 +74,13 @@ public:
     ExpressionAtomic(long long num);
     ExpressionAtomic(double num);
     ExpressionAtomic(std::string str, bool is_identifier);
+    ExpressionAtomic(std::string str, Expression* index);
     ExpressionAtomic(bool b);
     ExpressionAtomic(char c);
     ExpressionAtomic(std::string str, std::vector<Expression*> args);
     ExpressionAtomic();
+    ExpressionAtomic(AtomType type, int length, std::vector<long long> values);
+    ExpressionAtomic(AtomType type, int length, std::vector<double> values);
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
@@ -92,6 +98,10 @@ public:
     bool boolean;
     AtomType type;
     std::vector<Expression*> args;
+    int length;
+    std::vector<long long> int_vals;
+    std::vector<double> float_vals;
+    Expression* index;
 };
 
 class BinaryExpression : public Expression {
@@ -130,6 +140,7 @@ private:
 class AssignmentExpression : public Expression {
 public:
     AssignmentExpression(Expression* expr, Expression* op);
+    AssignmentExpression(Expression* expr, Expression* op, Expression* index);
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
@@ -141,6 +152,8 @@ public:
 private:
     class Expression* identifier;
     class Expression* value;
+    Expression* index;
+    bool is_arr;
 };
 
 class BreakExpression : public Expression {

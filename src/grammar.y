@@ -31,11 +31,13 @@ void yyerror(AST&, const char*);
     std::vector<std::string>* strs;
     std::vector<std::vector<std::string>>* vstrs;
     std::vector<Expression*>* exprs;
+    std::vector<long long>* numbers;
+    std::vector<double>* floats;
 }
 
 %token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
-%token SEMICOLON LBRACE RBRACE LPAREN RPAREN COLON COMMA ARROW
+%token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW
 %token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE BREAK
 
 %type<expr>  exp;
@@ -44,6 +46,8 @@ void yyerror(AST&, const char*);
 %type<strs>  typedarg;
 %type<vstrs> typedargs;
 %type<exprs> exprlist;
+%type<numbers> boolarr intarr;
+%type<floats> floatarr;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -88,6 +92,18 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($7), t_string, std::vector<std::vector<std::string>>()));
     }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW BOOL TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_bool_arr, std::vector<std::vector<std::string>>()));
+    }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW INT TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_number_arr, std::vector<std::vector<std::string>>()));
+    }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW FLOAT TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_float_arr, std::vector<std::vector<std::string>>()));
+    }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($6), t_null, std::move(*($4))));
@@ -115,6 +131,18 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW STR statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($8), t_string, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($9), t_bool_arr, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW INT TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($9), t_number_arr, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($9), t_float_arr, std::move(*($4))));
     }
     ;
 
@@ -170,6 +198,18 @@ statement: exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_string);
     }
+    | LET exp COLON INT TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($7), false, t_number_arr);
+    }
+    | LET exp COLON FLOAT TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($7), false, t_float_arr);
+    }
+    | LET exp COLON BOOL TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($7), false, t_bool_arr);
+    }
     | mutassign
     {
         $$ = std::move($1);
@@ -210,7 +250,6 @@ mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_long);
     }
-
     | LET MUTABLE exp COLON FLOAT EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_float);
@@ -226,6 +265,18 @@ mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
     | LET MUTABLE exp COLON CHAR EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_char);
+    }
+    | LET MUTABLE exp COLON INT TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($8), true, t_number_arr);
+    }
+    | LET MUTABLE exp COLON FLOAT TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($8), true, t_float_arr);
+    }
+    | LET MUTABLE exp COLON BOOL TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($8), true, t_bool_arr);
     }
     ;
 
@@ -274,6 +325,28 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("bool"));
+        delete $1;
+    }
+    | IDENTIFIER COLON INT TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("intarr"));
+        delete $1;
+    }
+
+    | IDENTIFIER COLON FLOAT TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("floatarr"));
+        delete $1;
+    }
+    | IDENTIFIER COLON BOOL TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("boolarr"));
         delete $1;
     }
     | IDENTIFIER COLON STR
@@ -367,9 +440,26 @@ exp: NUMBER
         $$ = new ExpressionAtomic(std::string(*($1)), true);
         free($1);
     }
+    | IDENTIFIER LSQUARE exp RSQUARE
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), std::move($3));
+        free($1);
+    }
     | BREAK
     {
         $$ = new BreakExpression();
+    }
+    | LBRACE boolarr RBRACE
+    {
+        $$ = new ExpressionAtomic(t_bool_arr, (*($2)).size(), std::move(*($2)));
+    }
+    | LBRACE intarr RBRACE
+    {
+        $$ = new ExpressionAtomic(t_number_arr, (*($2)).size(), std::move(*($2)));
+    }
+    | LBRACE floatarr RBRACE
+    {
+        $$ = new ExpressionAtomic(t_float_arr, (*($2)).size(), std::move(*($2)));
     }
     ;
 
@@ -426,6 +516,11 @@ exp: exp PLUS exp
         $$ = new AssignmentExpression(new ExpressionAtomic(std::string(*($1)), true), std::move($3));
         free($1);
     }
+    | IDENTIFIER LSQUARE exp RSQUARE EQUAL exp
+    {
+        $$ = new AssignmentExpression(new ExpressionAtomic(std::string(*($1)), true), std::move($6), std::move($3));
+        free($1);
+    }
     ;
 
 exp: NOT exp %prec UNARY
@@ -439,6 +534,80 @@ exp: NOT exp %prec UNARY
     | LPAREN exp RPAREN
     {
         $$ = new UnaryExpression(std::move($2), std::string("()"));
+    }
+    ;
+
+boolarr: %empty
+    {
+        $$ = new std::vector<long long>();
+    }
+    | boolarr TRUE
+    {
+        if ($$->size() > 0) {
+            yyerror(ast, "Expected a comma between expressions.");
+        } else {
+            $$->push_back(1);
+        }
+        free($2);
+    }
+    | boolarr FALSE
+    {
+        if ($$->size() > 0) {
+            yyerror(ast, "Expected a comma between expressions.");
+        } else {
+            $$->push_back(0);
+        }
+        free($2);
+    }
+    | boolarr COMMA TRUE
+    {
+        $$->push_back(1);
+        free($3);
+    }
+    | boolarr COMMA FALSE
+    {
+        $$->push_back(0);
+        free($3);
+    }
+    ;
+
+intarr: %empty
+    {
+        $$ = new std::vector<long long>();
+    }
+    | intarr NUMBER
+    {
+        if ($$->size() > 0) {
+            yyerror(ast, "Expected a comma between expressions.");
+        } else {
+            $$->push_back(std::stoll(*($2)));
+        }
+        free($2);
+    }
+    | intarr COMMA NUMBER
+    {
+        $$->push_back(std::stoll(*($3)));
+        free($3);
+    }
+    ;
+
+floatarr: %empty
+    {
+        $$ = new std::vector<double>();
+    }
+    | floatarr DOUBLE
+    {
+        if ($$->size() > 0) {
+            yyerror(ast, "Expected a comma between expressions.");
+        } else {
+            $$->push_back(std::stod(*($2)));
+        }
+        free($2);
+    }
+    | floatarr COMMA DOUBLE
+    {
+        $$->push_back(std::stod(*($3)));
+        free($3);
     }
     ;
 

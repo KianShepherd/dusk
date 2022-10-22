@@ -1,18 +1,39 @@
-fn fact_tail(acc: long, n: long) -> long {
-    if (n < 2) {
-        return acc;
+fn modify() -> int* {
+    let str: string = "%ld\n";
+    let n: int = 10;
+    let mut fact: int* = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    for (let mut i: int = 0; i < n; i = i + 1) {
+        fact[i] = 2 * i;
     }
-    return fact_tail(acc * n, n - 1);
+    return copyi(fact, 10);
 }
 
-fn fact(n: long) -> long {
-    return fact_tail(1, n);
+fn modifyd() -> float* {
+    let str: string = "%f\n";
+    let n: int = 10;
+    let mut fact: float* = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+    for (let mut i: int = 0; i < n; i = i + 1) {
+        fact[i] = 2.0;
+    }
+    return copyd(fact, 10);
 }
 
 fn main(argc: float, argv: float) -> int {
     let str: string = "%ld\n";
-    for (let mut i: long = 1; i < 21; i = i + 1) {
-        print(str, fact(i));
+    let strf: string = "%f\n";
+    let n: int = 10;
+    let mut facts2: int* = {};
+    facts2 = modify();
+    for (let mut i: int = 0; i < n; i = i + 1) {
+        print(str, facts2[i]);
     }
+    del(facts2);
+
+    let mut facts2: float* = {};
+    facts2 = modifyd();
+    for (let mut i: int = 0; i < n; i = i + 1) {
+        print(strf, facts2[i]);
+    }
+    del(facts2);
     return 1;
 }

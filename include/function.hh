@@ -13,6 +13,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <iterator>
 #include "expression.hh"
 #include "statement.hh"
 #include "helpers.hh"

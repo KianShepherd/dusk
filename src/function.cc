@@ -20,6 +20,12 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
             this->indentifier_type.push_back(t_float);
         } else if (args[i][1].compare("bool") == 0) {
             this->indentifier_type.push_back(t_bool);
+        } else if (args[i][1].compare("intarr") == 0) {
+            this->indentifier_type.push_back(t_number_arr);
+        } else if (args[i][1].compare("floatarr") == 0) {
+            this->indentifier_type.push_back(t_float_arr);
+        } else if (args[i][1].compare("boolarr") == 0) {
+            this->indentifier_type.push_back(t_bool_arr);
         } else if (args[i][1].compare("string") == 0) {
             this->indentifier_type.push_back(t_string);
         }
@@ -38,6 +44,9 @@ void Function::debug() {
         case t_string: std::cout << "str"; break;
         case t_null: std::cout << "void"; break;
         case t_bool: std::cout << "bool"; break;
+        case t_number_arr: std::cout << " int*"; break;
+        case t_float_arr: std::cout << " float*"; break;
+        case t_bool_arr: std::cout << " bool*"; break;
         default: std::cerr << "Unknown function type"; break;
     }
     std::cout << " function " << this->name <<  std::endl;
@@ -53,6 +62,9 @@ void Function::debug() {
             case t_float: std::cout << " float"; break;
             case t_bool: std::cout << " bool"; break;
             case t_string: std::cout << " string"; break;
+            case t_number_arr: std::cout << " int*"; break;
+            case t_float_arr: std::cout << " float*"; break;
+            case t_bool_arr: std::cout << " bool*"; break;
             default: break;
         }
     }
@@ -87,6 +99,9 @@ llvm::Function* Function::codegen(AST* ast) {
                 case t_float: func_args.push_back(llvm::Type::getDoubleTy(*(ast->TheContext))); break;
                 case t_bool: func_args.push_back(llvm::Type::getInt1Ty(*(ast->TheContext))); break;
                 case t_string: func_args.push_back(llvm::Type::getInt8PtrTy(*(ast->TheContext))); break;
+                case t_bool_arr: func_args.push_back(llvm::Type::getInt1PtrTy(*(ast->TheContext))); break;
+                case t_number_arr: func_args.push_back(llvm::Type::getInt64PtrTy(*(ast->TheContext))); break;
+                case t_float_arr: func_args.push_back(llvm::Type::getDoublePtrTy(*(ast->TheContext))); break;
                 default: break;
             }
         }
@@ -99,6 +114,9 @@ llvm::Function* Function::codegen(AST* ast) {
             case t_string: FT = nullptr; break;
             case t_null: FT = llvm::FunctionType::get(llvm::Type::getVoidTy(*(ast->TheContext)), func_args, false); break;
             case t_bool: FT = llvm::FunctionType::get(llvm::Type::getInt1Ty(*(ast->TheContext)), func_args, false); break;
+            case t_bool_arr: FT = llvm::FunctionType::get(llvm::Type::getInt1PtrTy(*(ast->TheContext)), func_args, false); break;
+            case t_number_arr: FT = llvm::FunctionType::get(llvm::Type::getInt64PtrTy(*(ast->TheContext)), func_args, false); break;
+            case t_float_arr: FT = llvm::FunctionType::get(llvm::Type::getDoublePtrTy(*(ast->TheContext)), func_args, false); break;
             default: FT = nullptr; break;
         }
 
@@ -125,12 +143,16 @@ llvm::Function* Function::codegen(AST* ast) {
 
     // Record the function arguments in the NamedValues map.
     ast->NamedValues.clear();
-    for (auto &Arg : TheFunction->args()) {
-        llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg.getName()), Arg.getType());
-        ast->Builder->CreateStore(&Arg, Alloca);
+    ast->NamedValueTypes.clear();
+    auto Arg = TheFunction->args().begin();
+    for (size_t i = 0; i < this->indentifier_type.size(); i++) {
+        llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), Arg->getType());
+        ast->Builder->CreateStore(Arg, Alloca);
 
         // Add arguments to variable symbol table.
-        ast->NamedValues[std::string(Arg.getName())] = std::make_pair(Alloca, Arg.getType());
+        ast->NamedValues[std::string(Arg->getName())] = std::make_pair(Alloca, Arg->getType());
+        ast->NamedValueTypes[std::string(Arg->getName())] = this->indentifier_type[i];
+        Arg = std::next(Arg);
     }
 
     this->statements->codegen(ast);

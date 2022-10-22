@@ -19,6 +19,13 @@ ExpressionAtomic::ExpressionAtomic(double num) {
 ExpressionAtomic::ExpressionAtomic(std::string str, bool is_identifier) {
     this->str = (is_identifier)?std::string(str):std::string(str.substr(1, str.length() - 2));
     this->type = (is_identifier)?t_identifier:t_string;
+    this->index = nullptr;
+}
+
+ExpressionAtomic::ExpressionAtomic(std::string str, Expression* index) {
+    this->str = std::string(str);
+    this->type = t_identifier;
+    this->index = index;
 }
 
 ExpressionAtomic::ExpressionAtomic(char character) {
@@ -41,6 +48,18 @@ ExpressionAtomic::ExpressionAtomic(std::string str, std::vector<Expression*> arg
     this->type = t_function_call;
 }
 
+ExpressionAtomic::ExpressionAtomic(AtomType type, int length, std::vector<long long> values) {
+    this->type = type;
+    this->length = length;
+    this->int_vals = values;
+}
+
+ExpressionAtomic::ExpressionAtomic(AtomType type, int length, std::vector<double> values) {
+    this->type = type;
+    this->length = length;
+    this->float_vals = values;
+}
+
 void ExpressionAtomic::debug(size_t depth) {
     switch (this->type) {
         case t_number: std::cout << std::string(depth * 4, ' ') << this->number << " : int"<< std::endl; break;
@@ -48,10 +67,43 @@ void ExpressionAtomic::debug(size_t depth) {
         case t_float: std::cout << std::string(depth * 4, ' ') << this->floating << " : float" << std::endl; break;
         case t_char: std::cout << std::string(depth * 4, ' ') << this->character << " : char" << std::endl; break;
         case t_string: std::cout << std::string(depth * 4, ' ') << this->str << " - len = " << this->str.length() << " : str" << std::endl; break;
-        case t_identifier: std::cout << std::string(depth * 4, ' ') << this->str << " - len = " << this->str.length() << " : identifier" << std::endl; break;
+        case t_identifier: {
+            std::cout << std::string(depth * 4, ' ') << this->str << " - len = " << this->str.length() << " : identifier";
+            if (this->index) {
+                std:: cout << " [ ";
+                this->index->debug(depth + 1);
+                std::cout << std::string(depth * 4, ' ') << " ] ";
+            }
+            std::cout << std::endl;
+            break;
+        }
         case t_null: std::cout << std::string(depth * 4, ' ') << "null : null" << std::endl; break;
         case t_bool: std::cout << std::string(depth * 4, ' ') << ((this->boolean)?"True : bool":"False : bool") << std::endl; break;
         case t_function_call: std::cout << std::string(depth * 4, ' ') << "call " << this->str << " : " << this->args.size() << " args" << std::endl; for (size_t i = 0; i < this->args.size(); i++) this->args[i]->debug(depth + 1); break;
+        case t_bool_arr: {
+            std::cout << std::string(depth * 4, ' ') << "bool array : len " << this->length << " { ";
+            for (auto v: this->int_vals) {
+                std::cout << v << " ";
+            }
+            std::cout << "}" << std::endl;
+            break;
+        }
+        case t_number_arr: {
+            std::cout << std::string(depth * 4, ' ') << "int array : len " << this->length << " { ";
+            for (auto v: this->int_vals) {
+                std::cout << v << " ";
+            }
+            std::cout << "}" << std::endl;
+            break;
+        }
+        case t_float_arr: {
+            std::cout << std::string(depth * 4, ' ') << "float array : len " << this->length << " { ";
+            for (auto v: this->int_vals) {
+                std::cout << v << " ";
+            }
+            std::cout << "}" << std::endl;
+            break;
+        }
         default: std::cout << "Unknown atomic type" << std::endl; break;
     }
 }
@@ -112,9 +164,9 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
             this->str = s2.str();
 
             auto atom_type = llvm::Type::getInt8Ty(*(ast->TheContext));
-            auto type = llvm::ArrayType::get(atom_type, this->str.size());
+            auto type = llvm::ArrayType::get(atom_type, this->str.size() + 1);
 
-            auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), this->str.size() + 1), llvm::Twine("s"), ast->Builder->GetInsertBlock());
+            auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), 1), llvm::Twine("s"), ast->Builder->GetInsertBlock());
             for (size_t i = 0; i < this->str.size(); i++) {
                 auto ptr = ast->Builder->CreateConstGEP1_32(atom_type, array, i);
                 ast->Builder->CreateStore(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->str.data()[i],true)), ptr);
@@ -128,7 +180,28 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
             llvm::Value *V = ast->NamedValues[this->str].first;
             if (!V)
                 return ast->LogErrorV("Unknown variable name");
-            return ast->Builder->CreateLoad(ast->NamedValues[this->str].second, V, this->str.c_str());
+            if (!this->index) {
+                return ast->Builder->CreateLoad(ast->NamedValues[this->str].second, V, this->str.c_str());
+            } else {
+
+                llvm::Type* atom_type = nullptr;
+                AtomType vec_type = ast->NamedValueTypes[this->str];
+                if (vec_type == t_float_arr) {
+                    atom_type = llvm::Type::getDoubleTy(*(ast->TheContext));
+                } else if (vec_type == t_number_arr) {
+                    atom_type = llvm::Type::getInt64Ty(*(ast->TheContext));
+                } else if (vec_type == t_bool_arr) {
+                    atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));
+                }
+                auto index_val = this->index->codegen(ast, t_number);
+                auto index_vec = std::vector<llvm::Value*>();
+                index_vec.push_back(index_val);
+
+                auto Vd = ast->Builder->CreateLoad(ast->NamedValues[this->str].second, V, this->str.c_str());
+
+                auto ptr = ast->Builder->CreateGEP(atom_type, Vd, index_vec);
+                return ast->Builder->CreateLoad(atom_type, ptr, this->str.c_str());
+            }
         }
         case t_null: return nullptr;
         case t_bool: return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, ((this->boolean)?1:0), false));
@@ -161,6 +234,39 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
             }
             auto ret = ast->Builder->CreateCall(CalleeF, ArgsV, "calltmp");
             return ret;
+        }
+        case t_bool_arr: {
+            auto atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));
+            auto type = llvm::ArrayType::get(atom_type, this->length);
+
+            auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), 1), llvm::Twine("ba"), ast->Builder->GetInsertBlock());
+            for (size_t i = 0; i < this->length; i++) {
+                auto ptr = ast->Builder->CreateConstGEP1_32(atom_type, array, i);
+                ast->Builder->CreateStore(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, (bool)this->int_vals[i],false)), ptr);
+            }
+            return array;
+        }
+        case t_number_arr: {
+            auto atom_type = llvm::Type::getInt64Ty(*(ast->TheContext));
+            auto type = llvm::ArrayType::get(atom_type, this->length);
+
+            auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt64Ty(*(ast->TheContext)), 1), llvm::Twine("na"), ast->Builder->GetInsertBlock());
+            for (size_t i = 0; i < this->length; i++) {
+                auto ptr = ast->Builder->CreateConstGEP1_64(atom_type, array, i);
+                ast->Builder->CreateStore(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, (long)this->int_vals[i],true)), ptr);
+            }
+            return array;
+        }
+        case t_float_arr: {
+            auto atom_type = llvm::Type::getDoubleTy(*(ast->TheContext));
+            auto type = llvm::ArrayType::get(atom_type, this->length);
+
+            auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), 1), llvm::Twine("fa"), ast->Builder->GetInsertBlock());
+            for (size_t i = 0; i < this->length; i++) {
+                auto ptr = ast->Builder->CreateConstGEP1_32(atom_type, array, i);
+                ast->Builder->CreateStore(llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat((double)this->float_vals[i])), ptr);
+            }
+            return array;
         }
         default: return nullptr; break;
     }
@@ -372,10 +478,25 @@ AtomType UnaryExpression::get_atomic_type_keep_identifier(AST* ast) {
 AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* value) {
     this->identifier = identifier;
     this->value = value;
+    this->index = 0;
+    this->is_arr = false;
+}
+
+AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* value, Expression* index) {
+    this->identifier = identifier;
+    this->value = value;
+    this->index = index;
+    this->is_arr = true;
 }
 
 void AssignmentExpression::debug(size_t depth) {
-    std::cout << std::string(depth * 4, ' ') << ((ExpressionAtomic*)this->identifier)->str << " = " << std::endl;
+    std::cout << std::string(depth * 4, ' ') << ((ExpressionAtomic*)this->identifier)->str;
+    if (this->index) {
+        std::cout << std::string(depth * 4, ' ') << "[";
+        this->index->debug(depth);
+        std::cout << std::string(depth * 4, ' ') << "]";
+    }
+    std::cout << " = " << std::endl;
     this->value->debug(depth + 1);
 }
 
@@ -401,8 +522,27 @@ llvm::Value* AssignmentExpression::codegen(AST* ast, AtomType type) {
     llvm::Value *Variable = ast->NamedValues[((ExpressionAtomic*)this->identifier)->str].first;
     if (!Variable)
         return ast->LogErrorV("Unknown variable name");
+    if (!this->is_arr) {
+        ast->Builder->CreateStore(Val, Variable);
+    } else {
+        llvm::Type* atom_type = nullptr;
+        AtomType vec_type = ast->NamedValueTypes[((ExpressionAtomic*)this->identifier)->str];
+        if (vec_type == t_float_arr) {
+            atom_type = llvm::Type::getDoubleTy(*(ast->TheContext));
+        } else if (vec_type == t_number_arr) {
+            atom_type = llvm::Type::getInt64Ty(*(ast->TheContext));
+        } else if (vec_type == t_bool_arr) {
+            atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));
+        }
+        auto index_val = this->index->codegen(ast, t_number);
+        auto index_vec = std::vector<llvm::Value*>();
+        index_vec.push_back(index_val);
 
-    ast->Builder->CreateStore(Val, Variable);
+        auto Arr = ast->Builder->CreateLoad(llvm::Type::getInt64PtrTy(*(ast->TheContext)), Variable);
+        auto ptr = ast->Builder->CreateGEP(atom_type, Arr, index_vec);
+
+        ast->Builder->CreateStore(Val, ptr);
+    }
     return Val;
 }
 
