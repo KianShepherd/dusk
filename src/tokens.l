@@ -67,6 +67,9 @@ break                   { return BREAK;    }
 
 [a-zA-Z_][a-zA-Z0-9_]*  { yylval.str = new std::string(yytext, yyleng); return IDENTIFIER; }
 
+
+
 [[:space:]]             ; /* Ignore whitespace */
+"//".*                  { /* DO NOTHING */ }
 .                       { std::stringstream ss; ss << "bad input character '" << yytext << "' at line " << yylineno << std::endl; yylval.str = new std::string(ss.str()); return LEXERROR; }
 %%

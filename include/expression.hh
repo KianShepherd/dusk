@@ -30,7 +30,8 @@ enum AtomType {
     t_function_call,
     t_number_arr,
     t_float_arr,
-    t_bool_arr
+    t_bool_arr,
+    t_string_arr
 };
 
 enum ExpType {
@@ -81,6 +82,7 @@ public:
     ExpressionAtomic();
     ExpressionAtomic(AtomType type, int length, std::vector<long long> values);
     ExpressionAtomic(AtomType type, int length, std::vector<double> values);
+    ExpressionAtomic(int length, std::vector<std::string> values);
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
@@ -101,6 +103,7 @@ public:
     int length;
     std::vector<long long> int_vals;
     std::vector<double> float_vals;
+    std::vector<std::string> string_vals;
     Expression* index;
 };
 

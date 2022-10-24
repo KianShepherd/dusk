@@ -1,0 +1,21 @@
+fn main() -> int {
+    let integer: int = 5;
+    let longint: long = 10;
+    let floating: float = 7.0;
+
+    // float to int
+    print("%d\n", ftoi(floating));
+    // long to int
+    print("%d\n", ltoi(longint));
+
+    // int to float
+    print("%f\n", itof(integer));
+    // long to float
+    print("%f\n", ltof(longint));
+
+    // int to long
+    print("%ld\n", itol(integer));
+    // float to long
+    print("%ld\n", ftol(floating));
+    return 1;
+}

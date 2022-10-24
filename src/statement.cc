@@ -74,8 +74,26 @@ llvm::Value* ReturnStatement::codegen(AST* ast) {
             ArgsV.push_back(retval);
             ArgsV.push_back(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, length, true)));
             retval = ast->Builder->CreateCall(CalleeF, ArgsV, "copytmp");
+        } else if (type == t_string_arr) {
+            llvm::Function *CalleeF = ast->TheModule->getFunction("copysa");
+            if (!CalleeF)
+                return ast->LogErrorV("Unknown function referenced");
+
+            std::vector<llvm::Value*> ArgsV;
+            ArgsV.push_back(retval);
+            ArgsV.push_back(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, length, true)));
+            retval = ast->Builder->CreateCall(CalleeF, ArgsV, "copytmp");
         } else if (type == t_number_arr) {
             llvm::Function *CalleeF = ast->TheModule->getFunction("copyi");
+            if (!CalleeF)
+                return ast->LogErrorV("Unknown function referenced");
+
+            std::vector<llvm::Value*> ArgsV;
+            ArgsV.push_back(retval);
+            ArgsV.push_back(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, length, true)));
+            retval = ast->Builder->CreateCall(CalleeF, ArgsV, "copytmp");
+        } else if (type == t_string) {
+            llvm::Function *CalleeF = ast->TheModule->getFunction("copys");
             if (!CalleeF)
                 return ast->LogErrorV("Unknown function referenced");
 
@@ -110,6 +128,7 @@ void AssignmentStatement::debug(size_t depth) {
         case t_bool_arr: std::cout << "bool* "; break;
         case t_number_arr: std::cout << "int* "; break;
         case t_float_arr: std::cout << "float* "; break;
+        case t_string_arr: std::cout << "string* "; break;
         default: std::cerr << "Unknown type for assignment"; break;
     }
     std::cout << " = " << std::endl;
@@ -137,19 +156,25 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
     Expression* Init;
     if (this->value) {
         Init = this->value;
-        if (this->type == t_float_arr || this->type == t_number_arr || this->type == t_bool_arr)
+        if (this->type == t_float_arr || this->type == t_number_arr || this->type == t_bool_arr || this->type == t_string_arr || this->type == t_string)
             this->length = ((ExpressionAtomic*)this->value)->length;
     } else {
-        if (this->type != t_float_arr) {
-            std::vector<long long> vals;
-            for (int i = 0; i < this->length; i++) {
-                vals.push_back(0);
-            }
-            Init = new ExpressionAtomic(this->type, this->length, vals);
-        } else {
+        if (this->type == t_float_arr) {
             std::vector<double> vals;
             for (int i = 0; i < this->length; i++) {
                 vals.push_back(0.0);
+            }
+            Init = new ExpressionAtomic(this->type, this->length, vals);
+        } else if (this->type == t_string_arr) {
+            std::vector<std::string> vals;
+            for (int i = 0; i < this->length; i++) {
+                vals.push_back(std::string(" "));
+            }
+            Init = new ExpressionAtomic(this->length, vals);
+        } else {
+            std::vector<long long> vals;
+            for (int i = 0; i < this->length; i++) {
+                vals.push_back(0);
             }
             Init = new ExpressionAtomic(this->type, this->length, vals);
         }
@@ -172,6 +197,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
         case t_bool_arr: init_type = llvm::Type::getInt1PtrTy(*(ast->TheContext)); break;
         case t_number_arr: init_type = llvm::Type::getInt64PtrTy(*(ast->TheContext)); break;
         case t_float_arr: init_type = llvm::Type::getDoublePtrTy(*(ast->TheContext)); break;
+        case t_string_arr: init_type = llvm::Type::getInt8PtrTy(*(ast->TheContext))->getPointerTo(); break;
         default: return nullptr; break;
     }
     llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, VarName, init_type);

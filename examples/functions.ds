@@ -1,0 +1,26 @@
+// Heavy optimization is done to the generated code, implementing functions in ways that support tail
+// call recursion will optimize down to a loop and will not recursively call the function
+fn fact_tail(n: int, acc: int) -> int {
+    if (n < 2) {
+        return acc;
+    }
+    return fact_tail(n - 1, n * acc);
+}
+
+// All functions must have a return statement, and no two functions may have the same name
+fn factorial(n: int) -> int {
+    return fact_tail(n, 1);
+}
+
+// A main function must be found within the compiled files, and it will be used as the entrypoint.
+// argc, and argv are optional, if they are present they contain the number of command line arguments
+// and a string array with the coontents
+fn main(argc: int, argv: string*) -> int {
+    for (let mut i: int = 0; i < 10; i = i + 1) {
+        print("%d\n", factorial(i));
+    }
+    for (let mut i: int = 0; i < argc; i = i + 1) {
+        print("%s\n", argv[i]);
+    }
+    return 1;
+}

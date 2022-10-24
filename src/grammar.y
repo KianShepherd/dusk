@@ -33,6 +33,7 @@ void yyerror(AST&, const char*);
     std::vector<Expression*>* exprs;
     std::vector<long long>* numbers;
     std::vector<double>* floats;
+    std::vector<std::string>* strings;
 }
 
 %token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
@@ -48,6 +49,7 @@ void yyerror(AST&, const char*);
 %type<exprs> exprlist;
 %type<numbers> boolarr intarr;
 %type<floats> floatarr;
+%type<strings> stringarr;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -104,6 +106,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($8), t_float_arr, std::vector<std::vector<std::string>>()));
     }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW STR TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_string_arr, std::vector<std::vector<std::string>>()));
+    }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($6), t_null, std::move(*($4))));
@@ -143,6 +149,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT TIMES statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($9), t_float_arr, std::move(*($4))));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW STR TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($9), t_string_arr, std::move(*($4))));
     }
     ;
 
@@ -209,6 +219,10 @@ statement: exp SEMICOLON
     | LET exp COLON BOOL TIMES EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($2), std::move($7), false, t_bool_arr);
+    }
+    | LET exp COLON STR TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($7), false, t_string_arr);
     }
     | mutassign
     {
@@ -278,6 +292,10 @@ mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($8), true, t_bool_arr);
     }
+    | LET MUTABLE exp COLON STR TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($8), true, t_string_arr);
+    }
     | LET MUTABLE exp COLON INT LSQUARE NUMBER RSQUARE SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), nullptr, true, t_number_arr, std::stol(*($7)));
@@ -289,6 +307,10 @@ mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
     | LET MUTABLE exp COLON BOOL LSQUARE NUMBER RSQUARE SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), nullptr, true, t_bool_arr, std::stol(*($7)));
+    }
+    | LET MUTABLE exp COLON STR LSQUARE NUMBER RSQUARE SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), nullptr, true, t_string_arr, std::stol(*($7)));
     }
     ;
 
@@ -359,6 +381,13 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("boolarr"));
+        delete $1;
+    }
+    | IDENTIFIER COLON STR TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("stringarr"));
         delete $1;
     }
     | IDENTIFIER COLON STR
@@ -472,6 +501,10 @@ exp: NUMBER
     | LBRACE floatarr RBRACE
     {
         $$ = new ExpressionAtomic(t_float_arr, (*($2)).size(), std::move(*($2)));
+    }
+    | LBRACE stringarr RBRACE
+    {
+        $$ = new ExpressionAtomic((*($2)).size(), std::move(*($2)));
     }
     ;
 
@@ -620,6 +653,24 @@ floatarr: %empty
     {
         $$->push_back(std::stod(*($3)));
         free($3);
+    }
+    ;
+
+stringarr: %empty
+    {
+        $$ = new std::vector<std::string>();
+    }
+    | stringarr STRING
+    {
+        if ($$->size() > 0) {
+            yyerror(ast, "Expected a comma between expressions.");
+        } else {
+            $$->push_back(std::move(*($2)));
+        }
+    }
+    | stringarr COMMA STRING
+    {
+        $$->push_back(std::move(*($3)));
     }
     ;
 

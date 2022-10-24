@@ -20,6 +20,7 @@ ExpressionAtomic::ExpressionAtomic(std::string str, bool is_identifier) {
     this->str = (is_identifier)?std::string(str):std::string(str.substr(1, str.length() - 2));
     this->type = (is_identifier)?t_identifier:t_string;
     this->index = nullptr;
+    this->length = this->str.length();
 }
 
 ExpressionAtomic::ExpressionAtomic(std::string str, Expression* index) {
@@ -58,6 +59,12 @@ ExpressionAtomic::ExpressionAtomic(AtomType type, int length, std::vector<double
     this->type = type;
     this->length = length;
     this->float_vals = values;
+}
+
+ExpressionAtomic::ExpressionAtomic(int length, std::vector<std::string> values) {
+    this->type = t_string_arr;
+    this->length = length;
+    this->string_vals = values;
 }
 
 void ExpressionAtomic::debug(size_t depth) {
@@ -104,6 +111,14 @@ void ExpressionAtomic::debug(size_t depth) {
             std::cout << "}" << std::endl;
             break;
         }
+        case t_string_arr: {
+            std::cout << std::string(depth * 4, ' ') << "string array : len " << this->length << " { ";
+            for (auto v: this->string_vals) {
+                std::cout << v << " ";
+            }
+            std::cout << "}" << std::endl;
+            break;
+        }
         default: std::cout << "Unknown atomic type" << std::endl; break;
     }
 }
@@ -143,7 +158,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
             if (type == t_long) {
                 return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(128, this->number, true));
             } else if (type == t_char) {
-                return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->character, true));
+                return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->number, true));
             }
             return llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(64, this->number, true));
         }
@@ -192,6 +207,8 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
                     atom_type = llvm::Type::getInt64Ty(*(ast->TheContext));
                 } else if (vec_type == t_bool_arr) {
                     atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));
+                } else if (vec_type == t_string_arr) {
+                    atom_type = llvm::Type::getInt8PtrTy(*(ast->TheContext));
                 }
                 auto index_val = this->index->codegen(ast, t_number);
                 auto index_vec = std::vector<llvm::Value*>();
@@ -267,6 +284,47 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
                 ast->Builder->CreateStore(llvm::ConstantFP::get(*(ast->TheContext), llvm::APFloat((double)this->float_vals[i])), ptr);
             }
             return array;
+        }
+        case t_string_arr: {
+
+            std::cout << "STRING ARR CONSTRUCTION\n";
+            std::cout << "len: " << this->length << "\n";
+            auto atom_type = llvm::Type::getInt8PtrTy(*(ast->TheContext));
+            auto type = llvm::ArrayType::get(atom_type, this->length);
+
+            auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), 1), llvm::Twine("sa"), ast->Builder->GetInsertBlock());
+            for (size_t i = 0; i < this->length; i++) {
+                std::cout << i << std::endl;
+                std::cout << "val[" << i << "]'" << this->string_vals[i] <<"'\n";
+                auto ptr = ast->Builder->CreateConstGEP1_32(atom_type, array, i);
+
+                char c;
+                std::stringstream s(this->string_vals[i]);
+                std::stringstream s2;
+                
+                while (s.good()) {
+                    c = s.get() ;
+                    if (!s.good()) break ;
+                    if (c == '\\' && s.get() == 'n') c = '\n' ;
+                    s2 << c ;
+                }
+                this->string_vals[i] = s2.str().substr(1, s2.str().length() - 2);
+                std::cout << "val[" << i << "]'" << this->string_vals[i] <<"'\n";
+                auto s_atom_type = llvm::Type::getInt8Ty(*(ast->TheContext));
+                auto s_type = llvm::ArrayType::get(s_atom_type, this->string_vals[i].size() + 1);
+
+                auto s_array = new llvm::AllocaInst(s_type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), 1), llvm::Twine("s"), ast->Builder->GetInsertBlock());
+                for (size_t j = 0; j < this->string_vals[i].size(); j++) {
+                    auto s_ptr = ast->Builder->CreateConstGEP1_32(s_atom_type, s_array, j);
+                    ast->Builder->CreateStore(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, this->string_vals[i].data()[j],true)), s_ptr);
+                }
+                auto s_ptr = ast->Builder->CreateConstGEP1_32(s_atom_type, s_array, this->string_vals[i].size());
+                ast->Builder->CreateStore(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(8, 0,true)), s_ptr);
+
+                ast->Builder->CreateStore(s_array, ptr);
+            }
+            return array;
+
         }
         default: return nullptr; break;
     }
@@ -533,6 +591,8 @@ llvm::Value* AssignmentExpression::codegen(AST* ast, AtomType type) {
             atom_type = llvm::Type::getInt64Ty(*(ast->TheContext));
         } else if (vec_type == t_bool_arr) {
             atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));
+        } else if (vec_type == t_string_arr) {
+            atom_type = llvm::Type::getInt8PtrTy(*(ast->TheContext));
         }
         auto index_val = this->index->codegen(ast, t_number);
         auto index_vec = std::vector<llvm::Value*>();

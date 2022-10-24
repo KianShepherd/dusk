@@ -1,0 +1,61 @@
+fn main() -> int {
+    // Atomic Types
+    // 8 bit integer / characters.
+    let c: char = 100;
+    // 64 bit integers.
+    let i: int = 1;
+    // 128 bit integers.
+    let l: long = 2;
+    // double precision floating point numbers.
+    let d: float = 1.0;
+    // booleans (1 bit ints)
+    let t: bool = True;
+    let f: bool = False;
+
+    // Array Types
+    // strings (just char arrays under the hood).
+    let s: string = "Hello, Dusk!";
+    // Integer array
+    let i_arr: int* = {1, 2, 3};
+    // Float array
+    let f_arr: float* = {1.0, 2.0, 3.0};
+    // boolean arrays
+    let b_arr: bool* = {True, False, True};
+    // string arrays
+    let s_arr: string* = {"Hello", ", world!\n"};
+
+    // int / float / boolean /string arrays can also be declared with a size and then modified after.
+    let mut i_arr2: int[2]; 
+    i_arr2[0] = 5;
+    i_arr2[1] = 6;
+
+    // The print function uses C format specifiers for printing.
+    print("%d\n", c);
+    print("%d\n", i);
+    print("%ld\n", l);
+    print("%f\n", d);
+    print("%d\n", t);
+    print("%d\n", f);
+    print("%s\n", s);
+    for (let mut i: int = 0; i < 3; i = i + 1) {
+        print("%d ", i_arr[i]);
+    }
+    print("\n");
+    for (let mut i: int = 0; i < 3; i = i + 1) {
+        print("%f ", f_arr[i]);
+    }
+    print("\n");
+    for (let mut i: int = 0; i < 3; i = i + 1) {
+        print("%d ", b_arr[i]);
+    }
+    print("\n");
+    for (let mut i: int = 0; i < 2; i = i + 1) {
+        print("%d ", i_arr2[i]);
+    }
+    print("\n");
+    for (let mut i: int = 0; i < 2; i = i + 1) {
+        print("%s", s_arr[i]);
+    }
+
+    return 1;
+}

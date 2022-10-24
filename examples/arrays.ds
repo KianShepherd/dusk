@@ -1,0 +1,49 @@
+// Arrays can be returned from functions, note that any array that is returned from a function will
+// be allocated on the heap and must have a matching call to del to release the memory.
+fn modify(len: int) -> int* {
+    // Create an array of ints that is 10 long
+    let mut fact: int[10];
+    for (let mut i: int = 0; i < len; i = i + 1) {
+        // Indexing into the array can be done with the [] syntax
+        fact[i] = 2 * i;
+    }
+    // fact is copied to the heap and returned
+    return fact;
+}
+
+// You can also pass arrays into functions, note that arrays do not locally store a length and therefore
+// you must also pass in the length to ensure you do not modify memory that is not allocated for the array
+fn modifyd(fact: float*, len: int) -> int {
+    for (let mut i: int = 0; i < len; i = i + 1) {
+        // itof converts the integer i into a float, binary operators require thier operands to be of
+        // the same type.
+        fact[i] = 2.0 * itof(i);
+    }
+    return 1;
+}
+
+fn main(argc: float, argv: float) -> int {
+    // strings are just arrays of 8 bit integers, we preallocate them here so they are not reallocated
+    // within the loops
+    let str: string = "%ld\n";
+    let strf: string = "%f\n";
+
+    let n: int = 10;
+    let mut facts2: int[10];
+    // facts 2 will become a heap allocated array as it is returned from the function call
+    facts2 = modify(n);
+    for (let mut i: int = 0; i < n; i = i + 1) {
+        print(str, facts2[i]);
+    }
+    // Make sure to delete the memory once it is no longer needed to aviod memory leaks.
+    del(facts2);
+
+    let mut facts2: float[10];
+    // Inplace modification of facts2, note this is stack allocated as it is not returned and therefore
+    // no free is required.
+    modifyd(facts2, n);
+    for (let mut i: int = 0; i < n; i = i + 1) {
+        print(strf, facts2[i]);
+    }
+    return 1;
+}

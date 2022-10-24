@@ -80,6 +80,23 @@ void AST::stdlib() {
     );
     this->functions.push_back(
         new Function(
+            std::string("copys"),
+            nullptr,
+            t_string,
+            std::vector<std::vector<std::string>> {{std::string("arr"), std::string("string")}, {std::string("n"), std::string("int")}}
+        )
+    );
+    this->functions.push_back(
+        new Function(
+            std::string("copysa"),
+            nullptr,
+            t_string_arr,
+            std::vector<std::vector<std::string>> {{std::string("arr"), std::string("stringarr")}, {std::string("n"), std::string("int")}}
+        )
+    );
+    
+    this->functions.push_back(
+        new Function(
             std::string("del"),
             nullptr,
             t_number,

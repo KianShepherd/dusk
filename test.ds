@@ -1,37 +1,21 @@
-fn modify() -> int* {
-    let str: string = "%ld\n";
-    let n: int = 10;
-    let mut fact: int[10];
-    for (let mut i: int = 0; i < n; i = i + 1) {
-        fact[i] = 2 * i;
-    }
-    return fact;
+fn get_str() -> string {
+    let s: string = "foo\n";
+    return s;
 }
 
-fn modifyd(fact: float*) -> int {
-    let str: string = "%f\n";
-    let n: int = 10;
-    for (let mut i: int = 0; i < n; i = i + 1) {
-        fact[i] = 2.0 * itof(i);
-    }
-    return 1;
+fn get_strs() -> string* {
+    let s: string* = {"baz", "bar"};
+    return s;
 }
 
-fn main(argc: float, argv: float) -> int {
-    let str: string = "%ld\n";
-    let strf: string = "%f\n";
-    let n: int = 10;
-    let mut facts2: int[10];
-    facts2 = modify();
-    for (let mut i: int = 0; i < n; i = i + 1) {
-        print(str, facts2[i]);
-    }
-    del(facts2);
-
-    let mut facts2: float[10];
-    modifyd(facts2);
-    for (let mut i: int = 0; i < n; i = i + 1) {
-        print(strf, facts2[i]);
+fn main(argc: int, argv: string*) -> int {
+    let str: string = "";
+    str = get_str();
+    let mut strs: string[2];
+    strs = get_strs();
+    print("%s", str);
+    for (let mut i: int = 0; i < 2; i = i + 1) {
+        print("%s\n", strs[i]);
     }
     return 1;
 }
