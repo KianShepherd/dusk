@@ -10,7 +10,7 @@ Uses flex as a tokenizer.
 
 Uses bison as a parser generator.
 
-The AST is generated with C++
+The AST is generated with C++.
 
 LLVM is used as a backend to generate machine specific object files which are then compiled with a c compiler into an executable.
 
@@ -92,6 +92,60 @@ dusk test.ds
 ```
 
 Would compile a file named `test.ds` into an executable.
+
+## Current Functionality
+
+- Base types
+    - Atomic types
+        - i1: boolean
+        - i8: char   (equivalent to C char)
+        - i64: int   (equivalent to C long)
+        - i128: long (equivalent to C long long)
+        - f64: float (equivalent to C double)
+    - Array Types
+        - boolean array
+        - strings
+        - int array
+        - float array
+        - string arrays
+- Functions
+    - `main` as entry point
+        - accepts and handles command line arguments
+    - Can be self recursive
+        - Optimized so tail call omptimization can be preformed to remove recursive calls where possible
+    - Can pass arguments to and from
+- stdlib
+    - Casting functions for atomic types
+    - `copy` functions to allocate on the heap
+    - `del` function to delete heap allocated objects
+    - `print` function, takes C style format strings
+
+
+## Planned Functionality
+
+- Fix block variable scope
+- Static checking
+    - Ensure `main` function is present
+    - Checks for non mutable vairables being mutated
+    - Parse `mut` keyword for function args
+- Structs
+- Improve command line options for compilation
+    - Optional optimizations
+    - link C libraries
+    - multiple source files
+    - help message
+    - output filename
+    - specify which C compiler is used to generate the executable
+    - compile to object file not just executable
+- `extern` keyword to load `C` functions from libraries
+-  stdlib improvements
+    - vectors
+    - maps
+- Better compile time failure error messages
+    - show line that error occured on
+- Tests
+- Documentation webpage
+- Refcounting for heap allocated objects to free them automatically when they go out of scope
 
 ## License
 
