@@ -36,4 +36,5 @@ private:
     size_t arg_count;
     std::vector<Expression*> indentifiers;
     std::vector<AtomType> indentifier_type;
+    std::vector<bool> indentifiers_mutability;
 };

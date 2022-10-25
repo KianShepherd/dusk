@@ -278,12 +278,7 @@ void ScopeFrame::update_value(AST* ast, std::string identifier, ScopeValue* valu
     while (scope != nullptr) {
         auto iter = scope->variables.find(identifier);
         if (iter != scope->variables.end()) {
-            if (scope->variables[identifier]->mut) {
-                if (scope->variables[identifier]->type != value->type){
-                    std::cout << identifier<< std::endl;
-                    ast->push_err("Attempted to assign incorrect type.");
-                }
-            } else {
+            if (!scope->variables[identifier]->mut) {
                 ast->push_err("Attempted to mutata static variable.");
             }
             break;

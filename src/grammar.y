@@ -337,6 +337,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("int"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
     | IDENTIFIER COLON LONG
@@ -344,6 +345,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("long"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
 
@@ -352,6 +354,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("float"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
     | IDENTIFIER COLON BOOL
@@ -359,6 +362,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("bool"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
     | IDENTIFIER COLON INT TIMES
@@ -366,6 +370,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("intarr"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
 
@@ -374,6 +379,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("floatarr"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
     | IDENTIFIER COLON BOOL TIMES
@@ -381,6 +387,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("boolarr"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
     | IDENTIFIER COLON STR TIMES
@@ -388,6 +395,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("stringarr"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
     | IDENTIFIER COLON STR
@@ -395,6 +403,7 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("string"));
+        $$->push_back(std::string("f"));
         delete $1;
     }
     | IDENTIFIER COLON CHAR
@@ -402,7 +411,88 @@ typedarg: IDENTIFIER COLON INT
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($1)));
         $$->push_back(std::string("char"));
+        $$->push_back(std::string("f"));
         delete $1;
+    }
+    | MUTABLE IDENTIFIER COLON INT
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("int"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON LONG
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("long"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON FLOAT
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("float"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON BOOL
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("bool"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON INT TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("intarr"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON FLOAT TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("floatarr"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON BOOL TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("boolarr"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON STR TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("stringarr"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON STR
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("string"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON CHAR
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("char"));
+        $$->push_back(std::string("t"));
+        delete $2;
     }
     ;
 

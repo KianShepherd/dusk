@@ -286,16 +286,11 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
             return array;
         }
         case t_string_arr: {
-
-            std::cout << "STRING ARR CONSTRUCTION\n";
-            std::cout << "len: " << this->length << "\n";
             auto atom_type = llvm::Type::getInt8PtrTy(*(ast->TheContext));
             auto type = llvm::ArrayType::get(atom_type, this->length);
 
             auto array = new llvm::AllocaInst(type, 0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(*(ast->TheContext)), 1), llvm::Twine("sa"), ast->Builder->GetInsertBlock());
             for (size_t i = 0; i < this->length; i++) {
-                std::cout << i << std::endl;
-                std::cout << "val[" << i << "]'" << this->string_vals[i] <<"'\n";
                 auto ptr = ast->Builder->CreateConstGEP1_32(atom_type, array, i);
 
                 char c;
@@ -309,7 +304,6 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
                     s2 << c ;
                 }
                 this->string_vals[i] = s2.str().substr(1, s2.str().length() - 2);
-                std::cout << "val[" << i << "]'" << this->string_vals[i] <<"'\n";
                 auto s_atom_type = llvm::Type::getInt8Ty(*(ast->TheContext));
                 auto s_type = llvm::ArrayType::get(s_atom_type, this->string_vals[i].size() + 1);
 

@@ -8,6 +8,10 @@ fn get_strs() -> string* {
     return s;
 }
 
+fn asd(n: int, mut m: int) -> int {
+    return 1;
+}
+
 fn main(argc: int, argv: string*) -> int {
     let str: string = "";
     str = get_str();

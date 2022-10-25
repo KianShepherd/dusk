@@ -141,8 +141,6 @@ void AssignmentStatement::debug(size_t depth) {
 
 void AssignmentStatement::fold(AST* ast) {
     this->value = this->value->fold(ast);
-    if (((ExpressionAtomic*)this->value)->type != this->type)
-        ast->push_err("Attempted to assign incorrect type to variable");
     ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->value->get_atomic_type(ast)));
 }
 

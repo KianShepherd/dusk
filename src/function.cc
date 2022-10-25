@@ -8,6 +8,7 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
     this->arg_count = args.size();
     this->indentifiers = std::vector<Expression*>();
     this->indentifier_type = std::vector<AtomType>();
+    this->indentifiers_mutability = std::vector<bool>();
     for (size_t i = 0; i < this->arg_count; i++) {
         this->indentifiers.push_back(new ExpressionAtomic(std::string(args[i][0]), true));
         if (args[i][1].compare("int") == 0) {
@@ -30,6 +31,15 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
             this->indentifier_type.push_back(t_string_arr);
         } else if (args[i][1].compare("string") == 0) {
             this->indentifier_type.push_back(t_string);
+        }
+        if (args[i].size() == 3) {
+            if (args[i][2].compare("t") == 0) {
+                this->indentifiers_mutability.push_back(true);
+            } else {
+                this->indentifiers_mutability.push_back(false);
+            }
+        } else {
+            this->indentifiers_mutability.push_back(false);
         }
     }
 }
@@ -57,6 +67,9 @@ void Function::debug() {
     for (size_t i = 0; i < this->arg_count; i++) {
         if (i != 0)
             std::cout << ", ";
+        if (this->indentifiers_mutability[i]) {
+            std::cout << "mut ";
+        }
         std::cout << ((ExpressionAtomic*)this->indentifiers[i])->str << " :";
         switch (this->indentifier_type[i]) {
             case t_number: std::cout << " int"; break;
@@ -83,7 +96,7 @@ void Function::debug() {
 void Function::fold(AST* ast) {
     ast->scope->new_scope();
     for (size_t i = 0; i < this->arg_count; i++) {
-        ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(false, this->indentifier_type[i]));
+        ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(this->indentifiers_mutability[i], this->indentifier_type[i]));
     }
     if (this->statements)
         this->statements->fold(ast);
