@@ -123,15 +123,14 @@ Would compile a file named `test.ds` into an executable.
     - `copy` functions to allocate on the heap
     - `del` function to delete heap allocated objects
     - `print` function, takes C style format strings
+- Static checking
+    - Ensure `main` function is present
+    - Checks for non mutable vairables being mutated
 
 
 ## Planned Functionality
 
 - Fix block variable scope
-- Static checking
-    - Ensure `main` function is present
-    - Checks for non mutable vairables being mutated
-    - Parse `mut` keyword for function args
 - Structs
 - Improve command line options for compilation
     - Optional optimizations

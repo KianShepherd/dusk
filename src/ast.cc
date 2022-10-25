@@ -38,12 +38,19 @@ void AST::debug() {
 }
 
 void AST::static_checking() {
+    bool found_entrypoint = false;
     for (int i = 0; i < (int)this->functions.size(); i++) {
-        this->func_definitions.push_back(this->functions[i]->get_meta());
+        auto meta = this->functions[i]->get_meta();
+        this->func_definitions.push_back(meta);
+        if (std::get<0>(meta).compare("main") == 0) {
+            found_entrypoint = true;
+        }
     }
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->fold(this);
     }
+    if (!found_entrypoint)
+        this->push_err("No entrypoint found, you must declare a main function.");
 }
 
 void AST::push_scope() {

@@ -140,8 +140,12 @@ void AssignmentStatement::debug(size_t depth) {
 }
 
 void AssignmentStatement::fold(AST* ast) {
-    this->value = this->value->fold(ast);
-    ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->value->get_atomic_type(ast)));
+    if (this->value) {
+        this->value = this->value->fold(ast);
+        ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->value->get_atomic_type(ast)));
+    } else {
+        ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->type));
+    }
 }
 
 llvm::Value* AssignmentStatement::codegen(AST* ast) {
@@ -228,8 +232,12 @@ void IfStatement::debug(size_t depth) {
 
 void IfStatement::fold(AST* ast) {
     this->condition = this->condition->fold(ast);
-    this->block1->fold(ast);
-    this->block2->fold(ast);
+    if (this->block1) {
+        this->block1->fold(ast);
+    }
+    if (this->block2) {
+        this->block2->fold(ast);
+    }
 }
 
 llvm::Value* IfStatement::codegen(AST* ast) {

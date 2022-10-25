@@ -4,16 +4,12 @@ fn get_str() -> string {
 }
 
 fn get_strs() -> string* {
-    let s: string* = {"baz", "bar"};
+    let mut s: string* = {"baz", "bar"};
     return s;
 }
 
-fn asd(n: int, mut m: int) -> int {
-    return 1;
-}
-
 fn main(argc: int, argv: string*) -> int {
-    let str: string = "";
+    let mut str: string = "";
     str = get_str();
     let mut strs: string[2];
     strs = get_strs();
