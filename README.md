@@ -1,5 +1,9 @@
 # Dusk
 
+## Documentation
+
+[The documentation for dusk can be found here](https://kian_shepherd.gitlab.io/Dusk/)
+
 ## Description
 
 A simple programming language built from scratch.
