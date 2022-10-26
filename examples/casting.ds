@@ -29,11 +29,18 @@ fn main() -> int {
     print("%ld\n", stol(str));
 
     print("To string\n");
+    // To string methods return heap allocated objects and need to be free when no longer used.
     // int to string
-    print("%s\n", itos(integer));
+    let s: string = itos(integer);
+    print("%s\n", s);
+    del(s);
     // long to string
-    print("%s\n", ltos(longint));
+    let s: string = ltos(longint);
+    print("%s\n", s);
+    del(s);
     // float to string
-    print("%s\n", ftos(floating));
+    let s: string = ftos(floating);
+    print("%s\n", s);
+    del(s);
     return 1;
 }
