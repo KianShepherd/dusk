@@ -95,6 +95,22 @@ For example
 dusk test.ds
 ```
 
+Help menu.
+
+```
+Usage: dusk [options] file...
+Options:
+-h                Display this information.
+-d                Print out debug information about the AST and LLVM IR.
+-O                Optimize the generated object / executable.
+-c                Only compile the sources do not link into executable.
+
+-o <file>         Set the name of the outputted object / executable.
+-cc <compiler>    Set the c / c++ compiler to use (default is g++).
+
+-l<library>       Add library to link to executable at compile time.
+```
+
 Would compile a file named `test.ds` into an executable.
 
 ## Current Functionality
