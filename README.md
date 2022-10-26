@@ -125,7 +125,7 @@ Would compile a file named `test.ds` into an executable.
     - Can print help info on how to use it
 - `extern` keyword to load `C` functions from libraries
 - stdlib
-    - Casting functions for atomic types
+    - Casting functions
     - `copy` functions to allocate on the heap
     - `del` function to delete heap allocated objects
     - `print` function, takes C style format strings

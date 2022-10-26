@@ -1,21 +1,39 @@
 fn main() -> int {
     let integer: int = 5;
     let longint: long = 10;
-    let floating: float = 7.0;
+    let floating: float = 7.5;
+    let str: string = "6";
 
+    print("To int\n");
     // float to int
     print("%d\n", ftoi(floating));
     // long to int
     print("%d\n", ltoi(longint));
+    // string to int
+    print("%d\n", stoi(str));
 
+    print("To float\n");
     // int to float
     print("%f\n", itof(integer));
     // long to float
     print("%f\n", ltof(longint));
+    // string to float
+    print("%f\n", stof(str));
 
+    print("To long\n");
     // int to long
     print("%ld\n", itol(integer));
     // float to long
     print("%ld\n", ftol(floating));
+    // string to long
+    print("%ld\n", stol(str));
+
+    print("To string\n");
+    // int to string
+    print("%s\n", itos(integer));
+    // long to string
+    print("%s\n", ltos(longint));
+    // float to string
+    print("%s\n", ftos(floating));
     return 1;
 }
