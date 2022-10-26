@@ -95,9 +95,12 @@ For example
 dusk test.ds
 ```
 
-Help menu.
+Would compile a file named `test.ds` into an executable.
+
+The help menu can be viewed like so.
 
 ```
+$ dusk -h
 Usage: dusk [options] file...
 Options:
 -h                Display this information.
@@ -111,8 +114,6 @@ Options:
 -l<library>       Add library to link to executable at compile time.
 -L<path>          Add path to library link paths.
 ```
-
-Would compile a file named `test.ds` into an executable.
 
 ## Current Functionality
 
