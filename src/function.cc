@@ -148,7 +148,6 @@ llvm::Function* Function::codegen_proto(AST* ast) {
         for (auto &Arg : F->args()) {
             Arg.setName(((ExpressionAtomic*)this->indentifiers[Idx++])->str);
         }
-
         TheFunction = F;
     }
     return TheFunction;
@@ -180,7 +179,11 @@ llvm::Function* Function::codegen(AST* ast) {
         Arg = std::next(Arg);
     }
 
-    this->statements->codegen(ast);
+    if (this->statements->codegen(ast))
+        if (TheFunction->getReturnType()->isVoidTy())
+            ast->Builder->CreateRetVoid();
+
+    ast->TheModule->dump();
     // Validate the generated code, checking for consistency.
     llvm::verifyFunction(*TheFunction);
 

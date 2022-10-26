@@ -136,6 +136,7 @@ Options:
     - Can be self recursive
         - Optimized so tail call omptimization can be preformed to remove recursive calls where possible
     - Can pass arguments to and from
+    - Can be void
 - Static checking
     - Ensure `main` function is present and only one exists
     - Checks for non mutable vairables being mutated
@@ -162,6 +163,7 @@ Options:
     - ...
 - Better compile time failure error messages
     - show line that error occured on
+- Early return in void functions
 - Tests
 - Documentation webpage
 - Refcounting for heap allocated objects to free them automatically when they go out of scope

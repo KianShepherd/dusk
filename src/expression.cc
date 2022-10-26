@@ -249,8 +249,12 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
                 if (!ArgsV.back())
                     return nullptr;
             }
-            auto ret = ast->Builder->CreateCall(CalleeF, ArgsV, "calltmp");
-            return ret;
+
+            if (CalleeF->getReturnType()->isVoidTy()) {
+                return ast->Builder->CreateCall(CalleeF, ArgsV, llvm::Twine::createNull());
+            } else {
+                return ast->Builder->CreateCall(CalleeF, ArgsV, "calltmp");
+            }
         }
         case t_bool_arr: {
             auto atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));

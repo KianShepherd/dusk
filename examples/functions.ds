@@ -1,3 +1,9 @@
+// Functions declaring no return type are void functions
+// No return statement is required
+fn print_square(n: int) {
+    print("%d\n", n * n);
+}
+
 // Heavy optimization is done to the generated code, implementing functions in ways that support tail
 // call recursion will optimize down to a loop and will not recursively call the function
 fn fact_tail(n: int, acc: int) -> int {
@@ -19,8 +25,11 @@ fn main(argc: int, argv: string*) -> int {
     for (let mut i: int = 0; i < 10; i = i + 1) {
         print("%d\n", factorial(i));
     }
+    print("\n");
     for (let mut i: int = 0; i < argc; i = i + 1) {
         print("%s\n", argv[i]);
     }
+    print("\n");
+    print_square(3);
     return 1;
 }

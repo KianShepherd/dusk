@@ -1,5 +1,10 @@
+fn foo() {
+    print("abc\n");
+}
+
 fn main(argc: int, argv: string*) -> int {
     let a: int = 3;
     print("%d\n", a);
+    foo();
     return 0;
 }
