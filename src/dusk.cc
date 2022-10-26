@@ -45,6 +45,13 @@ int main(int argc, char** argv) {
     compiler_args.c_compiler = std::string("g++");
     compiler_args.outfile = std::string("out");
 
+    if (development) {
+        compiler_args.sources.push_back("./dusklibs/stdlib.ds");
+    } else {
+        // TODO: Actually install this somewhere and load from there.
+        compiler_args.sources.push_back("./dusklibs/stdlib.ds");
+    }
+
     AST ast = AST();
     if (argc == 1) {
         std::cout << "No input files given." << std::endl;
@@ -102,6 +109,7 @@ int main(int argc, char** argv) {
         compiler_args.sources.push_back(cur_arg);
         args++;
     }
+
     int rc = 0;
     for (auto& file : compiler_args.sources) {
         yyin = fopen(file.data(), "r");
@@ -137,6 +145,7 @@ int main(int argc, char** argv) {
         compile_str.append("-lstddusk ");
         for (auto& lib : compiler_args.libs)
             compile_str.append(lib).append(" ");
+
         compile_str.append("-o ").append(compiler_args.outfile);
 
         std::cout << compile_str << std::endl;

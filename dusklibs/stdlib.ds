@@ -1,0 +1,13 @@
+extern copyi(arr: int*, n: int) -> int*;
+extern copyd(arr: float*, n: int) -> float*;
+extern copys(arr: string, n: int) -> string;
+extern copysa(arr: string*, n: int) -> string*;
+
+extern del(arr: int*) -> int;
+
+extern ftol(a: float) -> long;
+extern ftoi(a: float) -> int;
+extern itof(a: int) -> float;
+extern itol(a: int) -> long;
+extern ltof(a: long) -> float;
+extern ltoi(a: long) -> int;

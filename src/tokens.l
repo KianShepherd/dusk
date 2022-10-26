@@ -56,6 +56,7 @@ bool                    { return BOOL;     }
 char                    { return CHAR;     }
 string                  { return STR;      }
 fn                      { return FUNCTION; }
+extern                  { return EXTERN;   }
 if                      { return IF;       }
 else                    { return ELSE;     }
 for                     { return FOR;      }

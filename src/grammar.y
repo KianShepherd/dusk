@@ -39,7 +39,7 @@ void yyerror(AST&, const char*);
 %token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW
-%token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION IF ELSE FOR WHILE RETURN LET MUTABLE BREAK
+%token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK
 
 %type<expr>  exp;
 %type<stat>  statement statementblock mutassign;
@@ -153,6 +153,94 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW STR TIMES statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($9), t_string_arr, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_null, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW BOOL SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_bool, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW INT SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_number, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW LONG SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_long, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW CHAR SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_char, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW FLOAT SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_float, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW STR SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW BOOL TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_bool_arr, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW INT TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_number_arr, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW FLOAT TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_float_arr, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW STR TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_string_arr, std::vector<std::vector<std::string>>()));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_null, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_bool, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW INT SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_number, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW LONG SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_long, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW CHAR SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_char, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_float, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW STR SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_bool_arr, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW INT TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_number_arr, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_float_arr, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW STR TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_string_arr, std::move(*($4))));
     }
     ;
 

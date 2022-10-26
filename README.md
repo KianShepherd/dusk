@@ -123,6 +123,7 @@ Would compile a file named `test.ds` into an executable.
     - Checks for non mutable vairables being mutated
 - CLI for dusk executable
     - Can print help info on how to use it
+- `extern` keyword to load `C` functions from libraries
 - stdlib
     - Casting functions for atomic types
     - `copy` functions to allocate on the heap
@@ -133,10 +134,13 @@ Would compile a file named `test.ds` into an executable.
 
 - Fix block variable scope
 - Structs
-- `extern` keyword to load `C` functions from libraries
 -  stdlib improvements
-    - vectors
-    - maps
+    - More abstract datatypes
+    - More general functionality
+        - IO
+        - Math functions
+        - ...
+    - ...
 - Better compile time failure error messages
     - show line that error occured on
 - Tests
