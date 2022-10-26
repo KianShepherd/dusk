@@ -106,7 +106,7 @@ public:
     void static_checking();
     llvm::Value* LogErrorV(const char *Str);
 
-    void codegen(char debug);
+    void codegen(char debug, bool optimizations, std::string outfile);
     void stdlib();
 
     ScopeFrame* scope;

@@ -1,2 +1,2 @@
-./CMake/dusk test.ds
+./CMake/dusk -d -O test.ds
 ./out

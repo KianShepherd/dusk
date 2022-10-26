@@ -11,6 +11,7 @@ AST::AST() {
 
     // Create a new builder for the module.
     this->Builder = std::make_unique<llvm::IRBuilder<>>(*(this->TheContext));
+    this->stdlib();
 }
 
 void AST::push_function(Function* function) {
@@ -168,7 +169,7 @@ void AST::stdlib() {
     );
 }
 
-void AST::codegen(char debug) {
+void AST::codegen(char debug, bool optimizations, std::string outfile) {
     auto TargetTriple = llvm::sys::getDefaultTargetTriple();
     llvm::InitializeAllTargetInfos();
     llvm::InitializeAllTargets();
@@ -222,16 +223,25 @@ void AST::codegen(char debug) {
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }
-    if (debug)
+    if (debug) {
+        std::cout << "===== DEBUG IR ======" << std::endl;
         this->TheModule->dump();
+    }
 
-    // Optimize the IR!
-    MPM.run(*(this->TheModule), MAM);
+    if (optimizations) {
+        // Optimize the IR!
+        MPM.run(*(this->TheModule), MAM);
 
-    if (debug)
-        this->TheModule->dump();
+        if (debug) {
+            std::cout << "===== OPTIMIZE ======" << std::endl;
+            this->TheModule->dump();
+        }
+    }
+    if (debug) {
+        std::cout << "===== DEBUG IR ======" << std::endl;
+    }
 
-    auto Filename = "output.o";
+    auto Filename = outfile.data();
     std::error_code EC;
     llvm::raw_fd_ostream dest(Filename, EC, llvm::sys::fs::OF_None);
     if (EC) {

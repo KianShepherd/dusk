@@ -126,20 +126,13 @@ Would compile a file named `test.ds` into an executable.
 - Static checking
     - Ensure `main` function is present
     - Checks for non mutable vairables being mutated
-
+- CLI for dusk executable
+    - Can print help info on how to use it
 
 ## Planned Functionality
 
 - Fix block variable scope
 - Structs
-- Improve command line options for compilation
-    - Optional optimizations
-    - link C libraries
-    - multiple source files
-    - help message
-    - output filename
-    - specify which C compiler is used to generate the executable
-    - compile to object file not just executable
 - `extern` keyword to load `C` functions from libraries
 -  stdlib improvements
     - vectors

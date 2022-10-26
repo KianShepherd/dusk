@@ -3,7 +3,6 @@
 #include "expression.hh"
 #include <string>
 
-#define debuging 1
 #define development 1
 
 void yyerror(AST& ast, const char* msg) {
@@ -13,41 +12,141 @@ void yyerror(AST& ast, const char* msg) {
     ast.push_err(err_msg);
 }
 
+void print_help() {
+    std::cout << "Usage: dusk [options] file..." << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "-h                Display this information." << std::endl;
+    std::cout << "-d                Print out debug information about the AST and LLVM IR." << std::endl;
+    std::cout << "-O                Optimize the generated object / executable." << std::endl;
+    std::cout << "-c                Only compile the sources do not link into executable." << std::endl << std::endl;
+
+    std::cout << "-o <file>         Set the name of the outputted object / executable." << std::endl;
+    std::cout << "-cc <compiler>    Set the c / c++ compiler to use (default is g++)." << std::endl << std::endl;
+
+    std::cout << "-l<library>       Add library to link to executable at compile time." << std::endl;
+}
+
 int main(int argc, char** argv) {
 #ifdef DEBUGGING
     yydebug = 1;
 #endif
+    struct {
+        std::vector<std::string> sources;
+        std::vector<std::string> libs;
+        bool optimizations;
+        bool debug_info;
+        std::string outfile;
+        std::string c_compiler;
+        bool only_compile;
+    } compiler_args;
+    compiler_args.optimizations = false;
+    compiler_args.debug_info = false;
+    compiler_args.only_compile = false;
+    compiler_args.c_compiler = std::string("g++");
+    compiler_args.outfile = std::string("out");
+
     AST ast = AST();
-    ast.stdlib();
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        if (!yyin) {
-            std::cerr << "Unable to open " << argv[1] << ": " << strerror(errno) << '\n';
-            return 1;
-        }
-    } else {
-        yyin = stdin;
-    }
-    int rc = yyparse(ast);
-    if (ast.check_error(std::string("Parse Error: "))) {
-        return rc;
-    }
-    ast.static_checking();
-    if (ast.check_error(std::string("Logic Error: "))) {
+    if (argc == 1) {
+        std::cout << "No input files given." << std::endl;
         return 2;
     }
-    if (debuging)
-        ast.debug();
-    if (debuging)
-        std::cout << "===== DEBUG IR ======" << std::endl;
-    ast.codegen((char)debuging);
-    if (debuging)
-        std::cout << "===== DEBUG IR ======" << std::endl;
-    if (development) {
-        rc = system("g++ output.o -L./CMake -lstddusk -o out");
-    } else {
-        rc = system("g++ output.o -lstddusk -o out");
+    int args = 1;
+    while (true) {
+        if (args == argc)
+            break;
+        auto cur_arg = std::string(argv[args]);
+        if (cur_arg.compare("-h") == 0) {
+            print_help();
+            return 0;
+        }
+        if (cur_arg.compare("-O") == 0) {
+            compiler_args.optimizations = true;
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-d") == 0) {
+            compiler_args.debug_info = true;
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-o") == 0) {
+            args++;
+            if (args == argc) {
+                std::cout << "No output file given." << std::endl;
+                return 2;
+            }
+            compiler_args.outfile = std::string(argv[args]);
+            args++;
+            continue;
+        }
+        if (cur_arg.substr(0, 2).compare("-l") == 0) {
+            compiler_args.libs.push_back(cur_arg);
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-cc") == 0) {
+            args++;
+            if (args == argc) {
+                std::cout << "No C compiler given." << std::endl;
+                return 2;
+            }
+            compiler_args.c_compiler = std::string(argv[args]);
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-c") == 0) {
+            compiler_args.only_compile = true;
+            args++;
+            continue;
+        }
+        compiler_args.sources.push_back(cur_arg);
+        args++;
     }
-    rc = system("rm -f output.o");
+    int rc = 0;
+    for (auto& file : compiler_args.sources) {
+        yyin = fopen(file.data(), "r");
+        if (!yyin) {
+                std::cerr << "Unable to open " << file << ": " << strerror(errno) << '\n';
+            return 1;
+        }
+        rc = yyparse(ast);
+        if (ast.check_error(std::string("Parse Error: ")))
+            return rc;
+    }
+    ast.static_checking();
+    if (ast.check_error(std::string("Logic Error: ")))
+        return 2;
+    
+    if (compiler_args.debug_info) {
+        ast.debug();
+    }
+
+    std::string objectfile = "output.o";
+    if (compiler_args.only_compile && compiler_args.outfile.compare("out") != 0) {
+        objectfile = compiler_args.outfile;
+    }
+    ast.codegen((char)compiler_args.debug_info, compiler_args.optimizations, objectfile);
+
+    if (!compiler_args.only_compile) {
+        auto compile_str = compiler_args.c_compiler
+            .append(" ")
+            .append(objectfile)
+            .append(" ");
+        if (development)
+            compile_str.append("-L./CMake ");
+        compile_str.append("-lstddusk ");
+        for (auto& lib : compiler_args.libs)
+            compile_str.append(lib).append(" ");
+        compile_str.append("-o ").append(compiler_args.outfile);
+
+        std::cout << compile_str << std::endl;
+
+        // Compile the generated object file into an executable
+        rc = system(compile_str.data());
+
+        // Clean object file used for compilation
+        auto clean_str = std::string("rm -f ").append(objectfile);
+        rc = system(clean_str.data());
+    }
     return 0;
 }
