@@ -44,6 +44,8 @@ void AST::static_checking() {
         auto meta = this->functions[i]->get_meta();
         this->func_definitions.push_back(meta);
         if (std::get<0>(meta).compare("main") == 0) {
+            if (found_entrypoint)
+                this->push_err("Only one main function may be defined within an executable.");
             found_entrypoint = true;
         }
     }
@@ -219,7 +221,10 @@ void AST::codegen(char debug, bool optimizations, std::string outfile) {
     this->TheModule->setTargetTriple(TargetTriple);
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->func_definitions.push_back(this->functions[i]->get_meta());
+        // Forward declare all the function definitions
+        this->functions[i]->codegen_proto(this);
     }
+    // Codegen all of the actual functions
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }

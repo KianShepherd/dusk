@@ -28,6 +28,7 @@ public:
     std::tuple<std::string, AtomType, std::vector<AtomType>> get_meta();
 
     llvm::Function* codegen(AST* ast);
+    llvm::Function* codegen_proto(AST* ast);
 
     std::string name;
 private:

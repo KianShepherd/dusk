@@ -102,7 +102,8 @@ void Function::fold(AST* ast) {
         this->statements->fold(ast);
 }
 
-llvm::Function* Function::codegen(AST* ast) {
+
+llvm::Function* Function::codegen_proto(AST* ast) {
     llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);
 
     if (!TheFunction) {
@@ -147,9 +148,14 @@ llvm::Function* Function::codegen(AST* ast) {
         for (auto &Arg : F->args()) {
             Arg.setName(((ExpressionAtomic*)this->indentifiers[Idx++])->str);
         }
-            
+
         TheFunction = F;
     }
+    return TheFunction;
+}
+
+llvm::Function* Function::codegen(AST* ast) {
+    llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);
 
     if (!TheFunction)
         return nullptr;

@@ -17,5 +17,5 @@ fn main(argc: int, argv: string*) -> int {
     for (let mut i: int = 0; i < 2; i = i + 1) {
         print("%s\n", strs[i]);
     }
-    return 1;
+    return 0;
 }

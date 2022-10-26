@@ -20,7 +20,7 @@ LLVM is used as a backend to generate machine specific object files which are th
 
 ## Dependencies
 
-This project requires `cmake`, `flex`, `bison`, `llvm` and a `c`/`c++` compiler.
+This project requires `flex`, `bison`, `llvm`, `clang` and a `c`/`c++` compiler.
 
 The examples for building this project also include `ninja`, but that is an optional dependency.
 
@@ -118,16 +118,16 @@ Would compile a file named `test.ds` into an executable.
     - Can be self recursive
         - Optimized so tail call omptimization can be preformed to remove recursive calls where possible
     - Can pass arguments to and from
+- Static checking
+    - Ensure `main` function is present and only one exists
+    - Checks for non mutable vairables being mutated
+- CLI for dusk executable
+    - Can print help info on how to use it
 - stdlib
     - Casting functions for atomic types
     - `copy` functions to allocate on the heap
     - `del` function to delete heap allocated objects
     - `print` function, takes C style format strings
-- Static checking
-    - Ensure `main` function is present
-    - Checks for non mutable vairables being mutated
-- CLI for dusk executable
-    - Can print help info on how to use it
 
 ## Planned Functionality
 
