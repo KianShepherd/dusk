@@ -148,6 +148,8 @@ int main(int argc, char** argv) {
             .append(" ")
             .append(objectfile)
             .append(" ");
+        if (compiler_args.optimizations)
+            compile_str.append("-O3 ");
         for (auto& lib_path : compiler_args.lib_paths)
             compile_str.append(lib_path).append(" ");
         compile_str.append("-lstddusk ");
