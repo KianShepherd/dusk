@@ -155,6 +155,7 @@ Would compile a file named `test.ds` into an executable.
     - More general functionality
         - IO
         - Math functions
+        - String manipulation
         - ...
     - ...
 - Better compile time failure error messages
