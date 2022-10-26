@@ -272,6 +272,10 @@ statement: exp SEMICOLON
     {
         $$ = new ReturnStatement(std::move($2));
     }
+    | RETURN SEMICOLON
+    {
+        $$ = new ReturnStatement(nullptr);
+    }
     | LET exp COLON INT EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($2), std::move($6), false, t_number);

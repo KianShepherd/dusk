@@ -158,7 +158,8 @@ int main(int argc, char** argv) {
 
         compile_str.append("-o ").append(compiler_args.outfile);
 
-        std::cout << compile_str << std::endl;
+        if (compiler_args.debug_info)
+            std::cout << compile_str << std::endl;
 
         // Compile the generated object file into an executable
         rc = system(compile_str.data());

@@ -183,7 +183,6 @@ llvm::Function* Function::codegen(AST* ast) {
         if (TheFunction->getReturnType()->isVoidTy())
             ast->Builder->CreateRetVoid();
 
-    ast->TheModule->dump();
     // Validate the generated code, checking for consistency.
     llvm::verifyFunction(*TheFunction);
 

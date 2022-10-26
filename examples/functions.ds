@@ -4,6 +4,14 @@ fn print_square(n: int) {
     print("%d\n", n * n);
 }
 
+// you can also add blank returns to exit early from void funtions
+fn print_first(n: int) {
+    print("first\n");
+    if (n < 5) {
+        return;
+    }
+    print("second\n");
+}
 // Heavy optimization is done to the generated code, implementing functions in ways that support tail
 // call recursion will optimize down to a loop and will not recursively call the function
 fn fact_tail(n: int, acc: int) -> int {
@@ -31,5 +39,9 @@ fn main(argc: int, argv: string*) -> int {
     }
     print("\n");
     print_square(3);
+    print("\n");
+    print_first(3);
+    print("\n");
+    print_first(7);
     return 1;
 }

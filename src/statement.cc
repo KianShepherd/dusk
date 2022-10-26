@@ -51,15 +51,25 @@ ReturnStatement::ReturnStatement(Expression* expr) {
 }
 
 void ReturnStatement::debug(size_t depth) {
-    std::cout << std::string(depth * 4, ' ')<< "RETURN" << std::endl;
-    this->expr->debug(depth + 1);
+    std::cout << std::string(depth * 4, ' ')<< "RETURN";
+    if (this->expr) {
+        std::cout << std::endl;
+        this->expr->debug(depth + 1);
+    } else {
+        std::cout << " void" << std::endl;
+    }
 }
 
 void ReturnStatement::fold(AST* ast) {
-    this->expr = this->expr->fold(ast);
+    if (this->expr)
+        expr->fold(ast);
 }
 
 llvm::Value* ReturnStatement::codegen(AST* ast) {
+    if (!this->expr) {
+        ast->Builder->CreateRetVoid();
+        return nullptr;
+    }
     auto retval = this->expr->codegen(ast, t_null);
     auto type = this->expr->get_atomic_type_keep_identifier(ast);
     if (type == t_identifier) {
@@ -295,7 +305,8 @@ llvm::Value* IfStatement::codegen(AST* ast) {
 
         llvm::PHINode *PN = ast->Builder->CreatePHI(llvm::Type::getInt1Ty(*(ast->TheContext)), incoming, "iftmp");
 
-        PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 0, false)), ThenBB);
+        if (b1)
+            PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 0, false)), ThenBB);
         if (this->block2) {
             PN->addIncoming(llvm::ConstantInt::get(*(ast->TheContext), llvm::APInt(1, 1, false)), ElseBB);
         } else {
