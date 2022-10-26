@@ -24,6 +24,7 @@ void print_help() {
     std::cout << "-cc <compiler>    Set the c / c++ compiler to use (default is g++)." << std::endl << std::endl;
 
     std::cout << "-l<library>       Add library to link to executable at compile time." << std::endl;
+    std::cout << "-L<path>          Add path to library link paths." << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -33,11 +34,12 @@ int main(int argc, char** argv) {
     struct {
         std::vector<std::string> sources;
         std::vector<std::string> libs;
-        bool optimizations;
-        bool debug_info;
+        std::vector<std::string> lib_paths;
         std::string outfile;
         std::string c_compiler;
         bool only_compile;
+        bool optimizations;
+        bool debug_info;
     } compiler_args;
     compiler_args.optimizations = false;
     compiler_args.debug_info = false;
@@ -47,6 +49,7 @@ int main(int argc, char** argv) {
 
     if (development) {
         compiler_args.sources.push_back("./dusklibs/stdlib.ds");
+        compiler_args.lib_paths.push_back("-L./CMake ");
     } else {
         // TODO: Actually install this somewhere and load from there.
         compiler_args.sources.push_back("./dusklibs/stdlib.ds");
@@ -88,6 +91,11 @@ int main(int argc, char** argv) {
         }
         if (cur_arg.substr(0, 2).compare("-l") == 0) {
             compiler_args.libs.push_back(cur_arg);
+            args++;
+            continue;
+        }
+        if (cur_arg.substr(0, 2).compare("-L") == 0) {
+            compiler_args.lib_paths.push_back(cur_arg);
             args++;
             continue;
         }
@@ -140,8 +148,8 @@ int main(int argc, char** argv) {
             .append(" ")
             .append(objectfile)
             .append(" ");
-        if (development)
-            compile_str.append("-L./CMake ");
+        for (auto& lib_path : compiler_args.lib_paths)
+            compile_str.append(lib_path).append(" ");
         compile_str.append("-lstddusk ");
         for (auto& lib : compiler_args.libs)
             compile_str.append(lib).append(" ");

@@ -109,6 +109,7 @@ Options:
 -cc <compiler>    Set the c / c++ compiler to use (default is g++).
 
 -l<library>       Add library to link to executable at compile time.
+-L<path>          Add path to library link paths.
 ```
 
 Would compile a file named `test.ds` into an executable.

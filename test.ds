@@ -1,21 +1,5 @@
-fn get_str() -> string {
-    let s: string = "foo\n";
-    return s;
-}
-
-fn get_strs() -> string* {
-    let mut s: string* = {"baz", "bar"};
-    return s;
-}
-
 fn main(argc: int, argv: string*) -> int {
-    let mut str: string = "";
-    str = get_str();
-    let mut strs: string[2];
-    strs = get_strs();
-    print("%s", str);
-    for (let mut i: int = 0; i < 2; i = i + 1) {
-        print("%s\n", strs[i]);
-    }
+    let a: int = 3;
+    print("%d\n", a);
     return 0;
 }
