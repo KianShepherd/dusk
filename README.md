@@ -137,6 +137,7 @@ Options:
         - Optimized so tail call omptimization can be preformed to remove recursive calls where possible
     - Can pass arguments to and from
     - Can be void
+    - Variables are properly scoped to be function and block specific
 - Static checking
     - Ensure `main` function is present and only one exists
     - Checks for non mutable vairables being mutated
@@ -151,10 +152,10 @@ Options:
 
 ## Planned Functionality
 
-- Fix block variable scope
 - Structs
 -  stdlib improvements
     - More abstract datatypes
+        - Blocked until structs are functional
     - More general functionality
         - IO
         - Math functions

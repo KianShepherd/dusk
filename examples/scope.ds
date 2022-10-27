@@ -1,0 +1,24 @@
+fn foo(mut a : int, mut b : int) -> int {
+    print("1 : 2 -> %d : %d\n", a, b);
+    let a: int = 11;
+    b = 22;
+    print("11 : 22 -> %d : %d\n", a, b);
+    return 1;
+}
+
+fn main(argc: int, argv: string*) -> int {
+    let mut a: int = 3;
+    let mut b: int = 4;
+    print("3 : 4 -> %d : %d\n", a, b);
+    {
+        let a: int = 1;
+        b = 5;
+        print("1 : 5 -> %d : %d\n", a, b);
+    }
+    print("3 : 5 -> %d : %d\n", a, b);
+    a = 1;
+    b = 2;
+    foo(a, b);
+    print("1 : 2 -> %d : %d\n", a, b);
+    return 0;
+}

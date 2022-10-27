@@ -40,9 +40,13 @@ void StatementBlock::fold(AST* ast) {
 
 llvm::Value* StatementBlock::codegen(AST* ast) {
     llvm::Value* last = nullptr;
+    ast->NamedValues = ast->NamedValues->new_scope();
     for (long unsigned int i = 0; i < this->statements.size(); i++) {
         last = this->statements[i]->codegen(ast);
     }
+    auto frame = ast->NamedValues;
+    ast->NamedValues = (frame->prev_frame)?frame->prev_frame:frame;
+    delete frame;
     return last;
 }
 
@@ -73,8 +77,9 @@ llvm::Value* ReturnStatement::codegen(AST* ast) {
     auto retval = this->expr->codegen(ast, t_null);
     auto type = this->expr->get_atomic_type_keep_identifier(ast);
     if (type == t_identifier) {
-        type = ast->NamedValueTypes[((ExpressionAtomic*) this->expr)->str].first;
-        long length = ast->NamedValueTypes[((ExpressionAtomic*) this->expr)->str].second;
+        auto named_value = ast->NamedValues->get_value(((ExpressionAtomic*) this->expr)->str);
+        type = std::get<2>(named_value);
+        long length = std::get<3>(named_value);
         if (type == t_float_arr) {
             llvm::Function *CalleeF = ast->TheModule->getFunction("copyd");
             if (!CalleeF)
@@ -159,8 +164,6 @@ void AssignmentStatement::fold(AST* ast) {
 }
 
 llvm::Value* AssignmentStatement::codegen(AST* ast) {
-    auto OldBindings = ast->NamedValues;
-
     llvm::Function *TheFunction = ast->Builder->GetInsertBlock()->getParent();
 
     // Register all variables and emit their initializer.
@@ -216,8 +219,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
     ast->Builder->CreateStore(InitVal, Alloca);
 
     // Remember this binding.
-    ast->NamedValues[VarName] = std::make_pair(Alloca, init_type);
-    ast->NamedValueTypes[VarName] = std::make_pair(this->type, this->length);
+    ast->NamedValues->push_value(VarName, std::make_tuple(Alloca, init_type, this->type, this->length));
 
     // Return the body computation.
     return InitVal;

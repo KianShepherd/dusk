@@ -1,10 +1,12 @@
-fn foo() {
-    print("abc\n");
-}
-
 fn main(argc: int, argv: string*) -> int {
-    let a: int = 3;
-    print("%d\n", a);
-    foo();
+    let mut a: int = 3;
+    let mut b: int = 4;
+    print("3 : 4 -> %d : %d\n", a, b);
+    {
+        let a: int = 1;
+        b = 5;
+        print("1 : 5 -> %d : %d\n", a, b);
+    }
+    print("3 : 4 -> %d : %d\n", a, b);
     return 0;
 }

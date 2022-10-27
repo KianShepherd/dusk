@@ -5,6 +5,8 @@ AST::AST() {
     this->error = false;
     this->err = std::stringstream();
     this->scope = new ScopeFrame();
+    this->NamedValues = new CodegenScopeFrame();
+    this->NamedValues = this->NamedValues->new_scope();
 
     this->TheContext = std::make_unique<llvm::LLVMContext>();
     this->TheModule = std::make_unique<llvm::Module>("dusk", *(this->TheContext));
@@ -229,5 +231,53 @@ AtomType ScopeFrame::get_value(std::string identifier) {
     }
     if (this->prev_frame == nullptr)
         return t_null;
+    return this->prev_frame->get_value(identifier);
+}
+
+CodegenScopeFrame::CodegenScopeFrame() {
+    this->prev_frame = nullptr;
+    this->next_frame = nullptr;
+    this->NamedValues = std::map<std::string, std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long>>();
+}
+
+CodegenScopeFrame::CodegenScopeFrame(CodegenScopeFrame* prev) {
+    this->prev_frame = prev;
+    this->next_frame = nullptr;
+    this->NamedValues = std::map<std::string, std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long>>();
+}
+
+CodegenScopeFrame* CodegenScopeFrame::new_scope() {
+    CodegenScopeFrame* next = new CodegenScopeFrame(this);
+    this->next_frame = next;
+    return next;
+}
+
+void CodegenScopeFrame::push_value(std::string identifier, std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long>
+ value) {
+    this->NamedValues[identifier] = value;
+}
+
+void CodegenScopeFrame::update_value(std::string identifier, std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long> value) {
+    CodegenScopeFrame* scope = this;
+    while (scope != nullptr) {
+        auto iter = scope->NamedValues.find(identifier);
+        if (iter != scope->NamedValues.end()) {
+            scope->NamedValues[identifier] = value;
+            break;
+        }
+        scope = scope->prev_frame;
+    }
+}
+
+std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long> CodegenScopeFrame::get_value(std::string identifier) {
+    auto iter = this->NamedValues.find(identifier);
+    if (iter != this->NamedValues.end())
+        return this->NamedValues[identifier];
+    if (this->prev_frame == nullptr) {
+        std::cout << "GET " << identifier << std::endl;
+        auto ret = std::make_tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long>(nullptr, nullptr, t_null, 0);
+        std::cout << "~GET " << identifier << std::endl;
+        return ret;
+    }
     return this->prev_frame->get_value(identifier);
 }

@@ -91,6 +91,22 @@ private:
     std::map<std::string, ScopeValue*> variables;
 };
 
+class CodegenScopeFrame {
+public:
+    CodegenScopeFrame();
+    CodegenScopeFrame(CodegenScopeFrame* prev);
+    CodegenScopeFrame* new_scope();
+
+    std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long> get_value(std::string identifier);
+    void push_value(std::string identifier, std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long> value);
+    void update_value(std::string identifier, std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long>);
+
+    CodegenScopeFrame* prev_frame;
+    CodegenScopeFrame* next_frame;
+private:
+    std::map<std::string, std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long>> NamedValues;
+};
+
 class AST {
 public:
     AST();
@@ -110,11 +126,10 @@ public:
     void stdlib();
 
     ScopeFrame* scope;
+    CodegenScopeFrame* NamedValues;
     std::unique_ptr<llvm::LLVMContext> TheContext;
     std::unique_ptr<llvm::Module> TheModule;
     std::unique_ptr<llvm::IRBuilder<>> Builder;
-    std::map<std::string, std::pair<llvm::AllocaInst*, llvm::Type*>> NamedValues;
-    std::map<std::string, std::pair<AtomType, long>> NamedValueTypes;
 
     std::vector<std::tuple<std::string, AtomType, std::vector<AtomType>>> func_definitions;
 private:

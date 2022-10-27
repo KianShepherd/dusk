@@ -155,7 +155,7 @@ llvm::Function* Function::codegen_proto(AST* ast) {
 
 llvm::Function* Function::codegen(AST* ast) {
     llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);
-
+    
     if (!TheFunction)
         return nullptr;
     if (!this->statements)
@@ -166,16 +166,14 @@ llvm::Function* Function::codegen(AST* ast) {
     ast->Builder->SetInsertPoint(BB);
 
     // Record the function arguments in the NamedValues map.
-    ast->NamedValues.clear();
-    ast->NamedValueTypes.clear();
+    ast->NamedValues = ast->NamedValues->new_scope();
     auto Arg = TheFunction->args().begin();
     for (size_t i = 0; i < this->indentifier_type.size(); i++) {
         llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), Arg->getType());
         ast->Builder->CreateStore(Arg, Alloca);
 
         // Add arguments to variable symbol table.
-        ast->NamedValues[std::string(Arg->getName())] = std::make_pair(Alloca, Arg->getType());
-        ast->NamedValueTypes[std::string(Arg->getName())] = std::make_pair(this->indentifier_type[i], 1);
+        ast->NamedValues->push_value(std::string(Arg->getName()), std::make_tuple(Alloca, Arg->getType(), this->indentifier_type[i], 1));
         Arg = std::next(Arg);
     }
 
