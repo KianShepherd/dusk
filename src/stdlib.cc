@@ -1,9 +1,11 @@
-#include <string>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h> 
+#include <iostream>
 #include <cstring>
 #include <sstream>
+#include <fstream>
+#include <string>
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
 #else
@@ -107,6 +109,21 @@ extern "C" DLLEXPORT {
         std::string s = oss.str();
         const char* b = s.c_str();
         return copycs(b, s.size() + 1);
+    }
+
+    char* input() {
+        std::string strtmp;
+        std::cin >> strtmp;
+        char* tmp = copycs(strtmp.c_str(), (int)strtmp.size());
+        return tmp;
+    }
+    
+    char* readfile(char* filename) {
+        std::ifstream t(filename);
+        std::stringstream buffer;
+        buffer << t.rdbuf();
+        std::string content = buffer.str();
+        return copycs(content.c_str(), content.size());
     }
 
     // print

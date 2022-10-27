@@ -20,3 +20,6 @@ extern ltos(a: long) -> string;
 extern stoi(a: string) -> int;
 extern stol(a: string) -> long;
 extern stof(a: string) -> float;
+
+extern input() -> string;
+extern readfile(filename: string) -> string;
