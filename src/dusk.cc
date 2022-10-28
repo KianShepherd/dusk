@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
                 std::cerr << "Unable to open " << file << ": " << strerror(errno) << '\n';
             return 1;
         }
-        yylineno = 0;
+        yylineno = 1;
         rc = yyparse(ast);
         auto parse_err = std::string("Parse Error in ").append(file.data()).append(": ");
         if (ast.check_error(parse_err))

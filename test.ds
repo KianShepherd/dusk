@@ -1,4 +1,3 @@
 fn main(argc: int, argv: string*) -> int {
-    print("abc: %ld\n", stoi("15"));
     return 0;
 }

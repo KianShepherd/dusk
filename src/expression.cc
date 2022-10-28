@@ -558,8 +558,7 @@ void AssignmentExpression::debug(size_t depth) {
 Expression* AssignmentExpression::fold(AST* ast) {
     this->value = this->value->fold(ast);
     if (this->is_arr) {
-        std::cout << "ARR" << std::endl;
-        //ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast)));
+        ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast)));
     } else {
         ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast)));
     }
