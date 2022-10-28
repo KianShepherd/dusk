@@ -60,6 +60,7 @@ int main(int argc, char** argv) {
         std::cout << "No input files given." << std::endl;
         return 2;
     }
+
     int args = 1;
     while (true) {
         if (args == argc)
@@ -125,8 +126,10 @@ int main(int argc, char** argv) {
                 std::cerr << "Unable to open " << file << ": " << strerror(errno) << '\n';
             return 1;
         }
+        yylineno = 0;
         rc = yyparse(ast);
-        if (ast.check_error(std::string("Parse Error: ")))
+        auto parse_err = std::string("Parse Error in ").append(file.data()).append(": ");
+        if (ast.check_error(parse_err))
             return rc;
     }
     ast.static_checking();
