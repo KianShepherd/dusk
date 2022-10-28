@@ -155,4 +155,50 @@ extern "C" DLLEXPORT {
         va_end(args);
         return 0;
     }
+    
+    void* intvec() {
+        return new std::vector<long>();
+    }
+
+    void ipush_back(void* vec, long n) {
+        (*(std::vector<long>*)vec).push_back(n);
+    }
+
+    long getveci(void* vec, long idx) {
+        return (*(std::vector<long>*)vec)[idx];
+    }
+
+    long sizeveci(void* vec) {
+        return (long)(*(std::vector<long>*)vec).size();
+    }
+
+    void* floatvec() {
+        return new std::vector<double>();
+    }
+
+    void fpush_back(void* vec, double n) {
+        (*(std::vector<double>*)vec).push_back(n);
+    }
+
+    double getvecf(void* vec, long idx) {
+        return (*(std::vector<double>*)vec)[idx];
+    }
+
+    long sizevecf(void* vec) {
+        return (long)(*(std::vector<double>*)vec).size();
+    }
+
+    void printveci(void* vec) {
+        auto ve = (*(std::vector<long>*)vec);
+        for (auto& v : ve) {
+            std::cout << "Vec: " << v << std::endl;
+        }
+    }
+
+    void printvecf(void* vec) {
+        auto ve = (*(std::vector<double>*)vec);
+        for (auto& v : ve) {
+            std::cout << "Vec: " << v << std::endl;
+        }
+    }
 }

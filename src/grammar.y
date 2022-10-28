@@ -94,6 +94,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($7), t_string, std::vector<std::vector<std::string>>()));
     }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW VOID TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($8), t_string, std::vector<std::vector<std::string>>()));
+    }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW BOOL TIMES statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($8), t_bool_arr, std::vector<std::vector<std::string>>()));
@@ -182,6 +186,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::vector<std::vector<std::string>>()));
     }
+    | EXTERN IDENTIFIER LPAREN RPAREN ARROW VOID TIMES SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::vector<std::vector<std::string>>()));
+    }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW BOOL TIMES SEMICOLON
     {
         ast.push_function(new Function(std::string(*($2)), nullptr, t_bool_arr, std::vector<std::vector<std::string>>()));
@@ -223,6 +231,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
         ast.push_function(new Function(std::string(*($2)), nullptr, t_float, std::move(*($4))));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW STR SEMICOLON
+    {
+        ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::move(*($4))));
+    }
+    | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW VOID TIMES SEMICOLON
     {
         ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::move(*($4))));
     }
@@ -316,6 +328,10 @@ statement: exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($2), std::move($7), false, t_string_arr);
     }
+    | LET exp COLON VOID TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($2), std::move($7), false, t_string);
+    }
     | mutassign
     {
         $$ = std::move($1);
@@ -387,6 +403,10 @@ mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
     | LET MUTABLE exp COLON STR TIMES EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($8), true, t_string_arr);
+    }
+    | LET MUTABLE exp COLON VOID TIMES EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($8), true, t_string);
     }
     | LET MUTABLE exp COLON INT LSQUARE NUMBER RSQUARE SEMICOLON
     {
@@ -490,6 +510,14 @@ typedarg: IDENTIFIER COLON INT
         $$->push_back(std::string("f"));
         delete $1;
     }
+    | IDENTIFIER COLON VOID TIMES
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("string"));
+        $$->push_back(std::string("f"));
+        delete $1;
+    }
     | IDENTIFIER COLON STR
     {
         $$ = new std::vector<std::string>();
@@ -571,6 +599,14 @@ typedarg: IDENTIFIER COLON INT
         delete $2;
     }
     | MUTABLE IDENTIFIER COLON STR
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("string"));
+        $$->push_back(std::string("t"));
+        delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON VOID TIMES
     {
         $$ = new std::vector<std::string>();
         $$->push_back(std::string(*($2)));

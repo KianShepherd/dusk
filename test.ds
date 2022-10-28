@@ -1,11 +1,50 @@
-fn main(argc: int, argv: string*) -> int {
-    let n: int = 5;
-    let mut a: float* = falloc(n);
-    for (let mut i: int = 0; i < n; i = i + 1) {
-        a[i] = 2.0 * itof(i);
+fn fact_tail(acc: int, n: int) -> int {
+    if n < 2 {
+        return acc;
     }
-    for (let mut i: int = 0; i < n; i = i + 1) {
-        print("%f\n", a[i]);
+    return fact_tail(acc * n, n - 1);
+}
+
+fn fact(n: int) -> int {
+    return fact_tail(1, n);
+}
+fn fib_tail(n: int, a: int, b: int) -> int {
+    if (n == 0) {
+        return a;
+    }
+    if (n == 1) {
+        return b;
+    }
+    return fib_tail(n - 1, b, a + b);
+}
+
+fn fib(n: int) -> int {
+    return fib_tail(n, 0, 1);
+}
+
+fn main(argc: int, argv: string*) -> int {
+    let print_str: string = "fact(vec[%d]) = fact(%d) = %ld\n\n";
+    let file: string* = split(readfile("filetest.txt"), "\n");
+
+    let mut vec: void* = vec<int>();
+    let facts_inp: string =  file[0];
+    let split_inp: string* = split(facts_inp, " ");
+    let c_nums: int = count_substr(facts_inp, " ") + 1;
+    for (let mut i: int = 0; i < c_nums; i = i + 1) {
+        push_back<int>(vec, stoi(split_inp[i]));
+    }
+
+    let fib_n: int = 92;// stoi(file[1]);
+
+    for (let mut i: int = 0; i < size(vec); i = i + 1) {
+        let tmp: int = get<int>(vec, i);
+        print(print_str, i, tmp, fact(tmp));
+    }
+    for (let mut j: int = 0; j < 5000; j = j + 1) {
+        for (let mut i: int = 0; i <= fib_n; i = i + 1) {
+            let fib_res: int = fib(i);
+            print("fib(%d) = %ld\n", i, fib_res);
+        }
     }
     return 0;
 }

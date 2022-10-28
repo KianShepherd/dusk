@@ -26,3 +26,42 @@ extern readfile(filename: string) -> string;
 
 extern count_substr(str: string, substr: string) -> int;
 extern split(str: string, on: string) -> string*;
+
+extern intvec() -> void*;
+extern ipush_back(vec: void*, val: int);
+extern printveci(vec: void*);
+extern getveci(vec: void*, idx: int) -> int;
+extern sizeveci(vec: void*) -> int;
+
+extern floatvec() -> void*;
+extern fpush_back(vec: void*, val: float);
+extern printvecf(vec: void*);
+extern getvecf(vec: void*, idx: int) -> float;
+extern sizevecf(vec: void*) -> int;
+
+fn vec<int>() -> void* {
+    return intvec();
+}
+fn push_back<int>(vec: void*, n: int) {
+    ipush_back(vec, n);
+}
+
+fn get<int>(vec: void*, idx: int) -> int {
+    return getveci(vec, idx);
+}
+
+fn size(vec: void*) -> int {
+    return sizeveci(vec);
+}
+
+fn vec<float>() -> void* {
+    return floatvec();
+}
+
+fn push_back<float>(vec: void*, n: float) {
+    fpush_back(vec, n);
+}
+
+fn get<float>(vec: void*, idx: int) -> float {
+    return getvecf(vec, idx);
+}

@@ -66,7 +66,7 @@ mut                     { return MUTABLE;  }
 return                  { return RETURN;   }
 break                   { return BREAK;    }
 
-[a-zA-Z_][a-zA-Z0-9_]*  { yylval.str = new std::string(yytext, yyleng); return IDENTIFIER; }
+[a-zA-Z_][a-zA-Z0-9_<>]*  { yylval.str = new std::string(yytext, yyleng); return IDENTIFIER; }
 
 
 
