@@ -13,7 +13,7 @@ fn modify(len: int) -> int* {
 
 // You can also pass arrays into functions, note that arrays do not locally store a length and therefore
 // you must also pass in the length to ensure you do not modify memory that is not allocated for the array
-fn modifyd(fact: float*, len: int) -> int {
+fn modifyd(mut fact: float*, len: int) -> int {
     for (let mut i: int = 0; i < len; i = i + 1) {
         // itof converts the integer i into a float, binary operators require thier operands to be of
         // the same type.
@@ -45,5 +45,18 @@ fn main(argc: float, argv: float) -> int {
     for (let mut i: int = 0; i < n; i = i + 1) {
         print(strf, facts2[i]);
     }
+
+    // If you need to construct an array and the size is not know at compile time you can use falloc and ialloc
+    // to allocate float arrays or int arrays with a size known at runtime
+    let size: int = 3;
+    let mut int_arr: int* = ialloc(size);
+    int_arr[0] = 5;
+    int_arr[1] = 4;
+    int_arr[2] = 3;
+    for (let mut i: int = 0; i < size; i = i + 1) {
+        print(str, int_arr[i]);
+    }
+    // Ensure you delete the array after use
+    del(int_arr);
     return 1;
 }

@@ -3,6 +3,9 @@ extern copyd(arr: float*, n: int) -> float*;
 extern copys(arr: string, n: int) -> string;
 extern copysa(arr: string*, n: int) -> string*;
 
+extern ialloc(n: int) -> int*;
+extern falloc(n: int) -> float*;
+
 extern del(arr: int*) -> int;
 
 extern ftoi(a: float) -> int;

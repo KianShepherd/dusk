@@ -1,3 +1,11 @@
 fn main(argc: int, argv: string*) -> int {
+    let n: int = 5;
+    let mut a: float* = falloc(n);
+    for (let mut i: int = 0; i < n; i = i + 1) {
+        a[i] = 2.0 * itof(i);
+    }
+    for (let mut i: int = 0; i < n; i = i + 1) {
+        print("%f\n", a[i]);
+    }
     return 0;
 }

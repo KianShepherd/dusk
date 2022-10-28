@@ -48,6 +48,14 @@ extern "C" DLLEXPORT {
         return heap_arr;
     }
 
+    long* ialloc(long n) {
+        return (long*)malloc(n * sizeof(long));
+    }
+
+    double* falloc(long n) {
+        return (double*)malloc(n * sizeof(double));
+    }
+
     long del(void* arr) {
         free((void*)arr);
         return 1;
