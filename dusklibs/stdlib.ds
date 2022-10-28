@@ -65,3 +65,19 @@ fn push_back<float>(vec: void*, n: float) {
 fn get<float>(vec: void*, idx: int) -> float {
     return getvecf(vec, idx);
 }
+
+fn split<int>(mut vec: void*, str: string, on: string){
+    let count: int = count_substr(str, on) + 1;
+    let split_str: string* = split(str, on);
+    for (let mut i: int = 0; i < count; i = i + 1) {
+        ipush_back(vec, stoi(split_str[i]));
+    }
+}
+
+fn split<float>(mut vec: void*, str: string, on: string){
+    let count: int = count_substr(str, on) + 1;
+    let split_str: string* = split(str, on);
+    for (let mut i: int = 0; i < count; i = i + 1) {
+        fpush_back(vec, stof(split_str[i]));
+    }
+}

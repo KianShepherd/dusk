@@ -142,6 +142,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($8), t_string, std::move(*($4))));
     }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW VOID TIMES statementblock
+    {
+        ast.push_function(new Function(std::string(*($2)), std::move($9), t_string, std::move(*($4))));
+    }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL TIMES statementblock
     {
         ast.push_function(new Function(std::string(*($2)), std::move($9), t_bool_arr, std::move(*($4))));

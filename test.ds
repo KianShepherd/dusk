@@ -23,7 +23,7 @@ fn fib(n: int) -> int {
 }
 
 fn main(argc: int, argv: string*) -> int {
-    let print_str: string = "fact(vec[%d]) = fact(%d) = %ld\n\n";
+    let print_str: string = "fact(vec[%d]) = fact(%d) = %ld\n";
     let file: string* = split(readfile("filetest.txt"), "\n");
 
     let mut vec: void* = vec<int>();
@@ -33,18 +33,19 @@ fn main(argc: int, argv: string*) -> int {
     for (let mut i: int = 0; i < c_nums; i = i + 1) {
         push_back<int>(vec, stoi(split_inp[i]));
     }
+    let mut vec2: void* = vec<int>();
+    split<int>(vec2, facts_inp, " ");
 
     let fib_n: int = 92;// stoi(file[1]);
 
     for (let mut i: int = 0; i < size(vec); i = i + 1) {
         let tmp: int = get<int>(vec, i);
         print(print_str, i, tmp, fact(tmp));
+        let tmp: int = get<int>(vec2, i);
+        print(print_str, i, tmp, fact(tmp));
     }
-    for (let mut j: int = 0; j < 5000; j = j + 1) {
-        for (let mut i: int = 0; i <= fib_n; i = i + 1) {
-            let fib_res: int = fib(i);
-            print("fib(%d) = %ld\n", i, fib_res);
-        }
+    for (let mut i: int = 0; i <= fib_n; i = i + 1) {
+        print("fib(%d) = %ld\n", i, fib(i));
     }
     return 0;
 }
