@@ -6,6 +6,8 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <algorithm>
+#include <vector>
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
 #else
@@ -13,6 +15,7 @@
 #endif
 
 extern "C" DLLEXPORT {
+
     long* copyi(long* arr, long n) {
         long* heap_arr = (long*)malloc(sizeof(long) * n);
         memcpy(heap_arr, arr, n * sizeof(long));
@@ -50,18 +53,6 @@ extern "C" DLLEXPORT {
         return 1;
     }
 
-    // To longs
-    long long ftol(double a) {
-        return static_cast<long long>(a);
-    }
-
-    long long itol(long a) {
-        return static_cast<long long>(a);
-    }
-
-    long long stol(char* a) {
-        return std::atoll(a);
-    }
     // To ints
     long ftoi(double a) {
         return static_cast<long>(a);
@@ -111,9 +102,31 @@ extern "C" DLLEXPORT {
         return copycs(b, s.size() + 1);
     }
 
+    long count_substr(char* str, char* sub) {
+        std::string s = std::string(str);
+        std::string::difference_type n = std::count(s.begin(), s.end(), (char)sub[0]);
+        return (long)n;
+    }
+
+    char** split(char* str, char* split_on) {
+        std::stringstream test(str);
+        std::string segment;
+        std::vector<std::string> seglist;
+        while(std::getline(test, segment, (char)split_on[0]))
+        {
+            seglist.push_back(segment);
+        }
+        auto len = seglist.size();
+        char** out = (char**)malloc(len * sizeof(char*));
+        for (int i = 0; i < len; i++) {
+            out[i] = copycs(seglist[i].c_str(), seglist[i].size());
+        }
+        return out;
+    }
+
     char* input() {
         std::string strtmp;
-        std::cin >> strtmp;
+        std::getline(std::cin, strtmp);
         char* tmp = copycs(strtmp.c_str(), (int)strtmp.size());
         return tmp;
     }

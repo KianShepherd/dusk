@@ -5,12 +5,10 @@ extern copysa(arr: string*, n: int) -> string*;
 
 extern del(arr: int*) -> int;
 
-extern ftol(a: float) -> long;
 extern ftoi(a: float) -> int;
 extern ftos(a: float) -> string;
 
 extern itof(a: int) -> float;
-extern itol(a: int) -> long;
 extern itos(a: int) -> string;
 
 extern ltof(a: long) -> float;
@@ -18,8 +16,10 @@ extern ltoi(a: long) -> int;
 extern ltos(a: long) -> string;
 
 extern stoi(a: string) -> int;
-extern stol(a: string) -> long;
 extern stof(a: string) -> float;
 
 extern input() -> string;
 extern readfile(filename: string) -> string;
+
+extern count_substr(str: string, substr: string) -> int;
+extern split(str: string, on: string) -> string*;

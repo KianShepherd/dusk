@@ -1,18 +1,4 @@
-fn fact_tail(acc: long, n: long) -> long {
-    if (n < 1) {
-        return acc;
-    }
-    return fact_tail(acc * n, n - 1);
-}
-
-fn fact(n: long) -> long {
-    return fact_tail(1, n);
-}
-
 fn main(argc: int, argv: string*) -> int {
-    if (argc < 2) {
-        return 1;
-    }
-    print("%ld\n", fact(stol(argv[1])));
+    print("abc: %ld\n", stoi("15"));
     return 0;
 }
