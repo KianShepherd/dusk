@@ -7,6 +7,10 @@ extern ialloc(n: int) -> int*;
 extern falloc(n: int) -> float*;
 
 extern del(arr: int*) -> int;
+extern delet(arr: void*);
+fn delete(arr: void*) {
+    delet(arr);
+}
 
 extern ftoi(a: float) -> int;
 extern ftos(a: float) -> string;

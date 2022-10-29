@@ -61,6 +61,10 @@ extern "C" DLLEXPORT {
         return 1;
     }
 
+    void delet(void* vec) {
+        delete (std::vector<int>*)vec;
+    }
+
     // To ints
     long ftoi(double a) {
         return static_cast<long>(a);
