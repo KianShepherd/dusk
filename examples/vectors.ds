@@ -1,0 +1,25 @@
+fn main() -> int {
+    // All vectors are heap allocated and therefore need to be freed their type regardless of stored
+    // value type is void*
+    let mut i_vec: void* = vec<int>();
+    let mut f_vec: void* =  vec<float>();
+
+    // You can push to the end of vector using a helper function
+    push_back<float>(f_vec, 1.0);
+    push_back<float>(f_vec, 2.0);
+    push_back<float>(f_vec, 3.0);
+
+    // There are also helper functions around split, that will split a string and cast each of the elements
+    // and append them to a vector.
+    split<int>(i_vec, "1 2 3 4 5 6 7 8 9 10", " ");
+
+    // The size function can be used regardless of vector type to get the number of elements contained within it
+    for (let mut i: int = 0; i < size(i_vec); i = i + 1) {
+        // The get function can be used to get elements at the given index
+        print("%ld\n", get<int>(i_vec, i));
+    }
+    for (let mut i: int = 0; i < size(f_vec); i = i + 1) {
+        print("%f\n", get<float>(f_vec, i));
+    }
+    return 0;
+}
