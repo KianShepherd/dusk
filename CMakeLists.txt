@@ -34,6 +34,7 @@ set(SOURCES
     src/statement.cc
     src/function.cc
     src/helpers.cc
+    src/struct.cc
 )
 
 if(APPLE)
@@ -50,6 +51,7 @@ set(HEADER_FILES
     include/function.hh
     include/statement.hh
     include/helpers.hh
+    include/struct.hh
 )
 
 add_library(stddusk src/stdlib.cc)

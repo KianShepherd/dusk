@@ -65,6 +65,7 @@
 #include "expression.hh"
 #include "statement.hh"
 #include "function.hh"
+#include "struct.hh"
 
 class AST;
 
@@ -112,6 +113,7 @@ public:
     AST();
 
     void push_function(Function* function);
+    void push_struct(Struct* s);
     void push_err(std::string msg);
 
     void push_scope();
@@ -134,6 +136,7 @@ public:
     std::vector<std::tuple<std::string, AtomType, std::vector<AtomType>>> func_definitions;
 private:
     std::vector<Function*> functions;
+    std::vector<Struct*> structs;
     bool error;
     std::stringstream err;
 };

@@ -1,10 +1,4 @@
 fn main(argc: int, argv: string*) -> int {
-    for (let mut i: int = 0; i < 1000000; i = i + 1) {
-        let mut vec: void* = vec<float>();
-        for (let mut j: int = 0; j < 1000000; j = j + 1) {
-            push_back<float>(vec, itof(j));
-        }
-        delete(vec);
-    }
+
     return 0;
 }
