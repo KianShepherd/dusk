@@ -26,11 +26,14 @@ public:
     Struct(std::string name, AST* ast);
     void push_var(std::string name, AtomType);
     void push_function(Function* func);
+    void finalize();
 
     void debug(size_t depth);
 
     llvm::Value* codegen_functions(AST* ast);
     llvm::Value* codegen(AST* ast);
+
+    std::vector<Function*> member_functions;
 private:
     std::string name;
     AST* ast;
@@ -41,7 +44,6 @@ private:
     std::vector<std::string> func_idents;
     std::vector<AtomType> types;
     std::vector<llvm::Type*> llvm_types;
-    std::vector<Function*> member_functions;
     std::vector<llvm::Function*> funcs;
 
     std::map<std::string, int> gen_field_map; // Field map for llvm to use

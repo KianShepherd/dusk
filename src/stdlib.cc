@@ -48,6 +48,10 @@ extern "C" DLLEXPORT {
         return heap_arr;
     }
 
+    void* newstruct(long size) {
+        return malloc((size_t)size);
+    }
+
     long* ialloc(long n) {
         return (long*)malloc(n * sizeof(long));
     }

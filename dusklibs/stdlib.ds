@@ -5,6 +5,7 @@ extern copysa(arr: string*, n: int) -> string*;
 
 extern ialloc(n: int) -> int*;
 extern falloc(n: int) -> float*;
+extern newstruct(n: int) -> void*;
 
 extern del(arr: int*) -> int;
 extern delet(arr: void*);

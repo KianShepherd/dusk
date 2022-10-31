@@ -17,6 +17,8 @@ void print_help() {
     std::cout << "Options:" << std::endl;
     std::cout << "-h                Display this information." << std::endl;
     std::cout << "-d                Print out debug information about the AST and LLVM IR." << std::endl;
+    std::cout << "-da               Print out debug information about the AST." << std::endl;
+    std::cout << "-di               Print out debug information about the LLVM IR." << std::endl;
     std::cout << "-O                Optimize the generated object / executable." << std::endl;
     std::cout << "-c                Only compile the sources do not link into executable." << std::endl << std::endl;
 
@@ -39,10 +41,12 @@ int main(int argc, char** argv) {
         std::string c_compiler;
         bool only_compile;
         bool optimizations;
-        bool debug_info;
+        bool debug_ast;
+        bool debug_ir;
     } compiler_args;
     compiler_args.optimizations = false;
-    compiler_args.debug_info = false;
+    compiler_args.debug_ast = false;
+    compiler_args.debug_ir = false;
     compiler_args.only_compile = false;
     compiler_args.c_compiler = std::string("g++");
     compiler_args.outfile = std::string("out");
@@ -76,7 +80,18 @@ int main(int argc, char** argv) {
             continue;
         }
         if (cur_arg.compare("-d") == 0) {
-            compiler_args.debug_info = true;
+            compiler_args.debug_ast = true;
+            compiler_args.debug_ir = true;
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-da") == 0) {
+            compiler_args.debug_ast = true;
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-di") == 0) {
+            compiler_args.debug_ir = true;
             args++;
             continue;
         }
@@ -136,7 +151,7 @@ int main(int argc, char** argv) {
     if (ast.check_error(std::string("Logic Error: ")))
         return 2;
     
-    if (compiler_args.debug_info) {
+    if (compiler_args.debug_ast) {
         ast.debug();
     }
 
@@ -144,7 +159,7 @@ int main(int argc, char** argv) {
     if (compiler_args.only_compile && compiler_args.outfile.compare("out") != 0) {
         objectfile = compiler_args.outfile;
     }
-    ast.codegen((char)compiler_args.debug_info, compiler_args.optimizations, objectfile);
+    ast.codegen((char)compiler_args.debug_ir, compiler_args.optimizations, objectfile);
 
     if (!compiler_args.only_compile) {
         auto compile_str = compiler_args.c_compiler
@@ -161,7 +176,7 @@ int main(int argc, char** argv) {
 
         compile_str.append("-o ").append(compiler_args.outfile);
 
-        if (compiler_args.debug_info)
+        if (compiler_args.debug_ast && compiler_args.debug_ir)
             std::cout << compile_str << std::endl;
 
         // Compile the generated object file into an executable

@@ -130,6 +130,15 @@ AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* val
     this->length = length;
 }
 
+AssignmentStatement::AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type, std::string struct_name) {
+    this->identifier = identifier;
+    this->value = value;
+    this->mut = mut;
+    this->type = type;
+    this->length = -1;
+    this->struct_name = struct_name;
+}
+
 void AssignmentStatement::debug(size_t depth) {
     std::cout << std::string(depth * 4, ' ');
     std::cout << "let " << ((this->mut)?"mutable ":"static ") << ((ExpressionAtomic*)this->identifier)->str << " : ";
@@ -144,6 +153,7 @@ void AssignmentStatement::debug(size_t depth) {
         case t_number_arr: std::cout << "int* "; break;
         case t_float_arr: std::cout << "float* "; break;
         case t_string_arr: std::cout << "string* "; break;
+        case t_struct: std::cout << this->struct_name << " "; break;
         default: std::cerr << "Unknown type for assignment"; break;
     }
     std::cout << " = " << std::endl;
@@ -173,6 +183,8 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
         Init = this->value;
         if (this->type == t_float_arr || this->type == t_number_arr || this->type == t_bool_arr || this->type == t_string_arr || this->type == t_string)
             this->length = ((ExpressionAtomic*)this->value)->length;
+        if (this->type == t_struct)
+            this->length = 1;
     } else {
         if (this->type == t_float_arr) {
             std::vector<double> vals;
@@ -209,6 +221,7 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
         case t_float: init_type = llvm::Type::getDoubleTy(*(ast->TheContext)); break;
         case t_char: init_type = llvm::Type::getInt8Ty(*(ast->TheContext)); break;
         case t_string: init_type = llvm::Type::getInt8PtrTy(*(ast->TheContext)); break;
+        case t_struct: init_type = llvm::Type::getInt8PtrTy(*(ast->TheContext)); break;
         case t_bool_arr: init_type = llvm::Type::getInt1PtrTy(*(ast->TheContext)); break;
         case t_number_arr: init_type = llvm::Type::getInt64PtrTy(*(ast->TheContext)); break;
         case t_float_arr: init_type = llvm::Type::getDoublePtrTy(*(ast->TheContext)); break;

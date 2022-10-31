@@ -7,6 +7,7 @@
 #include "expression.hh"
 #include "statement.hh"
 #include "function.hh"
+#include "struct.hh"
 #include "ast.hh"
 
 extern FILE* yyin;
@@ -34,12 +35,13 @@ void yyerror(AST&, const char*);
     std::vector<long long>* numbers;
     std::vector<double>* floats;
     std::vector<std::string>* strings;
+    std::vector<std::pair<int, void*>>* fields;
 }
 
 %token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW
-%token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK
+%token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT
 
 %type<expr>  exp;
 %type<stat>  statement statementblock mutassign;
@@ -50,6 +52,8 @@ void yyerror(AST&, const char*);
 %type<numbers> boolarr intarr;
 %type<floats> floatarr;
 %type<strings> stringarr;
+%type<fields> structfields;
+%type<func> function;
 
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
@@ -60,203 +64,277 @@ void yyerror(AST&, const char*);
 %destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 
 %%
-functions: %empty
+program: %empty
     | err
     | error
-    | functions function
+    | program globalfunction
+    | program structdef
+    ;
+
+structdef: STRUCT IDENTIFIER LBRACE structfields RBRACE
+    {
+        auto s = new Struct(std::string(*($2)), &ast);
+        std::vector<std::pair<int, void*>> vals = *($4);
+        for (auto& p : vals) {
+            if (p.first == 0) {
+                std::pair<std::string, AtomType> field = *((std::pair<std::string, AtomType>*)p.second);
+                s->push_var(field.first, field.second);
+            } else {
+                s->push_function((Function*)p.second);
+            }
+        }
+        s->finalize();
+        ast.push_struct(s);
+    }
+    ;
+
+structfields: %empty
+    {
+        $$ = new std::vector<std::pair<int, void*>>();
+    }
+    | structfields function
+    {
+        $$->push_back(std::pair<int, void*>(1, (void*)$2));
+    }
+    | structfields IDENTIFIER COLON BOOL COMMA
+    {
+        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_char);
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    | structfields IDENTIFIER COLON CHAR COMMA
+    {
+        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_char);
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    | structfields IDENTIFIER COLON FLOAT COMMA
+    {
+        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_float);
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    | structfields IDENTIFIER COLON INT COMMA
+    {
+        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_number);
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    | structfields IDENTIFIER COLON LONG COMMA
+    {
+        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_number);
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    | structfields IDENTIFIER COLON STR COMMA
+    {
+        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_string);
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    | structfields IDENTIFIER COLON INT TIMES COMMA
+    {
+        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_number_arr);
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    | structfields IDENTIFIER COLON FLOAT TIMES COMMA
+    {
+        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_float_arr);
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    ;
+
+globalfunction: function
+    {
+        ast.push_function($1);
+    }
     ;
 
 function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($5), t_null, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($5), t_null, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW BOOL statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_bool, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($7), t_bool, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW INT statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_number, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($7), t_number, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW LONG statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_long, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($7), t_long, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW CHAR statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_char, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($7), t_char, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW FLOAT statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_float, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($7), t_float, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW STR statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($7), t_string, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($7), t_string, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW VOID TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_string, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($8), t_string, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW BOOL TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_bool_arr, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($8), t_bool_arr, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW INT TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_number_arr, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($8), t_number_arr, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW FLOAT TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_float_arr, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($8), t_float_arr, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN RPAREN ARROW STR TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_string_arr, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), std::move($8), t_string_arr, std::vector<std::vector<std::string>>());
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($6), t_null, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($6), t_null, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_bool, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($8), t_bool, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW INT statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_number, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($8), t_number, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW LONG statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_long, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($8), t_long, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW CHAR statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_char, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($8), t_char, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_float, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($8), t_float, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW STR statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($8), t_string, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($8), t_string, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW VOID TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($9), t_string, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($9), t_string, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($9), t_bool_arr, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($9), t_bool_arr, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW INT TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($9), t_number_arr, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($9), t_number_arr, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($9), t_float_arr, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($9), t_float_arr, std::move(*($4)));
     }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW STR TIMES statementblock
     {
-        ast.push_function(new Function(std::string(*($2)), std::move($9), t_string_arr, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), std::move($9), t_string_arr, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN RPAREN SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_null, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_null, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW BOOL SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_bool, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_bool, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW INT SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_number, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_number, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW LONG SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_long, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_long, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW CHAR SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_char, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_char, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW FLOAT SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_float, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_float, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW STR SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_string, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW VOID TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_string, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW BOOL TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_bool_arr, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_bool_arr, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW INT TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_number_arr, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_number_arr, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW FLOAT TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_float_arr, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_float_arr, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN RPAREN ARROW STR TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_string_arr, std::vector<std::vector<std::string>>()));
+        $$ = new Function(std::string(*($2)), nullptr, t_string_arr, std::vector<std::vector<std::string>>());
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_null, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_null, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_bool, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_bool, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW INT SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_number, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_number, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW LONG SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_long, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_long, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW CHAR SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_char, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_char, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_float, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_float, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW STR SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_string, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW VOID TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_string, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_string, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW BOOL TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_bool_arr, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_bool_arr, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW INT TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_number_arr, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_number_arr, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW FLOAT TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_float_arr, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_float_arr, std::move(*($4)));
     }
     | EXTERN IDENTIFIER LPAREN typedargs RPAREN ARROW STR TIMES SEMICOLON
     {
-        ast.push_function(new Function(std::string(*($2)), nullptr, t_string_arr, std::move(*($4))));
+        $$ = new Function(std::string(*($2)), nullptr, t_string_arr, std::move(*($4)));
     }
     ;
 
@@ -391,6 +469,10 @@ mutassign: LET MUTABLE exp COLON INT EQUAL exp SEMICOLON
     | LET MUTABLE exp COLON CHAR EQUAL exp SEMICOLON
     {
         $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_char);
+    }
+    | LET MUTABLE exp COLON IDENTIFIER EQUAL exp SEMICOLON
+    {
+        $$ = new AssignmentStatement(std::move($3), std::move($7), true, t_struct, std::string(*($5)));
     }
     | LET MUTABLE exp COLON INT TIMES EQUAL exp SEMICOLON
     {

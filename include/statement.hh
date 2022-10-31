@@ -63,6 +63,7 @@ private:
 class AssignmentStatement : public Statement {
 public:
     AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type, long length=0);
+    AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type, std::string struct_name);
 
     void debug(size_t depth) override;
     void fold(AST* ast) override;
@@ -73,6 +74,7 @@ private:
     bool mut;
     AtomType type;
     long length;
+    std::string struct_name;
 };
 
 class IfStatement : public Statement {

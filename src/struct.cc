@@ -54,15 +54,25 @@ Struct::Struct(std::string name, AST* ast) {
     this->ast = ast;
 }
 
+void Struct::finalize() {
+    std::vector<Statement*> stats;
+    stats.push_back(new ReturnStatement(new ExpressionAtomic("newstruct", std::vector<Expression*>({ new ExpressionAtomic((long)this->mem_size) }))));
+    auto statements = new StatementBlock(stats);
+    this->member_functions.push_back(new Function(this->name, statements, t_string, std::vector<std::vector<std::string>>()));
+}
+
 void Struct::debug(size_t depth) {
-    for (auto& f : this->member_functions) {
-        f->debug();
-    }
     std::cout << std::endl << "Struct "<< this->name << " {" << std::endl;;
 
     for (int i = 0; i < this->type_idents.size(); i++) {
         std::cout << std::string(4, ' ') << this->type_idents[i] << " : " << atom_to_debug(this->types[i]) << " : " << this->gen_field_map[this->type_idents[i]] << "," << std::endl;
     }
+    std::cout << std::endl;
+    for (auto& f : this->member_functions) {
+        std::cout << "MEMBER FUNCTION:" << std::endl;
+        f->debug();
+    }
+    std::cout << std::endl;
     std::cout << "}" << std::endl;
 
 }
@@ -81,6 +91,7 @@ void Struct::push_var(std::string name, AtomType type) {
 
 void Struct::push_function(Function* func) {
     auto func_name = std::string(this->name).append(func->name);
+    func->push_front(new ExpressionAtomic("self", true), t_struct, true);
     this->func_idents.push_back(func_name);
     this->gen_field_map[func_name] = -1;
     int field_idx = this->member_functions.size();

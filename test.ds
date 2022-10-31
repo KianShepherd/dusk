@@ -1,4 +1,16 @@
-fn main(argc: int, argv: string*) -> int {
+struct Foo {
+    c: int,
 
+    fn bar() -> int {
+        return 1;
+    }
+
+    fn bax(n: long) -> long {
+        return n;
+    }
+}
+
+fn main(argc: int, argv: string*) -> int {
+    let mut s: Foo = Foo();
     return 0;
 }

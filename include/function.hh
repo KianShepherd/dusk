@@ -25,6 +25,7 @@ public:
     Function(std::string name, Statement* statements, AtomType type, std::vector<std::vector<std::string>> args);
     void debug();
     void fold(AST* ast);
+    void push_front(Expression* name, AtomType type, bool mut);
     std::tuple<std::string, AtomType, std::vector<AtomType>> get_meta();
 
     llvm::Function* codegen(AST* ast);

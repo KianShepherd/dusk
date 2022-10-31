@@ -20,6 +20,10 @@ void AST::push_function(Function* function) {
     this->functions.push_back(function);
 }
 
+void AST::push_struct(Struct* s) {
+    this->structs.push_back(s);
+}
+
 void AST::push_err(std::string msg) {
     this->error = true;
     this->err << msg;
@@ -34,16 +38,22 @@ bool AST::check_error(std::string stage) {
 
 void AST::debug() {
     std::cout << "----- DEBUG AST -----" << std::endl;
-    for (int i = 0; i < (int)this->structs.size(); i++) {
-        this->structs[i]->debug(0);
-    }
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->debug();
+    }
+    for (int i = 0; i < (int)this->structs.size(); i++) {
+        this->structs[i]->debug(0);
     }
     std::cout << "----- DEBUG AST -----" << std::endl;
 }
 
 void AST::static_checking() {
+    for (int i = 0; i < (int)this->structs.size(); i++) {
+        for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
+            this->func_definitions.push_back(this->structs[i]->member_functions[j]->get_meta());
+        }
+    }
+
     bool found_entrypoint = false;
     for (int i = 0; i < (int)this->functions.size(); i++) {
         auto meta = this->functions[i]->get_meta();
@@ -135,15 +145,35 @@ void AST::codegen(char debug, bool optimizations, std::string outfile) {
     auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
     this->TheModule->setDataLayout(TargetMachine->createDataLayout());
     this->TheModule->setTargetTriple(TargetTriple);
+    std::cout << "FUNC PROTOS\n";
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->func_definitions.push_back(this->functions[i]->get_meta());
         // Forward declare all the function definitions
         this->functions[i]->codegen_proto(this);
     }
+    std::cout << "STRUCT PROTOS\n";
+    for (int i = 0; i < (int)this->structs.size(); i++) {
+        for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
+            this->func_definitions.push_back(this->structs[i]->member_functions[j]->get_meta());
+            // Forward declare all the function definitions
+            this->structs[i]->member_functions[j]->codegen_proto(this);
+        }
+    }
+    std::cout << "PROTOS DONE\n";
+    this->TheModule->dump();
+    std::cout << "MEMBERFUNC\n";
+    for (int i = 0; i < (int)this->structs.size(); i++) {
+        for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
+            this->structs[i]->codegen_functions(this);
+        }
+    }
+    std::cout << "MEMBERFUNC DONE\n";
+    std::cout << "FUNCS\n";
     // Codegen all of the actual functions
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }
+    std::cout << "FUNCS DONE\n";
     if (debug) {
         std::cout << "===== DEBUG IR ======" << std::endl;
         this->TheModule->dump();

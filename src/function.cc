@@ -31,6 +31,8 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
             this->indentifier_type.push_back(t_string_arr);
         } else if (args[i][1].compare("string") == 0) {
             this->indentifier_type.push_back(t_string);
+        } else if (args[i][1].compare("struct") == 0) {
+            this->indentifier_type.push_back(t_struct);
         }
         if (args[i].size() == 3) {
             if (args[i][2].compare("t") == 0) {
@@ -54,6 +56,7 @@ void Function::debug() {
         case t_char: std::cout << "char"; break;
         case t_float: std::cout << "float"; break;
         case t_string: std::cout << "str"; break;
+        case t_struct: std::cout << "struct"; break;
         case t_null: std::cout << "void"; break;
         case t_bool: std::cout << "bool"; break;
         case t_number_arr: std::cout << " int*"; break;
@@ -78,6 +81,7 @@ void Function::debug() {
             case t_float: std::cout << " float"; break;
             case t_bool: std::cout << " bool"; break;
             case t_string: std::cout << " string"; break;
+            case t_struct: std::cout << " struct"; break;
             case t_number_arr: std::cout << " int*"; break;
             case t_float_arr: std::cout << " float*"; break;
             case t_bool_arr: std::cout << " bool*"; break;
@@ -117,6 +121,7 @@ llvm::Function* Function::codegen_proto(AST* ast) {
                 case t_float: func_args.push_back(llvm::Type::getDoubleTy(*(ast->TheContext))); break;
                 case t_bool: func_args.push_back(llvm::Type::getInt1Ty(*(ast->TheContext))); break;
                 case t_string: func_args.push_back(llvm::Type::getInt8PtrTy(*(ast->TheContext))); break;
+                case t_struct: func_args.push_back(llvm::Type::getInt8PtrTy(*(ast->TheContext))); break;
                 case t_bool_arr: func_args.push_back(llvm::Type::getInt1PtrTy(*(ast->TheContext))); break;
                 case t_number_arr: func_args.push_back(llvm::Type::getInt64PtrTy(*(ast->TheContext))); break;
                 case t_float_arr: func_args.push_back(llvm::Type::getDoublePtrTy(*(ast->TheContext))); break;
@@ -131,6 +136,7 @@ llvm::Function* Function::codegen_proto(AST* ast) {
             case t_char: FT = llvm::FunctionType::get(llvm::Type::getInt8Ty(*(ast->TheContext)), func_args, false); break;
             case t_float: FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*(ast->TheContext)), func_args, false); break;
             case t_string: FT = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(*(ast->TheContext)), func_args, false); break;
+            case t_struct: FT = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(*(ast->TheContext)), func_args, false); break;
             case t_null: FT = llvm::FunctionType::get(llvm::Type::getVoidTy(*(ast->TheContext)), func_args, false); break;
             case t_bool: FT = llvm::FunctionType::get(llvm::Type::getInt1Ty(*(ast->TheContext)), func_args, false); break;
             case t_bool_arr: FT = llvm::FunctionType::get(llvm::Type::getInt1PtrTy(*(ast->TheContext)), func_args, false); break;
@@ -154,6 +160,7 @@ llvm::Function* Function::codegen_proto(AST* ast) {
 }
 
 llvm::Function* Function::codegen(AST* ast) {
+    std::cout << this->name << std::endl;
     llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);
     
     if (!TheFunction)
@@ -161,6 +168,7 @@ llvm::Function* Function::codegen(AST* ast) {
     if (!this->statements)
         return TheFunction;
 
+    std::cout << this->name << std::endl;
     // Create a new basic block to start insertion into.
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(ast->TheContext), "entry", TheFunction);
     ast->Builder->SetInsertPoint(BB);
@@ -168,7 +176,9 @@ llvm::Function* Function::codegen(AST* ast) {
     // Record the function arguments in the NamedValues map.
     ast->NamedValues = ast->NamedValues->new_scope();
     auto Arg = TheFunction->args().begin();
+    std::cout << this->indentifier_type.size() << std::endl;
     for (size_t i = 0; i < this->indentifier_type.size(); i++) {
+        std::cout << this->name << " : " << i << std::endl;
         llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), Arg->getType());
         ast->Builder->CreateStore(Arg, Alloca);
 
@@ -185,4 +195,11 @@ llvm::Function* Function::codegen(AST* ast) {
     llvm::verifyFunction(*TheFunction);
 
     return TheFunction;
+}
+
+void Function::push_front(Expression* name, AtomType type, bool mut) {
+    this->indentifiers.insert(this->indentifiers.begin(), name);
+    this->indentifier_type.insert(this->indentifier_type.begin(), type);
+    this->indentifiers_mutability.insert(this->indentifiers_mutability.begin(), mut);
+    this->arg_count++;
 }

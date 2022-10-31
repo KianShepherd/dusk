@@ -31,7 +31,8 @@ enum AtomType {
     t_number_arr,
     t_float_arr,
     t_bool_arr,
-    t_string_arr
+    t_string_arr,
+    t_struct
 };
 
 enum ExpType {
