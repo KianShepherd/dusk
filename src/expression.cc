@@ -1,5 +1,6 @@
 #include "expression.hh"
 #include "ast.hh"
+#include "struct.hh"
 
 ExpressionAtomic::ExpressionAtomic(long num) {
     this->number = num;
@@ -67,6 +68,22 @@ ExpressionAtomic::ExpressionAtomic(int length, std::vector<std::string> values) 
     this->string_vals = values;
 }
 
+ExpressionAtomic::ExpressionAtomic(Expression* base, Expression* operand) {
+    this->base = base;
+    this->operand = operand;
+    this->type = t_dot_exp;
+    this->dot_type = (((ExpressionAtomic*)operand)->type == t_identifier)?0:1;
+}
+
+ExpressionAtomic::ExpressionAtomic(Expression* base, Struct* s, int index, std::string field_name) {
+    this->base = base;
+    this->struct_t = s;
+    this->number = index;
+    this->type = t_get_struct;
+    this->str = field_name;
+
+}
+
 void ExpressionAtomic::debug(size_t depth) {
     switch (this->type) {
         case t_number: std::cout << std::string(depth * 4, ' ') << this->number << " : int"<< std::endl; break;
@@ -119,6 +136,24 @@ void ExpressionAtomic::debug(size_t depth) {
             std::cout << "}" << std::endl;
             break;
         }
+        case t_dot_exp: {
+            std::cout << std::string(depth * 4, ' ') << "method chain" << std::endl;
+            this->base->debug(depth + 1);
+            std::cout << std::string(depth * 4, ' ') << ". ";;
+            if (this->dot_type != 0) {
+                std::cout << "call";
+            } else {
+                std::cout << "get";
+            }
+            std::cout << std::endl;
+            this->operand->debug(depth + 1);
+            break;
+        }
+        case t_get_struct: {
+            std::cout << std::string(depth * 4, ' ') << "Get " << this->struct_t->name << "." << this->str << " : " << this->number << " from" << std::endl;
+            this->base->debug(depth + 1);
+            break;
+        }
         default: std::cout << "Unknown atomic type" << std::endl; break;
     }
 }
@@ -149,6 +184,65 @@ AtomType ExpressionAtomic::get_atomic_type_keep_identifier(AST* ast) {
 }
 
 Expression* ExpressionAtomic::fold(AST* ast) {
+    if (this->type == t_dot_exp) {
+        this->operand = this->operand->fold(ast);
+        this->base = this->base->fold(ast);
+        if (this->dot_type == 0) {
+            if ((this->base)->get_atomic_type_keep_identifier(ast) == t_identifier) {
+                std::string struct_name = ast->scope->get_value_struct(((ExpressionAtomic*)this->base)->str);
+                Struct* strct = ast->struct_map[struct_name];
+                return new ExpressionAtomic(this->base, strct, strct->gen_field_map[((ExpressionAtomic*)this->operand)->str], ((ExpressionAtomic*)this->operand)->str);
+            } else if (((ExpressionAtomic*)this->base)->type == t_function_call) {
+                Function* func = ast->func_map[((ExpressionAtomic*)this->base)->str];
+                if (func->type != t_struct) {
+                    ast->push_err(std::string("Attempted to call . method off non struct object."));
+                    return (Expression*)this;
+                }
+                Struct* strct = ast->struct_map[func->struct_name];
+                return new ExpressionAtomic(this->base, strct, strct->gen_field_map[((ExpressionAtomic*)this->operand)->str], ((ExpressionAtomic*)this->operand)->str);
+            } else if (((ExpressionAtomic*)this->base)->type == t_get_struct) {
+                Struct* strct = ((ExpressionAtomic*)this->base)->struct_t;
+                if (strct->struct_var_map.find(((ExpressionAtomic*)this->base)->str) == strct->struct_var_map.end()) {
+                    ast->push_err(std::string("Attempted to call . method off non struct object."));
+                }
+                strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->base)->str]];
+                std::string struct_name = strct->name;
+                return new ExpressionAtomic(this->base, strct, strct->gen_field_map[((ExpressionAtomic*)this->operand)->str], ((ExpressionAtomic*)this->operand)->str);
+            }
+            return (Expression*)this;
+        } else {
+            if ((this->base)->get_atomic_type_keep_identifier(ast) == t_identifier) {
+                std::string struct_name = ast->scope->get_value_struct(((ExpressionAtomic*)this->base)->str);
+                struct_name.append(((ExpressionAtomic*)this->operand)->str);
+                ((ExpressionAtomic*)this->operand)->args.insert(((ExpressionAtomic*)this->operand)->args.begin(), this->base);
+                ((ExpressionAtomic*)this->operand)->str = struct_name;
+                return this->operand;
+            } else if (((ExpressionAtomic*)this->base)->type == t_function_call) {
+                Function* func = ast->func_map[((ExpressionAtomic*)this->base)->str];
+                if (func->type != t_struct) {
+                    ast->push_err(std::string("Attempted to call . method off non struct object."));
+                    return (Expression*)this;
+                }
+                std::string struct_name = func->struct_name;
+                struct_name.append(((ExpressionAtomic*)this->operand)->str);
+                ((ExpressionAtomic*)this->operand)->args.insert(((ExpressionAtomic*)this->operand)->args.begin(), this->base);
+                ((ExpressionAtomic*)this->operand)->str = struct_name;
+                return this->operand;
+            } else if (((ExpressionAtomic*)this->base)->type == t_get_struct) {
+                Struct* strct = ((ExpressionAtomic*)this->base)->struct_t;
+                if (strct->struct_var_map.find(((ExpressionAtomic*)this->base)->str) == strct->struct_var_map.end()) {
+                    ast->push_err(std::string("Attempted to call . method off non struct object."));
+                }
+                strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->base)->str]];
+                std::string struct_name = strct->name;
+                struct_name.append(((ExpressionAtomic*)this->operand)->str);
+            
+                ((ExpressionAtomic*)this->operand)->args.insert(((ExpressionAtomic*)this->operand)->args.begin(), this->base);
+                ((ExpressionAtomic*)this->operand)->str = struct_name;
+                return this->operand;
+            }
+        }
+    }
     return (Expression*)this;
 }
 
@@ -558,9 +652,9 @@ void AssignmentExpression::debug(size_t depth) {
 Expression* AssignmentExpression::fold(AST* ast) {
     this->value = this->value->fold(ast);
     if (this->is_arr) {
-        ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast)));
+        ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast), std::string("")));
     } else {
-        ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast)));
+        ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast), std::string("")));
     }
     return (Expression*)this;
 }

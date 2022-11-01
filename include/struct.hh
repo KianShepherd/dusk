@@ -25,6 +25,7 @@ class Struct {
 public:
     Struct(std::string name, AST* ast);
     void push_var(std::string name, AtomType);
+    void push_var(std::string name, AtomType, std::string struct_name);
     void push_function(Function* func);
     void finalize();
 
@@ -34,8 +35,12 @@ public:
     llvm::Value* codegen(AST* ast);
 
     std::vector<Function*> member_functions;
-private:
+
     std::string name;
+    llvm::Type* struct_type;
+    std::map<std::string, int> gen_field_map; // Field map for llvm to use
+    std::map<std::string, std::string> struct_var_map;
+private:
     AST* ast;
 
     int mem_size;
@@ -46,6 +51,5 @@ private:
     std::vector<llvm::Type*> llvm_types;
     std::vector<llvm::Function*> funcs;
 
-    std::map<std::string, int> gen_field_map; // Field map for llvm to use
     std::map<std::string, std::tuple<int, int>> field_map; // field type to access, field index to acess for member
 };

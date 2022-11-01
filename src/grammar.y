@@ -40,7 +40,7 @@ void yyerror(AST&, const char*);
 
 %token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
-%token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW
+%token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW DOT
 %token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT
 
 %type<expr>  exp;
@@ -60,6 +60,7 @@ void yyerror(AST&, const char*);
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left UNARY
+%left DOT
 
 %destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 
@@ -77,8 +78,12 @@ structdef: STRUCT IDENTIFIER LBRACE structfields RBRACE
         std::vector<std::pair<int, void*>> vals = *($4);
         for (auto& p : vals) {
             if (p.first == 0) {
-                std::pair<std::string, AtomType> field = *((std::pair<std::string, AtomType>*)p.second);
-                s->push_var(field.first, field.second);
+                std::tuple<std::string, AtomType, std::string> field = *((std::tuple<std::string, AtomType, std::string>*)p.second);
+                if (std::get<1>(field) == t_struct) {
+                    s->push_var(std::get<0>(field), std::get<1>(field), std::get<2>(field));
+                } else {
+                    s->push_var(std::get<0>(field), std::get<1>(field));
+                }
             } else {
                 s->push_function((Function*)p.second);
             }
@@ -98,42 +103,47 @@ structfields: %empty
     }
     | structfields IDENTIFIER COLON BOOL COMMA
     {
-        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_char);
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_char, std::string(""));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
     | structfields IDENTIFIER COLON CHAR COMMA
     {
-        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_char);
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_char, std::string(""));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
     | structfields IDENTIFIER COLON FLOAT COMMA
     {
-        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_float);
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_float, std::string(""));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
     | structfields IDENTIFIER COLON INT COMMA
     {
-        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_number);
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_number, std::string(""));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
     | structfields IDENTIFIER COLON LONG COMMA
     {
-        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_number);
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_number, std::string(""));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
     | structfields IDENTIFIER COLON STR COMMA
     {
-        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_string);
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_string, std::string(""));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
     | structfields IDENTIFIER COLON INT TIMES COMMA
     {
-        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_number_arr);
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_number_arr, std::string(""));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
     | structfields IDENTIFIER COLON FLOAT TIMES COMMA
     {
-        std::pair<std::string, AtomType>* info = new std::pair<std::string, AtomType>(std::string(*($2)), t_float_arr);
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_float_arr, std::string(""));
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
+    | structfields IDENTIFIER COLON IDENTIFIER COMMA
+    {
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_struct, std::string(*($4)));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
     ;
@@ -192,6 +202,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     {
         $$ = new Function(std::string(*($2)), std::move($8), t_string_arr, std::vector<std::vector<std::string>>());
     }
+    | FUNCTION IDENTIFIER LPAREN RPAREN ARROW IDENTIFIER statementblock
+    {
+        $$ = new Function(std::string(*($2)), std::move($7), t_struct, std::vector<std::vector<std::string>>(), std::move(*($6)));
+    }
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN statementblock
     {
         $$ = new Function(std::string(*($2)), std::move($6), t_null, std::move(*($4)));
@@ -239,6 +253,10 @@ function: FUNCTION IDENTIFIER LPAREN RPAREN statementblock
     | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW STR TIMES statementblock
     {
         $$ = new Function(std::string(*($2)), std::move($9), t_string_arr, std::move(*($4)));
+    }
+    | FUNCTION IDENTIFIER LPAREN typedargs RPAREN ARROW IDENTIFIER statementblock
+    {
+        $$ = new Function(std::string(*($2)), std::move($8), t_struct, std::move(*($4)), std::move(*($7)));
     }
     | EXTERN IDENTIFIER LPAREN RPAREN SEMICOLON
     {
@@ -809,6 +827,10 @@ exp: NUMBER
     | LBRACE stringarr RBRACE
     {
         $$ = new ExpressionAtomic((*($2)).size(), std::move(*($2)));
+    }
+    | exp DOT exp
+    {
+        $$ = new ExpressionAtomic(std::move($1), std::move($3));
     }
     ;
 

@@ -18,10 +18,12 @@ AST::AST() {
 
 void AST::push_function(Function* function) {
     this->functions.push_back(function);
+    this->func_map[function->name] = function;
 }
 
 void AST::push_struct(Struct* s) {
     this->structs.push_back(s);
+    this->struct_map[s->name] = s;
 }
 
 void AST::push_err(std::string msg) {
@@ -51,6 +53,8 @@ void AST::static_checking() {
     for (int i = 0; i < (int)this->structs.size(); i++) {
         for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
             this->func_definitions.push_back(this->structs[i]->member_functions[j]->get_meta());
+            this->func_map[this->structs[i]->member_functions[j]->name] = this->structs[i]->member_functions[j];
+            this->functions.push_back(this->structs[i]->member_functions[j]);
         }
     }
 
@@ -62,6 +66,11 @@ void AST::static_checking() {
             if (found_entrypoint)
                 this->push_err("Only one main function may be defined within an executable.");
             found_entrypoint = true;
+        }
+    }
+    for (int i = 0; i < (int)this->structs.size(); i++) {
+        for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
+            //this->structs[i]->member_functions[j]->fold(this);
         }
     }
     for (int i = 0; i < (int)this->functions.size(); i++) {
@@ -145,13 +154,11 @@ void AST::codegen(char debug, bool optimizations, std::string outfile) {
     auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
     this->TheModule->setDataLayout(TargetMachine->createDataLayout());
     this->TheModule->setTargetTriple(TargetTriple);
-    std::cout << "FUNC PROTOS\n";
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->func_definitions.push_back(this->functions[i]->get_meta());
         // Forward declare all the function definitions
         this->functions[i]->codegen_proto(this);
     }
-    std::cout << "STRUCT PROTOS\n";
     for (int i = 0; i < (int)this->structs.size(); i++) {
         for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
             this->func_definitions.push_back(this->structs[i]->member_functions[j]->get_meta());
@@ -159,21 +166,13 @@ void AST::codegen(char debug, bool optimizations, std::string outfile) {
             this->structs[i]->member_functions[j]->codegen_proto(this);
         }
     }
-    std::cout << "PROTOS DONE\n";
-    this->TheModule->dump();
-    std::cout << "MEMBERFUNC\n";
     for (int i = 0; i < (int)this->structs.size(); i++) {
-        for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
-            this->structs[i]->codegen_functions(this);
-        }
+        this->structs[i]->codegen_functions(this);
     }
-    std::cout << "MEMBERFUNC DONE\n";
-    std::cout << "FUNCS\n";
     // Codegen all of the actual functions
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
     }
-    std::cout << "FUNCS DONE\n";
     if (debug) {
         std::cout << "===== DEBUG IR ======" << std::endl;
         this->TheModule->dump();
@@ -214,9 +213,10 @@ llvm::Value* AST::LogErrorV(const char *Str) {
     return nullptr;
 }
 
-ScopeValue::ScopeValue(bool mut, AtomType type) {
+ScopeValue::ScopeValue(bool mut, AtomType type, std::string struct_name) {
     this->mut = mut;
     this->type = type;
+    this->struct_name = struct_name;
 }
 
 ScopeFrame::ScopeFrame() {
@@ -267,6 +267,16 @@ AtomType ScopeFrame::get_value(std::string identifier) {
     return this->prev_frame->get_value(identifier);
 }
 
+std::string ScopeFrame::get_value_struct(std::string identifier) {
+    auto iter = this->variables.find(identifier);
+    if (iter != this->variables.end() ) {
+        return iter->second->struct_name;
+    }
+    if (this->prev_frame == nullptr)
+        return std::string("");
+    return this->prev_frame->get_value_struct(identifier);
+}
+
 CodegenScopeFrame::CodegenScopeFrame() {
     this->prev_frame = nullptr;
     this->next_frame = nullptr;
@@ -307,10 +317,7 @@ std::tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long> CodegenScopeFrame::ge
     if (iter != this->NamedValues.end())
         return this->NamedValues[identifier];
     if (this->prev_frame == nullptr) {
-        std::cout << "GET " << identifier << std::endl;
-        auto ret = std::make_tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long>(nullptr, nullptr, t_null, 0);
-        std::cout << "~GET " << identifier << std::endl;
-        return ret;
+        return std::make_tuple<llvm::AllocaInst*, llvm::Type*, AtomType, long>(nullptr, nullptr, t_null, 0);
     }
     return this->prev_frame->get_value(identifier);
 }

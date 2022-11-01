@@ -33,6 +33,54 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
             this->indentifier_type.push_back(t_string);
         } else if (args[i][1].compare("struct") == 0) {
             this->indentifier_type.push_back(t_struct);
+            this->struct_names.push_back(args[i][2]);
+        }
+        if (args[i].size() == 3) {
+            if (args[i][2].compare("t") == 0) {
+                this->indentifiers_mutability.push_back(true);
+            } else {
+                this->indentifiers_mutability.push_back(false);
+            }
+        } else {
+            this->indentifiers_mutability.push_back(false);
+        }
+    }
+}
+
+Function::Function(std::string name, Statement* statements, AtomType type, std::vector<std::vector<std::string>> args, std::string struct_name) {
+    this->name = name;
+    this->struct_name = struct_name;
+    this->statements = statements;
+    this->type = type;
+    this->arg_count = args.size();
+    this->indentifiers = std::vector<Expression*>();
+    this->indentifier_type = std::vector<AtomType>();
+    this->indentifiers_mutability = std::vector<bool>();
+    for (size_t i = 0; i < this->arg_count; i++) {
+        this->indentifiers.push_back(new ExpressionAtomic(std::string(args[i][0]), true));
+        if (args[i][1].compare("int") == 0) {
+            this->indentifier_type.push_back(t_number);
+        } else if (args[i][1].compare("long") == 0) {
+            this->indentifier_type.push_back(t_long);
+        } else if (args[i][1].compare("char") == 0) {
+            this->indentifier_type.push_back(t_char);
+        } else if (args[i][1].compare("float") == 0) {
+            this->indentifier_type.push_back(t_float);
+        } else if (args[i][1].compare("bool") == 0) {
+            this->indentifier_type.push_back(t_bool);
+        } else if (args[i][1].compare("intarr") == 0) {
+            this->indentifier_type.push_back(t_number_arr);
+        } else if (args[i][1].compare("floatarr") == 0) {
+            this->indentifier_type.push_back(t_float_arr);
+        } else if (args[i][1].compare("boolarr") == 0) {
+            this->indentifier_type.push_back(t_bool_arr);
+        } else if (args[i][1].compare("stringarr") == 0) {
+            this->indentifier_type.push_back(t_string_arr);
+        } else if (args[i][1].compare("string") == 0) {
+            this->indentifier_type.push_back(t_string);
+        } else if (args[i][1].compare("struct") == 0) {
+            this->indentifier_type.push_back(t_struct);
+            this->struct_names.push_back(args[i][2]);
         }
         if (args[i].size() == 3) {
             if (args[i][2].compare("t") == 0) {
@@ -56,7 +104,7 @@ void Function::debug() {
         case t_char: std::cout << "char"; break;
         case t_float: std::cout << "float"; break;
         case t_string: std::cout << "str"; break;
-        case t_struct: std::cout << "struct"; break;
+        case t_struct: std::cout << "struct " << this->struct_name; break;
         case t_null: std::cout << "void"; break;
         case t_bool: std::cout << "bool"; break;
         case t_number_arr: std::cout << " int*"; break;
@@ -67,6 +115,7 @@ void Function::debug() {
     }
     std::cout << " function " << this->name <<  std::endl;
     std::cout << this->arg_count << " argument" << ((this->arg_count != 1)? std::string("s") : std::string("")) << std::endl;
+    int struct_count = 0;
     for (size_t i = 0; i < this->arg_count; i++) {
         if (i != 0)
             std::cout << ", ";
@@ -81,7 +130,7 @@ void Function::debug() {
             case t_float: std::cout << " float"; break;
             case t_bool: std::cout << " bool"; break;
             case t_string: std::cout << " string"; break;
-            case t_struct: std::cout << " struct"; break;
+            case t_struct: std::cout << " struct " << this->struct_names[struct_count++]; break;
             case t_number_arr: std::cout << " int*"; break;
             case t_float_arr: std::cout << " float*"; break;
             case t_bool_arr: std::cout << " bool*"; break;
@@ -99,8 +148,9 @@ void Function::debug() {
 
 void Function::fold(AST* ast) {
     ast->scope->new_scope();
+    int struct_count = 0;
     for (size_t i = 0; i < this->arg_count; i++) {
-        ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(this->indentifiers_mutability[i], this->indentifier_type[i]));
+        ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(this->indentifiers_mutability[i], this->indentifier_type[i], (!(this->indentifier_type[i] == t_struct))?std::string(""):this->struct_names[struct_count++]));
     }
     if (this->statements)
         this->statements->fold(ast);
@@ -160,7 +210,6 @@ llvm::Function* Function::codegen_proto(AST* ast) {
 }
 
 llvm::Function* Function::codegen(AST* ast) {
-    std::cout << this->name << std::endl;
     llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);
     
     if (!TheFunction)
@@ -168,23 +217,39 @@ llvm::Function* Function::codegen(AST* ast) {
     if (!this->statements)
         return TheFunction;
 
-    std::cout << this->name << std::endl;
     // Create a new basic block to start insertion into.
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(ast->TheContext), "entry", TheFunction);
     ast->Builder->SetInsertPoint(BB);
 
+    int struct_count = 0;
+
     // Record the function arguments in the NamedValues map.
     ast->NamedValues = ast->NamedValues->new_scope();
     auto Arg = TheFunction->args().begin();
-    std::cout << this->indentifier_type.size() << std::endl;
     for (size_t i = 0; i < this->indentifier_type.size(); i++) {
-        std::cout << this->name << " : " << i << std::endl;
-        llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), Arg->getType());
-        ast->Builder->CreateStore(Arg, Alloca);
+        if (this->indentifier_type[i] == t_struct) {
+            auto real_name = std::string(Arg->getName()).substr(0, std::string(Arg->getName()).size() - 3);
+            auto real_type = ast->struct_map[this->struct_names[struct_count++]]->struct_type;
 
-        // Add arguments to variable symbol table.
-        ast->NamedValues->push_value(std::string(Arg->getName()), std::make_tuple(Alloca, Arg->getType(), this->indentifier_type[i], 1));
-        Arg = std::next(Arg);
+            llvm::AllocaInst* Alloca_s_ptr = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), llvm::PointerType::get(real_type, 0));
+            ast->Builder->CreateStore(Arg, Alloca_s_ptr);
+            ast->NamedValues->push_value(std::string(real_name), std::make_tuple(Alloca_s_ptr, llvm::PointerType::get(real_type, 0), this->indentifier_type[i], 1));
+
+            llvm::AllocaInst* Alloca = CreateEntryBlockAlloca(ast, TheFunction, real_name, real_type);
+            auto real_value = ast->Builder->CreateConstGEP1_64(real_type, Arg, 0, std::string("struct_ptr"));
+            ast->Builder->CreateStore(real_value, Alloca);
+
+            // Add arguments to variable symbol table.
+            ast->NamedValues->push_value(std::string(real_name), std::make_tuple(Alloca, real_type, this->indentifier_type[i], 1));
+            Arg = std::next(Arg);
+        } else {
+            llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), Arg->getType());
+            ast->Builder->CreateStore(Arg, Alloca);
+
+            // Add arguments to variable symbol table.
+            ast->NamedValues->push_value(std::string(Arg->getName()), std::make_tuple(Alloca, Arg->getType(), this->indentifier_type[i], 1));
+            Arg = std::next(Arg);
+        }
     }
 
     if (this->statements->codegen(ast))
@@ -197,9 +262,10 @@ llvm::Function* Function::codegen(AST* ast) {
     return TheFunction;
 }
 
-void Function::push_front(Expression* name, AtomType type, bool mut) {
+void Function::push_front(Expression* name, AtomType type, bool mut, std::string struct_name) {
     this->indentifiers.insert(this->indentifiers.begin(), name);
     this->indentifier_type.insert(this->indentifier_type.begin(), type);
     this->indentifiers_mutability.insert(this->indentifiers_mutability.begin(), mut);
     this->arg_count++;
+    this->struct_names.push_back(struct_name);
 }

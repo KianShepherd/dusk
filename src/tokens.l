@@ -46,6 +46,7 @@ Null                    { yylval.str = new std::string(yytext, yyleng); return N
 \]                      { return RSQUARE;   }
 :                       { return COLON;     }
 ,                       { return COMMA;     }
+\.                      { return DOT;       }
 ->                      { return ARROW;     }
 
 int                     { return INT;      }

@@ -17,6 +17,7 @@
 
 class AST;
 class ScopeValue;
+class Struct;
 
 enum AtomType {
     t_bool,
@@ -32,7 +33,9 @@ enum AtomType {
     t_float_arr,
     t_bool_arr,
     t_string_arr,
-    t_struct
+    t_struct,
+    t_dot_exp,
+    t_get_struct
 };
 
 enum ExpType {
@@ -84,6 +87,8 @@ public:
     ExpressionAtomic(AtomType type, int length, std::vector<long long> values);
     ExpressionAtomic(AtomType type, int length, std::vector<double> values);
     ExpressionAtomic(int length, std::vector<std::string> values);
+    ExpressionAtomic(Expression* base, Expression* operand);
+    ExpressionAtomic(Expression* base, Struct* s, int index, std::string field_name);
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
@@ -106,6 +111,10 @@ public:
     std::vector<double> float_vals;
     std::vector<std::string> string_vals;
     Expression* index;
+    Expression* base;
+    Expression* operand;
+    char dot_type;
+    Struct* struct_t;
 };
 
 class BinaryExpression : public Expression {

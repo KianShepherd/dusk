@@ -167,9 +167,17 @@ void AssignmentStatement::debug(size_t depth) {
 void AssignmentStatement::fold(AST* ast) {
     if (this->value) {
         this->value = this->value->fold(ast);
-        ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->value->get_atomic_type(ast)));
+        if (this->type == t_struct) {
+            ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->type, this->struct_name));
+        } else {
+            ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->value->get_atomic_type(ast), std::string("")));
+        }
     } else {
-        ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->type));
+        if (this->type == t_struct) {
+            ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->type, this->struct_name));
+        } else {
+            ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->type, std::string("")));
+        }
     }
 }
 

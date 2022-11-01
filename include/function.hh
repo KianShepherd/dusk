@@ -23,20 +23,23 @@ class AST;
 class Function {
 public:
     Function(std::string name, Statement* statements, AtomType type, std::vector<std::vector<std::string>> args);
+    Function(std::string name, Statement* statements, AtomType type, std::vector<std::vector<std::string>> args, std::string struct_name);
     void debug();
     void fold(AST* ast);
-    void push_front(Expression* name, AtomType type, bool mut);
+    void push_front(Expression* name, AtomType type, bool mut, std::string struct_name);
     std::tuple<std::string, AtomType, std::vector<AtomType>> get_meta();
 
     llvm::Function* codegen(AST* ast);
     llvm::Function* codegen_proto(AST* ast);
 
     std::string name;
+    std::string struct_name;
+    AtomType type;
 private:
     Statement* statements;
-    AtomType type;
     size_t arg_count;
     std::vector<Expression*> indentifiers;
     std::vector<AtomType> indentifier_type;
     std::vector<bool> indentifiers_mutability;
+    std::vector<std::string> struct_names;
 };

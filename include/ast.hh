@@ -71,9 +71,10 @@ class AST;
 
 class ScopeValue {
 public:
-    ScopeValue(bool mut, AtomType type);
+    ScopeValue(bool mut, AtomType type, std::string struct_name);
     bool mut;
     AtomType type;
+    std::string struct_name;
 };
 
 class ScopeFrame {
@@ -83,6 +84,7 @@ public:
     ScopeFrame* new_scope();
 
     AtomType get_value(std::string identifier);
+    std::string get_value_struct(std::string identifier);
     void push_value(std::string identifier, ScopeValue* value);
     void update_value(AST* ast, std::string identifier, ScopeValue* value);
 
@@ -134,6 +136,8 @@ public:
     std::unique_ptr<llvm::IRBuilder<>> Builder;
 
     std::vector<std::tuple<std::string, AtomType, std::vector<AtomType>>> func_definitions;
+    std::map<std::string, Struct*> struct_map;
+    std::map<std::string, Function*> func_map;
 private:
     std::vector<Function*> functions;
     std::vector<Struct*> structs;

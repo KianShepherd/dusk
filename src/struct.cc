@@ -59,13 +59,18 @@ void Struct::finalize() {
     stats.push_back(new ReturnStatement(new ExpressionAtomic("newstruct", std::vector<Expression*>({ new ExpressionAtomic((long)this->mem_size) }))));
     auto statements = new StatementBlock(stats);
     this->member_functions.push_back(new Function(this->name, statements, t_string, std::vector<std::vector<std::string>>()));
+    this->struct_type = llvm::StructType::create(*(this->ast->TheContext), this->llvm_types, this->name, false);
 }
 
 void Struct::debug(size_t depth) {
     std::cout << std::endl << "Struct "<< this->name << " {" << std::endl;;
 
     for (int i = 0; i < this->type_idents.size(); i++) {
-        std::cout << std::string(4, ' ') << this->type_idents[i] << " : " << atom_to_debug(this->types[i]) << " : " << this->gen_field_map[this->type_idents[i]] << "," << std::endl;
+        std::cout << std::string(4, ' ') << this->type_idents[i] << " : " << atom_to_debug(this->types[i]);
+        if (this->struct_var_map.find(this->type_idents[i]) != this->struct_var_map.end()) {
+            std::cout << " " << this->struct_var_map[this->type_idents[i]];
+        }
+        std::cout << " : " << this->gen_field_map[this->type_idents[i]] << "," << std::endl;
     }
     std::cout << std::endl;
     for (auto& f : this->member_functions) {
@@ -89,9 +94,23 @@ void Struct::push_var(std::string name, AtomType type) {
 
 }
 
+void Struct::push_var(std::string name, AtomType type, std::string struct_name) {
+    int idx = this->type_idents.size();
+    this->type_idents.push_back(name);
+    this->gen_field_map[name] = idx;
+    int field_idx = this->types.size();
+    this->types.push_back(type);
+    this->llvm_types.push_back(atom_to_type(type, this->ast));
+    this->field_map[name] = std::tuple<int, int>(0, field_idx);
+    this->mem_size += atom_to_size(type);
+    if (type == t_struct) {
+        this->struct_var_map[name] = struct_name;
+    }
+}
+
 void Struct::push_function(Function* func) {
     auto func_name = std::string(this->name).append(func->name);
-    func->push_front(new ExpressionAtomic("self", true), t_struct, true);
+    func->push_front(new ExpressionAtomic("self", true), t_struct, true, this->name);
     this->func_idents.push_back(func_name);
     this->gen_field_map[func_name] = -1;
     int field_idx = this->member_functions.size();
@@ -108,5 +127,5 @@ llvm::Value* Struct::codegen_functions(AST* ast) {
 }
 
 llvm::Value* Struct::codegen(AST* ast) {
-    return nullptr;
+     return nullptr;
 }
