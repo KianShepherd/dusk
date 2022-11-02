@@ -1,13 +1,18 @@
 struct Bar {
+    //struct fields must have a name and type and a following comma
     z: int,
+
+    // Constructors can be overloaded for structs
     fn Bar(self: Bar) -> Bar {
         self.z = 15;
         return self;
     }
+
     fn Bar(self: Bar, n: int) -> Bar {
         self.z = n;
         return self;
     }
+
     fn inc(self: Bar) -> Bar {
         self.z = self.z + 1;
         return self;
@@ -54,7 +59,7 @@ fn main(argc: int, argv: string*) -> int {
     s = s.inc();
     print("%ld\n", s.a);
     print("%ld\n", s.b);
-    b.inc();
+    b.inc(); // The value from b was copied it is not a reference
     print("%ld\n", s.a);
     print("%ld\n", s.b);
     return 0;
