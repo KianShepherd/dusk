@@ -55,10 +55,42 @@ Struct::Struct(std::string name, AST* ast) {
 }
 
 void Struct::finalize() {
-    std::vector<Statement*> stats;
-    stats.push_back(new ReturnStatement(new ExpressionAtomic("newstruct", std::vector<Expression*>({ new ExpressionAtomic((long)this->mem_size) }))));
-    auto statements = new StatementBlock(stats);
-    this->member_functions.push_back(new Function(this->name, statements, t_string, std::vector<std::vector<std::string>>()));
+    auto base_const_name = std::string("~").append(this->name).append("~");
+    this->member_functions.push_back(
+        new Function(
+            base_const_name,
+            new StatementBlock(
+                std::vector<Statement*>(
+                    {
+                        new ReturnStatement(
+                            new ExpressionAtomic(
+                                "newstruct",
+                                std::vector<Expression*>({ new ExpressionAtomic((long)this->mem_size) })
+                            )
+                        )
+                    }
+                )
+            ),
+            t_string,
+            std::vector<std::vector<std::string>>()
+        )
+    );
+    for (auto& con : this->constructors) {
+        // delete self arg, we add a statement to the top to instantiate self.
+        con->indentifiers.erase(con->indentifiers.begin());
+        con->indentifier_type.erase(con->indentifier_type.begin());
+        con->indentifiers_mutability.erase(con->indentifiers_mutability.begin());
+        con->struct_names.erase(con->struct_names.begin());
+        con->arg_count--;
+
+        // Handling for constructor overloading attach num_args and arg types to func_name
+        con->name.append(std::to_string(((int)con->indentifiers.size())));
+        con->name.append(con->func_args_to_str());
+
+        // First line of function declares self
+        ((StatementBlock*)con->statements)->statements.insert(((StatementBlock*)con->statements)->statements.begin(), new AssignmentStatement(new ExpressionAtomic("self", true), new ExpressionAtomic(base_const_name, std::vector<Expression*>()), true, t_struct, this->name));
+        this->member_functions.push_back(con);
+    }
     this->struct_type = llvm::StructType::create(*(this->ast->TheContext), this->llvm_types, this->name, false);
 }
 
@@ -93,6 +125,7 @@ void Struct::push_var(std::string name, AtomType type) {
     this->field_map[name] = std::tuple<int, int>(0, field_idx);
     this->mem_size += atom_to_size(type);
     this->field_type_map[name] = llvm_type;
+    this->struct_var_map[name] = type;
 
 }
 
@@ -110,11 +143,21 @@ void Struct::push_var(std::string name, AtomType type, std::string struct_name) 
         this->struct_var_map[name] = struct_name;
     }
     this->field_type_map[name] = llvm_type;
+    this->struct_var_map[name] = type;
 }
 
 void Struct::push_function(Function* func) {
+    if (((ExpressionAtomic*)func->indentifiers[0])->str.compare(std::string("self")) != 0 || func->indentifier_type[0] != t_struct) {
+        auto err_msg = std::string("All struct member functions must start with the argument self and matching type (");
+        err_msg.append(std::string(this->name));
+        err_msg.append(std::string(")\n"));
+        this->ast->push_err(err_msg);
+    }
+    if (func->name.compare(this->name) == 0) {
+        this->constructors.push_back(func);
+        return;
+    }
     auto func_name = std::string(this->name).append(func->name);
-    func->push_front(new ExpressionAtomic("self", true), t_struct, true, this->name);
     this->func_idents.push_back(func_name);
     this->gen_field_map[func_name] = -1;
     int field_idx = this->member_functions.size();

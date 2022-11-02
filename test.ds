@@ -1,14 +1,64 @@
+struct Bar {
+    z: int,
+    fn Bar(self: Bar) -> Bar {
+        self.z = 15;
+        return self;
+    }
+    fn Bar(self: Bar, n: int) -> Bar {
+        self.z = n;
+        return self;
+    }
+}
 struct Foo {
     a: int,
-    b: int,
+
+    fn Foo(self: Foo) -> Foo {
+        self.a = 10;
+        return self;
+    }
+
+    fn Foo(self: Foo, n: int) -> Foo {
+        self.a = n;
+        return self;
+    }
+
+    fn Foo(self: Foo, n: Bar) -> Foo {
+        self.a = n.z;
+        return self;
+    }
+
+    fn inc(self: Foo) -> Foo {
+        self.a = self.a + 1;
+        return self;
+    }
 }
 
 
 fn main(argc: int, argv: string*) -> int {
+    let mut s: Foo = Foo(5);
+    print("%ld\n", s.a);
+    s.inc();
+    print("%ld\n", s.a);
+    s = s.inc();
+    print("%ld\n", s.a);
     let mut s: Foo = Foo();
     print("%ld\n", s.a);
-    print("%ld\n", s.b);
-    s.a = 7;
+    s.inc();
+    print("%ld\n", s.a);
+    s = s.inc();
+    print("%ld\n", s.a);
+    let mut b: Bar = Bar();
+    let mut s: Foo = Foo(b);
+    print("%ld\n", s.a);
+    s.inc();
+    print("%ld\n", s.a);
+    s = s.inc();
+    print("%ld\n", s.a);
+    let mut s: Foo = Foo(Bar(25));
+    print("%ld\n", s.a);
+    s.inc();
+    print("%ld\n", s.a);
+    s = s.inc();
     print("%ld\n", s.a);
     return 0;
 }

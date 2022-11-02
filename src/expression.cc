@@ -2,6 +2,34 @@
 #include "ast.hh"
 #include "struct.hh"
 
+std::string type_string(AST* ast, AtomType type) {
+    switch (type) {
+        case t_number: return std::string("int");
+        case t_long: return std::string("long");
+        case t_float: return std::string("float");
+        case t_char: return std::string("char");
+        case t_string: return std::string("string");
+        case t_identifier: {
+            // TODO
+            return std::string("");
+        }
+        case t_bool: return std::string("bool");
+        case t_function_call: {
+            // TODO
+            return std::string("");
+        }
+        case t_bool_arr: return std::string("bool*");
+        case t_number_arr: return std::string("int*");
+        case t_float_arr: return std::string("float*");
+        case t_string_arr: return std::string("string*");
+        case t_get_struct: {
+            // TODO
+            return std::string("");
+        }
+        default: return std::string("");
+    }
+}
+
 ExpressionAtomic::ExpressionAtomic(long num) {
     this->number = num;
     this->type = t_number;
@@ -103,7 +131,13 @@ void ExpressionAtomic::debug(size_t depth) {
         }
         case t_null: std::cout << std::string(depth * 4, ' ') << "null : null" << std::endl; break;
         case t_bool: std::cout << std::string(depth * 4, ' ') << ((this->boolean)?"True : bool":"False : bool") << std::endl; break;
-        case t_function_call: std::cout << std::string(depth * 4, ' ') << "call " << this->str << " : " << this->args.size() << " args" << std::endl; for (size_t i = 0; i < this->args.size(); i++) this->args[i]->debug(depth + 1); break;
+        case t_function_call: {
+            std::cout << std::string(depth * 4, ' ') << "call " << this->str << " : ";
+            std::cout << this->args.size() << " args" << std::endl;
+            for (size_t i = 0; i < this->args.size(); i++)
+                this->args[i]->debug(depth + 1);
+            break;
+        }
         case t_bool_arr: {
             std::cout << std::string(depth * 4, ' ') << "bool array : len " << this->length << " { ";
             for (auto v: this->int_vals) {
@@ -246,8 +280,43 @@ Expression* ExpressionAtomic::fold(AST* ast) {
         for (auto& arg : this->args) {
             arg = arg->fold(ast);
         }
+        if (ast->struct_map[this->str] != nullptr) {
+            std::cout << " DEBUG " << std::endl;
+            std::cout << this->str << std::endl;
+            std::string s = std::string("");
+            for (auto& arg: this->args) {
+                s.append(arg->type_str(ast));
+            }
+            std::cout << s << std::endl;
+            std::cout << "~DEBUG~" << std::endl;
+            this->str = this->str.append(std::to_string(this->args.size())).append(s);
+        }
     }
     return (Expression*)this;
+}
+
+std::string ExpressionAtomic::type_str(AST* ast) {
+    switch (this->type) {
+        case t_identifier: {
+            if (ast->scope->get_value(this->str) == t_struct)
+                return ast->scope->get_value_struct(this->str);
+            return type_string(ast, ast->scope->get_value(this->str));
+        }
+        case t_function_call: {
+            if (ast->struct_map[this->str] != nullptr)
+                return this->str;
+            auto func = ast->func_map[this->str];
+            if (func->type == t_struct)
+                return func->struct_name;
+            return type_string(ast, func->type);
+        }
+        case t_get_struct: {
+            if (this->struct_t->struct_var_type_map[this->str] == t_struct)
+                return this->struct_t->struct_var_map[this->str];
+            return type_string(ast, this->struct_t->struct_var_type_map[this->str]);
+        }
+        default: return type_string(ast, this->type);
+    }
 }
 
 llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
@@ -422,15 +491,11 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
 
         }
         case t_get_struct: {
-            // this->struct_t   Struct*
-            // this->str        field name in struct
-            // this->number     field number in llvm struct
-            // this->base       object to get field from
-
             auto real_type = this->struct_t->struct_type;
             auto real_name = this->struct_t->name;
             real_name.append(this->str);
             auto val_ptr = ast->Builder->CreateConstGEP2_32(real_type, this->base->codegen(ast, t_null), 0, this->number,  std::string("struct_field_ptr"));
+            // If this is used as an lvalue (e.g. something to write to) we return the adress to write into, rather than the value stored there
             if (type == t_lvalue)
                 return val_ptr;
             return ast->Builder->CreateLoad(this->struct_t->field_type_map[this->str], val_ptr, real_name);
@@ -468,7 +533,16 @@ void BinaryExpression::debug(size_t depth) {
 }
 
 Expression* BinaryExpression::fold(AST* ast) {
+    this->lhs = this->lhs->fold(ast);
+    this->rhs = this->rhs->fold(ast);
     return (Expression*)this;
+}
+
+std::string BinaryExpression::type_str(AST* ast) {
+    if (this->lhs->get_atomic_type(ast) != this->rhs->get_atomic_type(ast)) {
+        ast->push_err("Both operands of a binary operator must be of same type");
+    }
+    return this->lhs->type_str(ast);
 }
 
 llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
@@ -604,6 +678,10 @@ Expression* UnaryExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
+std::string UnaryExpression::type_str(AST* ast) {
+    return this->operand->type_str(ast);
+}
+
 llvm::Value* UnaryExpression::codegen(AST* ast, AtomType type) {
     llvm::Value *L = this->operand->codegen(ast, type);
 
@@ -694,6 +772,10 @@ Expression* AssignmentExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
+std::string AssignmentExpression::type_str(AST* ast) {
+    return std::string("");
+}
+
 llvm::Value* AssignmentExpression::codegen(AST* ast, AtomType type) {
     if (!this->is_methods) {
         AtomType t = t_null;
@@ -777,4 +859,8 @@ AtomType BreakExpression::get_atomic_type(AST* ast) {
 
 AtomType BreakExpression::get_atomic_type_keep_identifier(AST* ast) {
     return t_null;
+}
+
+std::string BreakExpression::type_str(AST* ast) {
+    return std::string("");
 }

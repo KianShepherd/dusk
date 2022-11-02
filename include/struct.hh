@@ -34,12 +34,13 @@ public:
     llvm::Value* codegen_functions(AST* ast);
     llvm::Value* codegen(AST* ast);
 
-    std::vector<Function*> member_functions;
-
     std::string name;
     llvm::Type* struct_type;
+    std::vector<Function*> member_functions;
+    std::vector<Function*> constructors;
     std::map<std::string, int> gen_field_map; // Field map for llvm to use
     std::map<std::string, std::string> struct_var_map; // map of field name to struct name
+    std::map<std::string, AtomType> struct_var_type_map; // map of field name to struct name
     std::map<std::string, llvm::Type*> field_type_map; // map of field name to llvm type
 private:
     AST* ast;

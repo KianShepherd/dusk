@@ -3,6 +3,7 @@
 
 Function::Function(std::string name, Statement* statements, AtomType type, std::vector<std::vector<std::string>> args) {
     this->name = name;
+    this->struct_name = std::string("");
     this->statements = statements;
     this->type = type;
     this->arg_count = args.size();
@@ -80,18 +81,37 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
             this->indentifier_type.push_back(t_string);
         } else if (args[i][1].compare("struct") == 0) {
             this->indentifier_type.push_back(t_struct);
-            this->struct_names.push_back(args[i][2]);
+            this->struct_names.push_back(args[i][3]);
         }
-        if (args[i].size() == 3) {
-            if (args[i][2].compare("t") == 0) {
-                this->indentifiers_mutability.push_back(true);
-            } else {
-                this->indentifiers_mutability.push_back(false);
-            }
+        if (args[i][2].compare("t") == 0) {
+            this->indentifiers_mutability.push_back(true);
         } else {
             this->indentifiers_mutability.push_back(false);
         }
     }
+    std::cout << this->func_args_to_str() << std::endl;
+}
+
+std::string Function::func_args_to_str() {
+    auto str = std::string("");
+    int struct_count = 0;
+    for (int i = 0; i < this->indentifier_type.size(); i++) {
+        switch (this->indentifier_type[i]) {
+            case t_number: str.append("int"); break;
+            case t_long: str.append("long"); break;
+            case t_char: str.append("char"); break;
+            case t_float: str.append("float"); break;
+            case t_bool: str.append("bool"); break;
+            case t_string: str.append("string"); break;
+            case t_struct: str.append(this->struct_names[struct_count++]); break;
+            case t_number_arr: str.append("int*"); break;
+            case t_float_arr: str.append("float*"); break;
+            case t_bool_arr: str.append("bool*"); break;
+            case t_string_arr: str.append("string*"); break;
+            default: break;
+        }
+    }
+    return str;
 }
 
 std::tuple<std::string, AtomType, std::vector<AtomType>> Function::get_meta() {

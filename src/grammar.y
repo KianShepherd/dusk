@@ -43,7 +43,7 @@ void yyerror(AST&, const char*);
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW DOT
 %token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT
 
-%type<expr>  exp methodchain;
+%type<expr>  exp;
 %type<stat>  statement statementblock mutassign;
 %type<stats> statements;
 %type<strs>  typedarg;
@@ -55,13 +55,13 @@ void yyerror(AST&, const char*);
 %type<fields> structfields;
 %type<func> function;
 
+%left EQUAL
 %left OR AND
 %left EQUALEQUAL BANGEQUAL MORETHAN LESSTHAN MOREEQUAL LESSEQUAL
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left UNARY
 %left DOT
-%right EQUAL
 
 %destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 
@@ -590,7 +590,16 @@ typedarg: IDENTIFIER COLON INT
         $$->push_back(std::string("f"));
         delete $1;
     }
-
+    | IDENTIFIER COLON IDENTIFIER
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($1)));
+        $$->push_back(std::string("struct"));
+        $$->push_back(std::string("t"));
+        $$->push_back(std::string(*($3)));
+        delete $1;
+        delete $3;
+    }
     | IDENTIFIER COLON FLOAT TIMES
     {
         $$ = new std::vector<std::string>();
@@ -670,6 +679,16 @@ typedarg: IDENTIFIER COLON INT
         $$->push_back(std::string("bool"));
         $$->push_back(std::string("t"));
         delete $2;
+    }
+    | MUTABLE IDENTIFIER COLON IDENTIFIER
+    {
+        $$ = new std::vector<std::string>();
+        $$->push_back(std::string(*($2)));
+        $$->push_back(std::string("struct"));
+        $$->push_back(std::string("t"));
+        $$->push_back(std::string(*($4)));
+        delete $2;
+        delete $4;
     }
     | MUTABLE IDENTIFIER COLON INT TIMES
     {

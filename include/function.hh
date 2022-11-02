@@ -32,14 +32,16 @@ public:
     llvm::Function* codegen(AST* ast);
     llvm::Function* codegen_proto(AST* ast);
 
+    std::string func_args_to_str();
+
     std::string name;
     std::string struct_name;
     AtomType type;
-private:
-    Statement* statements;
-    size_t arg_count;
     std::vector<Expression*> indentifiers;
     std::vector<AtomType> indentifier_type;
     std::vector<bool> indentifiers_mutability;
+    Statement* statements;
+    size_t arg_count;
     std::vector<std::string> struct_names;
+private:
 };
