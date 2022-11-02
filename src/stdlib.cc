@@ -49,7 +49,12 @@ extern "C" DLLEXPORT {
     }
 
     void* newstruct(long size) {
-        return malloc((size_t)size);
+        void* ptr = malloc((size_t)size);
+        // TODO: directly return ptr when structs are complete
+        long* mod = (long*)ptr;
+        mod[0] = 1;
+        mod[1] = 5;
+        return ptr;
     }
 
     long* ialloc(long n) {

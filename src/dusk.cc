@@ -147,13 +147,16 @@ int main(int argc, char** argv) {
         if (ast.check_error(parse_err))
             return rc;
     }
+    if (compiler_args.debug_ast) {
+        ast.debug();
+    }
     ast.static_checking();
-    if (ast.check_error(std::string("Logic Error: ")))
-        return 2;
     
     if (compiler_args.debug_ast) {
         ast.debug();
     }
+    if (ast.check_error(std::string("Logic Error: ")))
+        return 2;
 
     std::string objectfile = "output.o";
     if (compiler_args.only_compile && compiler_args.outfile.compare("out") != 0) {

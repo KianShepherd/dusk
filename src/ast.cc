@@ -166,9 +166,6 @@ void AST::codegen(char debug, bool optimizations, std::string outfile) {
             this->structs[i]->member_functions[j]->codegen_proto(this);
         }
     }
-    for (int i = 0; i < (int)this->structs.size(); i++) {
-        this->structs[i]->codegen_functions(this);
-    }
     // Codegen all of the actual functions
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->codegen(this);
@@ -247,7 +244,9 @@ void ScopeFrame::update_value(AST* ast, std::string identifier, ScopeValue* valu
         auto iter = scope->variables.find(identifier);
         if (iter != scope->variables.end()) {
             if (!scope->variables[identifier]->mut) {
-                ast->push_err("Attempted to mutata static variable.");
+                ast->push_err("Attempted to mutate a static variable.\n");
+                ast->push_err(identifier);
+                ast->push_err("\n");
             }
             break;
         }

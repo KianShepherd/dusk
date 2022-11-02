@@ -1,34 +1,14 @@
-struct V {
-    z: int,
-
-    fn zux() -> int {
-        return 2;
-    }
-}
-
 struct Foo {
     a: int,
-    b: V,
-
-    fn bar() -> int {
-        return 1;
-    }
-
-    fn baz(n: int) -> Foo {
-        self.a;
-        return self;
-    }
+    b: int,
 }
 
 
 fn main(argc: int, argv: string*) -> int {
     let mut s: Foo = Foo();
-    s.a;
-    s.bar();
-    s.baz(3);
-    s.baz(1).b;
-    s.baz(1).bar();
-    s.b.zux();
-    s.b.z;
+    print("%ld\n", s.a);
+    print("%ld\n", s.b);
+    s.a = 7;
+    print("%ld\n", s.a);
     return 0;
 }

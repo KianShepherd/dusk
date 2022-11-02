@@ -35,7 +35,8 @@ enum AtomType {
     t_string_arr,
     t_struct,
     t_dot_exp,
-    t_get_struct
+    t_get_struct,
+    t_lvalue
 };
 
 enum ExpType {
@@ -154,6 +155,7 @@ class AssignmentExpression : public Expression {
 public:
     AssignmentExpression(Expression* expr, Expression* op);
     AssignmentExpression(Expression* expr, Expression* op, Expression* index);
+    AssignmentExpression(Expression* expr, Expression* op, int is_methods);
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
@@ -165,6 +167,7 @@ public:
 private:
     class Expression* identifier;
     class Expression* value;
+    int is_methods;
     Expression* index;
     bool is_arr;
 };

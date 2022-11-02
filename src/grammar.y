@@ -43,7 +43,7 @@ void yyerror(AST&, const char*);
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW DOT
 %token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT
 
-%type<expr>  exp;
+%type<expr>  exp methodchain;
 %type<stat>  statement statementblock mutassign;
 %type<stats> statements;
 %type<strs>  typedarg;
@@ -61,6 +61,7 @@ void yyerror(AST&, const char*);
 %left TIMES DIVIDE
 %left UNARY
 %left DOT
+%right EQUAL
 
 %destructor { delete $$; } NUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 
@@ -828,11 +829,20 @@ exp: NUMBER
     {
         $$ = new ExpressionAtomic((*($2)).size(), std::move(*($2)));
     }
-    | exp DOT exp
+    | exp DOT IDENTIFIER
     {
-        $$ = new ExpressionAtomic(std::move($1), std::move($3));
+        $$ = new ExpressionAtomic(std::move($1), new ExpressionAtomic(std::string(*($3)), true));
+    }
+    | exp DOT IDENTIFIER LPAREN RPAREN
+    {
+        $$ = new ExpressionAtomic(std::move($1), new ExpressionAtomic(std::string(*($3)), std::vector<Expression*>()));
+    }
+    | exp DOT IDENTIFIER LPAREN exprlist RPAREN
+    {
+        $$ = new ExpressionAtomic(std::move($1), new ExpressionAtomic(std::string(*($3)), std::move(*($5))));
     }
     ;
+
 
 exp: exp PLUS exp
     {
@@ -882,10 +892,13 @@ exp: exp PLUS exp
     {
         $$ = new BinaryExpression(std::move($1), std::move($3), op_or);
     }
-    | IDENTIFIER EQUAL exp
+    | exp EQUAL exp
     {
-        $$ = new AssignmentExpression(new ExpressionAtomic(std::string(*($1)), true), std::move($3));
-        free($1);
+        if (($1)->get_atomic_type_keep_identifier(&ast) == t_identifier) {
+            $$ = new AssignmentExpression(std::move($1), std::move($3));
+        } else {
+            $$ = new AssignmentExpression(std::move($1), std::move($3), 1);
+        }
     }
     | IDENTIFIER LSQUARE exp RSQUARE EQUAL exp
     {
@@ -893,6 +906,7 @@ exp: exp PLUS exp
         free($1);
     }
     ;
+
 
 exp: NOT exp %prec UNARY
     {

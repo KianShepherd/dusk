@@ -221,35 +221,16 @@ llvm::Function* Function::codegen(AST* ast) {
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(*(ast->TheContext), "entry", TheFunction);
     ast->Builder->SetInsertPoint(BB);
 
-    int struct_count = 0;
-
     // Record the function arguments in the NamedValues map.
     ast->NamedValues = ast->NamedValues->new_scope();
     auto Arg = TheFunction->args().begin();
     for (size_t i = 0; i < this->indentifier_type.size(); i++) {
-        if (this->indentifier_type[i] == t_struct) {
-            auto real_name = std::string(Arg->getName()).substr(0, std::string(Arg->getName()).size() - 3);
-            auto real_type = ast->struct_map[this->struct_names[struct_count++]]->struct_type;
+        llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), Arg->getType());
+        ast->Builder->CreateStore(Arg, Alloca);
 
-            llvm::AllocaInst* Alloca_s_ptr = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), llvm::PointerType::get(real_type, 0));
-            ast->Builder->CreateStore(Arg, Alloca_s_ptr);
-            ast->NamedValues->push_value(std::string(real_name), std::make_tuple(Alloca_s_ptr, llvm::PointerType::get(real_type, 0), this->indentifier_type[i], 1));
-
-            llvm::AllocaInst* Alloca = CreateEntryBlockAlloca(ast, TheFunction, real_name, real_type);
-            auto real_value = ast->Builder->CreateConstGEP1_64(real_type, Arg, 0, std::string("struct_ptr"));
-            ast->Builder->CreateStore(real_value, Alloca);
-
-            // Add arguments to variable symbol table.
-            ast->NamedValues->push_value(std::string(real_name), std::make_tuple(Alloca, real_type, this->indentifier_type[i], 1));
-            Arg = std::next(Arg);
-        } else {
-            llvm::AllocaInst *Alloca = CreateEntryBlockAlloca(ast, TheFunction, std::string(Arg->getName()), Arg->getType());
-            ast->Builder->CreateStore(Arg, Alloca);
-
-            // Add arguments to variable symbol table.
-            ast->NamedValues->push_value(std::string(Arg->getName()), std::make_tuple(Alloca, Arg->getType(), this->indentifier_type[i], 1));
-            Arg = std::next(Arg);
-        }
+        // Add arguments to variable symbol table.
+        ast->NamedValues->push_value(std::string(Arg->getName()), std::make_tuple(Alloca, Arg->getType(), this->indentifier_type[i], 1));
+        Arg = std::next(Arg);
     }
 
     if (this->statements->codegen(ast))

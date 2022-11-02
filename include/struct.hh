@@ -39,7 +39,8 @@ public:
     std::string name;
     llvm::Type* struct_type;
     std::map<std::string, int> gen_field_map; // Field map for llvm to use
-    std::map<std::string, std::string> struct_var_map;
+    std::map<std::string, std::string> struct_var_map; // map of field name to struct name
+    std::map<std::string, llvm::Type*> field_type_map; // map of field name to llvm type
 private:
     AST* ast;
 

@@ -242,6 +242,10 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                 return this->operand;
             }
         }
+    } else if (this->type == t_function_call) {
+        for (auto& arg : this->args) {
+            arg = arg->fold(ast);
+        }
     }
     return (Expression*)this;
 }
@@ -416,6 +420,20 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
             }
             return array;
 
+        }
+        case t_get_struct: {
+            // this->struct_t   Struct*
+            // this->str        field name in struct
+            // this->number     field number in llvm struct
+            // this->base       object to get field from
+
+            auto real_type = this->struct_t->struct_type;
+            auto real_name = this->struct_t->name;
+            real_name.append(this->str);
+            auto val_ptr = ast->Builder->CreateConstGEP2_32(real_type, this->base->codegen(ast, t_null), 0, this->number,  std::string("struct_field_ptr"));
+            if (type == t_lvalue)
+                return val_ptr;
+            return ast->Builder->CreateLoad(this->struct_t->field_type_map[this->str], val_ptr, real_name);
         }
         default: return nullptr; break;
     }
@@ -629,6 +647,7 @@ AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* v
     this->value = value;
     this->index = 0;
     this->is_arr = false;
+    this->is_methods = 0;
 }
 
 AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* value, Expression* index) {
@@ -636,21 +655,37 @@ AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* v
     this->value = value;
     this->index = index;
     this->is_arr = true;
+    this->is_methods = 0;
+}
+
+AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* value, int is_methods) {
+    this->identifier = identifier;
+    this->value = value;
+    this->index = 0;
+    this->is_arr = true;
+    this->is_methods = 1;
 }
 
 void AssignmentExpression::debug(size_t depth) {
-    std::cout << std::string(depth * 4, ' ') << ((ExpressionAtomic*)this->identifier)->str;
+    if (!this->is_methods) {
+        std::cout << std::string(depth * 4, ' ') << ((ExpressionAtomic*)this->identifier)->str;
+    } else {
+        this->identifier->debug(depth+1);
+    }
     if (this->index) {
         std::cout << std::string(depth * 4, ' ') << "[";
         this->index->debug(depth);
         std::cout << std::string(depth * 4, ' ') << "]";
     }
-    std::cout << " = " << std::endl;
+    std::cout << std::string(depth * 4, ' ') << " = " << std::endl;
     this->value->debug(depth + 1);
 }
 
 Expression* AssignmentExpression::fold(AST* ast) {
     this->value = this->value->fold(ast);
+    this->identifier = this->identifier->fold(ast);
+    if (this->is_methods)
+        return (Expression*)this;
     if (this->is_arr) {
         ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast), std::string("")));
     } else {
@@ -660,45 +695,56 @@ Expression* AssignmentExpression::fold(AST* ast) {
 }
 
 llvm::Value* AssignmentExpression::codegen(AST* ast, AtomType type) {
-    AtomType t = t_null;
-    if (std::get<1>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str))->isIntegerTy(8)) {
-        t = t_char;
-    } else if (std::get<1>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str))->isIntegerTy(64)) {
-        t = t_number;
-    } else if (std::get<1>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str))->isIntegerTy(128)) {
-        t = t_long;
-    }
-    llvm::Value *Val = this->value->codegen(ast, t);
-    if (!Val)
-        return nullptr;
-
-    llvm::Value *Variable = std::get<0>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str));
-    if (!Variable)
-        return ast->LogErrorV("Unknown variable name");
-    if (!this->is_arr) {
-        ast->Builder->CreateStore(Val, Variable);
-    } else {
-        llvm::Type* atom_type = nullptr;
-        AtomType vec_type= std::get<2>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str));
-        if (vec_type == t_float_arr) {
-            atom_type = llvm::Type::getDoubleTy(*(ast->TheContext));
-        } else if (vec_type == t_number_arr) {
-            atom_type = llvm::Type::getInt64Ty(*(ast->TheContext));
-        } else if (vec_type == t_bool_arr) {
-            atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));
-        } else if (vec_type == t_string_arr) {
-            atom_type = llvm::Type::getInt8PtrTy(*(ast->TheContext));
+    if (!this->is_methods) {
+        AtomType t = t_null;
+        if (std::get<1>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str))->isIntegerTy(8)) {
+            t = t_char;
+        } else if (std::get<1>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str))->isIntegerTy(64)) {
+            t = t_number;
+        } else if (std::get<1>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str))->isIntegerTy(128)) {
+            t = t_long;
         }
-        auto index_val = this->index->codegen(ast, t_number);
-        auto index_vec = std::vector<llvm::Value*>();
-        index_vec.push_back(index_val);
+        llvm::Value *Val = this->value->codegen(ast, t);
+        if (!Val)
+            return nullptr;
 
-        auto Arr = ast->Builder->CreateLoad(llvm::Type::getInt64PtrTy(*(ast->TheContext)), Variable);
-        auto ptr = ast->Builder->CreateGEP(atom_type, Arr, index_vec);
+        llvm::Value *Variable = std::get<0>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str));
+        if (!Variable)
+            return ast->LogErrorV("Unknown variable name");
+        if (!this->is_arr) {
+            ast->Builder->CreateStore(Val, Variable);
+        } else {
+            llvm::Type* atom_type = nullptr;
+            AtomType vec_type= std::get<2>(ast->NamedValues->get_value(((ExpressionAtomic*)this->identifier)->str));
+            if (vec_type == t_float_arr) {
+                atom_type = llvm::Type::getDoubleTy(*(ast->TheContext));
+            } else if (vec_type == t_number_arr) {
+                atom_type = llvm::Type::getInt64Ty(*(ast->TheContext));
+            } else if (vec_type == t_bool_arr) {
+                atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));
+            } else if (vec_type == t_string_arr) {
+                atom_type = llvm::Type::getInt8PtrTy(*(ast->TheContext));
+            }
+            auto index_val = this->index->codegen(ast, t_number);
+            auto index_vec = std::vector<llvm::Value*>();
+            index_vec.push_back(index_val);
 
-        ast->Builder->CreateStore(Val, ptr);
+            auto Arr = ast->Builder->CreateLoad(llvm::Type::getInt64PtrTy(*(ast->TheContext)), Variable);
+            auto ptr = ast->Builder->CreateGEP(atom_type, Arr, index_vec);
+
+            ast->Builder->CreateStore(Val, ptr);
+        }
+        return Val;
+    } else {
+        llvm::Value* Variable = this->identifier->codegen(ast, t_lvalue);
+        if (!Variable)
+            return nullptr;
+        llvm::Value *Val = this->value->codegen(ast, t_null);
+        if (!Val)
+            return nullptr;
+        ast->Builder->CreateStore(Val, Variable);
+        return Val;
     }
-    return Val;
 }
 
 AtomType AssignmentExpression::get_atomic_type(AST* ast) {

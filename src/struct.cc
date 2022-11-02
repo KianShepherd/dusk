@@ -88,9 +88,11 @@ void Struct::push_var(std::string name, AtomType type) {
     this->gen_field_map[name] = idx;
     int field_idx = this->types.size();
     this->types.push_back(type);
-    this->llvm_types.push_back(atom_to_type(type, this->ast));
+    auto llvm_type = atom_to_type(type, this->ast);
+    this->llvm_types.push_back(llvm_type);
     this->field_map[name] = std::tuple<int, int>(0, field_idx);
     this->mem_size += atom_to_size(type);
+    this->field_type_map[name] = llvm_type;
 
 }
 
@@ -100,12 +102,14 @@ void Struct::push_var(std::string name, AtomType type, std::string struct_name) 
     this->gen_field_map[name] = idx;
     int field_idx = this->types.size();
     this->types.push_back(type);
-    this->llvm_types.push_back(atom_to_type(type, this->ast));
+    auto llvm_type = atom_to_type(type, this->ast);
+    this->llvm_types.push_back(llvm_type);
     this->field_map[name] = std::tuple<int, int>(0, field_idx);
     this->mem_size += atom_to_size(type);
     if (type == t_struct) {
         this->struct_var_map[name] = struct_name;
     }
+    this->field_type_map[name] = llvm_type;
 }
 
 void Struct::push_function(Function* func) {
