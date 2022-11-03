@@ -3,13 +3,13 @@ fn main() -> int {
     // value type is void*
     let mut vec: Vec<int> = Vec<int>();
 
-    //vec.append(1);
-    //vec.append(2);
-    //vec.append(3);
+    vec.append(1);
+    vec.append(2);
+    vec.append(3);
 
-    //for (let mut i: int = 0; i < vec.size(); i = i + 1) {
+    for (let mut i: int = 0; i < vec.size(); i = i + 1) {
         // The get function can be used to get elements at the given index
-        //print("%ld\n", vec.get(i));
-    //}
+        print("%ld\n", vec.get(i));
+    }
     return 0;
 }

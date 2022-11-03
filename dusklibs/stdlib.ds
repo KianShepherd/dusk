@@ -32,34 +32,8 @@ extern readfile(filename: string) -> string;
 extern count_substr(str: string, substr: string) -> int;
 extern split(str: string, on: string) -> string*;
 
-extern intvec() -> void*;
-extern ipush_back(vec: void*, val: int);
-extern printveci(vec: void*);
-extern getveci(vec: void*, idx: int) -> int;
-extern sizeveci(vec: void*) -> int;
-
-extern floatvec() -> void*;
-extern fpush_back(vec: void*, val: float);
-extern printvecf(vec: void*);
-extern getvecf(vec: void*, idx: int) -> float;
-extern sizevecf(vec: void*) -> int;
 
 
-fn size(vec: void*) -> int {
-    return sizeveci(vec);
-}
-
-fn vec<float>() -> void* {
-    return floatvec();
-}
-
-fn push_back<float>(vec: void*, n: float) {
-    fpush_back(vec, n);
-}
-
-fn get<float>(vec: void*, idx: int) -> float {
-    return getvecf(vec, idx);
-}
 
 fn split<int>(mut vec: void*, str: string, on: string){
     let count: int = count_substr(str, on) + 1;
@@ -77,6 +51,10 @@ fn split<float>(mut vec: void*, str: string, on: string){
     }
 }
 
+extern intvec() -> void*;
+extern ipush_back(vec: void*, val: int);
+extern getveci(vec: void*, idx: int) -> int;
+
 struct Vec<int> {
     vector: void*,
     size: int,
@@ -87,19 +65,44 @@ struct Vec<int> {
         return self;
     }
     
-    fn test(self: Vec<int>) -> Vec<int> {
-        return self;
-    }
     fn size(self: Vec<int>) -> int {
         return self.size;
     }
 
-    //fn append(self: Vec<int>, n: int) {
-    //    ipush_back(self.vector, n);
-    //    self.size = self.size + 1;
-    //}
+    fn append(self: Vec<int>, n: int) {
+        ipush_back(self.vector, n);
+        self.size = self.size + 1;
+    }
 
-    //fn get(self: Vec<int>, idx: int) {
-    //    return getveci(self.vector, idx);
-    //}
+    fn get(self: Vec<int>, idx: int) -> int {
+        return getveci(self.vector, idx);
+    }
+}
+
+extern floatvec() -> void*;
+extern fpush_back(vec: void*, val: float);
+extern getvecf(vec: void*, idx: int) -> float;
+
+struct Vec<float> {
+    vector: void*,
+    size: int,
+
+    fn Vec<float>(self: Vec<float>) -> Vec<float> {
+        self.vector = floatvec();
+        self.size = 0;
+        return self;
+    }
+    
+    fn size(self: Vec<float>) -> int {
+        return self.size;
+    }
+
+    fn append(self: Vec<float>, n: float) {
+        fpush_back(self.vector, n);
+        self.size = self.size + 1;
+    }
+
+    fn get(self: Vec<float>, idx: int) -> float {
+        return getvecf(self.vector, idx);
+    }
 }

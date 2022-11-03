@@ -175,11 +175,6 @@ extern "C" DLLEXPORT {
     long getveci(void* vec, long idx) {
         return ((*(std::vector<long>*)vec)[idx]);
     }
-
-    long sizeveci(void* vec) {
-        return (long)(*(std::vector<long*>*)vec).size();
-    }
-
     void* floatvec() {
         return new std::vector<double>();
     }
@@ -190,9 +185,5 @@ extern "C" DLLEXPORT {
 
     double getvecf(void* vec, long idx) {
         return (*(std::vector<double>*)vec)[idx];
-    }
-
-    long sizevecf(void* vec) {
-        return (long)(*(std::vector<double>*)vec).size();
     }
 }
