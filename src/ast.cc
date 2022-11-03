@@ -1,5 +1,33 @@
 #include "ast.hh"
 
+std::string type_string(AtomType type) {
+    switch (type) {
+        case t_number: return std::string("int");
+        case t_long: return std::string("long");
+        case t_float: return std::string("float");
+        case t_char: return std::string("char");
+        case t_string: return std::string("string");
+        case t_identifier: {
+            // TODO
+            return std::string("");
+        }
+        case t_bool: return std::string("bool");
+        case t_function_call: {
+            // TODO
+            return std::string("");
+        }
+        case t_bool_arr: return std::string("bool*");
+        case t_number_arr: return std::string("int*");
+        case t_float_arr: return std::string("float*");
+        case t_string_arr: return std::string("string*");
+        case t_get_struct: {
+            // TODO
+            return std::string("");
+        }
+        default: return std::string("");
+    }
+}
+
 AST::AST() {
     this->functions = std::vector<Function*>();
     this->error = false;
@@ -24,6 +52,12 @@ void AST::push_function(Function* function) {
 void AST::push_struct(Struct* s) {
     this->structs.push_back(s);
     this->struct_map[s->name] = s;
+
+    for (int i = 0; i < (int)s->member_functions.size(); i++) {
+        this->func_definitions.push_back(s->member_functions[i]->get_meta());
+        this->func_map[s->member_functions[i]->name] = s->member_functions[i];
+        this->functions.push_back(s->member_functions[i]);
+    }
 }
 
 void AST::push_err(std::string msg) {
@@ -50,14 +84,6 @@ void AST::debug() {
 }
 
 void AST::static_checking() {
-    for (int i = 0; i < (int)this->structs.size(); i++) {
-        for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
-            this->func_definitions.push_back(this->structs[i]->member_functions[j]->get_meta());
-            this->func_map[this->structs[i]->member_functions[j]->name] = this->structs[i]->member_functions[j];
-            this->functions.push_back(this->structs[i]->member_functions[j]);
-        }
-    }
-
     bool found_entrypoint = false;
     for (int i = 0; i < (int)this->functions.size(); i++) {
         auto meta = this->functions[i]->get_meta();
@@ -68,11 +94,13 @@ void AST::static_checking() {
             found_entrypoint = true;
         }
     }
+    /*
     for (int i = 0; i < (int)this->structs.size(); i++) {
         for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
-            //this->structs[i]->member_functions[j]->fold(this);
+            this->structs[i]->member_functions[j]->fold(this);
         }
     }
+    */
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->functions[i]->fold(this);
     }

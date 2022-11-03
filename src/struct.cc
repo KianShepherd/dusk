@@ -91,7 +91,7 @@ void Struct::finalize() {
         ((StatementBlock*)con->statements)->statements.insert(((StatementBlock*)con->statements)->statements.begin(), new AssignmentStatement(new ExpressionAtomic("self", true), new ExpressionAtomic(base_const_name, std::vector<Expression*>()), true, t_struct, this->name));
         this->member_functions.push_back(con);
     }
-    this->struct_type = llvm::StructType::create(*(this->ast->TheContext), this->llvm_types, this->name, false);
+    this->struct_type = llvm::StructType::create(*(this->ast->TheContext), this->llvm_types, this->name, true);
 }
 
 void Struct::debug(size_t depth) {
@@ -151,6 +151,7 @@ void Struct::push_function(Function* func) {
         auto err_msg = std::string("All struct member functions must start with the argument self and matching type (");
         err_msg.append(std::string(this->name));
         err_msg.append(std::string(")\n"));
+        std::cout << "ERROR: " << err_msg << std::endl;
         this->ast->push_err(err_msg);
     }
     if (func->name.compare(this->name) == 0) {

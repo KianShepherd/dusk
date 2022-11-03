@@ -142,6 +142,11 @@ structfields: %empty
         std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_float_arr, std::string(""));
         $$->push_back(std::pair<int, void*>(0, (void*)info));
     }
+    | structfields IDENTIFIER COLON VOID TIMES COMMA
+    {
+        std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_string, std::string(""));
+        $$->push_back(std::pair<int, void*>(0, (void*)info));
+    }
     | structfields IDENTIFIER COLON IDENTIFIER COMMA
     {
         std::tuple<std::string, AtomType, std::string>* info = new std::tuple<std::string, AtomType, std::string>(std::string(*($2)), t_struct, std::string(*($4)));

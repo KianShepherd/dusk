@@ -34,7 +34,7 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
             this->indentifier_type.push_back(t_string);
         } else if (args[i][1].compare("struct") == 0) {
             this->indentifier_type.push_back(t_struct);
-            this->struct_names.push_back(args[i][2]);
+            this->struct_names.push_back(args[i][3]);
         }
         if (args[i].size() == 3) {
             if (args[i][2].compare("t") == 0) {
@@ -89,7 +89,6 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
             this->indentifiers_mutability.push_back(false);
         }
     }
-    std::cout << this->func_args_to_str() << std::endl;
 }
 
 std::string Function::func_args_to_str() {
@@ -170,7 +169,7 @@ void Function::fold(AST* ast) {
     ast->scope->new_scope();
     int struct_count = 0;
     for (size_t i = 0; i < this->arg_count; i++) {
-        ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(this->indentifiers_mutability[i], this->indentifier_type[i], (!(this->indentifier_type[i] == t_struct))?std::string(""):this->struct_names[struct_count++]));
+        ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(this->indentifiers_mutability[i], this->indentifier_type[i], ((this->indentifier_type[i] != t_struct)?std::string(""):this->struct_names[struct_count++])));
     }
     if (this->statements)
         this->statements->fold(ast);

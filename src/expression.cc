@@ -11,12 +11,12 @@ std::string type_string(AST* ast, AtomType type) {
         case t_string: return std::string("string");
         case t_identifier: {
             // TODO
-            return std::string("");
+            return std::string("string todo");
         }
         case t_bool: return std::string("bool");
         case t_function_call: {
             // TODO
-            return std::string("");
+            return std::string("call todo");
         }
         case t_bool_arr: return std::string("bool*");
         case t_number_arr: return std::string("int*");
@@ -24,9 +24,9 @@ std::string type_string(AST* ast, AtomType type) {
         case t_string_arr: return std::string("string*");
         case t_get_struct: {
             // TODO
-            return std::string("");
+            return std::string("struct todo");
         }
-        default: return std::string("");
+        default: return std::string("oh no");
     }
 }
 
@@ -281,14 +281,10 @@ Expression* ExpressionAtomic::fold(AST* ast) {
             arg = arg->fold(ast);
         }
         if (ast->struct_map[this->str] != nullptr) {
-            std::cout << " DEBUG " << std::endl;
-            std::cout << this->str << std::endl;
             std::string s = std::string("");
             for (auto& arg: this->args) {
                 s.append(arg->type_str(ast));
             }
-            std::cout << s << std::endl;
-            std::cout << "~DEBUG~" << std::endl;
             this->str = this->str.append(std::to_string(this->args.size())).append(s);
         }
     }

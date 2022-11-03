@@ -66,7 +66,7 @@ void ReturnStatement::debug(size_t depth) {
 
 void ReturnStatement::fold(AST* ast) {
     if (this->expr)
-        expr->fold(ast);
+        this->expr = this->expr->fold(ast);
 }
 
 llvm::Value* ReturnStatement::codegen(AST* ast) {

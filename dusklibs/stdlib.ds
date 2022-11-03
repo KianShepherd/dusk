@@ -44,16 +44,6 @@ extern printvecf(vec: void*);
 extern getvecf(vec: void*, idx: int) -> float;
 extern sizevecf(vec: void*) -> int;
 
-fn vec<int>() -> void* {
-    return intvec();
-}
-fn push_back<int>(vec: void*, n: int) {
-    ipush_back(vec, n);
-}
-
-fn get<int>(vec: void*, idx: int) -> int {
-    return getveci(vec, idx);
-}
 
 fn size(vec: void*) -> int {
     return sizeveci(vec);
@@ -85,4 +75,31 @@ fn split<float>(mut vec: void*, str: string, on: string){
     for (let mut i: int = 0; i < count; i = i + 1) {
         fpush_back(vec, stof(split_str[i]));
     }
+}
+
+struct Vec<int> {
+    vector: void*,
+    size: int,
+
+    fn Vec<int>(self: Vec<int>) -> Vec<int> {
+        self.vector = intvec();
+        self.size = 0;
+        return self;
+    }
+    
+    fn test(self: Vec<int>) -> Vec<int> {
+        return self;
+    }
+    fn size(self: Vec<int>) -> int {
+        return self.size;
+    }
+
+    //fn append(self: Vec<int>, n: int) {
+    //    ipush_back(self.vector, n);
+    //    self.size = self.size + 1;
+    //}
+
+    //fn get(self: Vec<int>, idx: int) {
+    //    return getveci(self.vector, idx);
+    //}
 }
