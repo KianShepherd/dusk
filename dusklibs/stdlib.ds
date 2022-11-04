@@ -55,6 +55,8 @@ struct String {
     extern new_str() -> void*;
     extern new_str_preset(text: string) -> void*;
     extern print_str(str: void*) -> string;
+    extern append_str_c(str: void*, text: string);
+    extern append_str_s(str: void*, text: void*);
 
     str: void*,
 
@@ -70,6 +72,21 @@ struct String {
 
     fn __str__(self: String) -> string {
         return print_str(self.str);
+    }
+
+    fn __add__(self: String, text: string) -> String {
+        append_str_c(self.str, text);
+        return self;
+    }
+
+    fn __add__(self: String, text: String) -> String {
+        append_str_s(self.str, text.str);
+        return self;
+    }
+
+    fn __add__(text: string, self: String) -> String {
+        append_str_s(self.str, text);
+        return self;
     }
 }
 

@@ -203,6 +203,8 @@ AtomType ExpressionAtomic::get_atomic_type(AST* ast) {
             if (this->str.compare(std::get<0>(func)) == 0)
                 return std::get<1>(func);
         }
+    } else if (this->type == t_get_struct) {
+        // TODO
     }
     return this->type;
 }
@@ -571,6 +573,66 @@ void BinaryExpression::debug(size_t depth) {
 Expression* BinaryExpression::fold(AST* ast) {
     this->lhs = this->lhs->fold(ast);
     this->rhs = this->rhs->fold(ast);
+    if (this->lhs->get_atomic_type(ast) == t_struct || this->rhs->get_atomic_type(ast) == t_struct) {
+        std::cout << "LHS" << std::endl;
+        std::string f_name = std::string("");
+        if (this->lhs->get_atomic_type_keep_identifier(ast) == t_identifier && this->lhs->get_atomic_type(ast) == t_struct) {
+            f_name.append(ast->scope->get_value_struct(((ExpressionAtomic*)this->lhs)->str));
+        } else if (((ExpressionAtomic*)this->lhs)->type == t_function_call) {
+            Function* func = ast->func_map[((ExpressionAtomic*)this->lhs)->str];
+            if (func->type != t_struct) {
+                f_name.append(type_string(ast, func->type));
+            } else {
+                f_name.append(func->struct_name);
+            }
+        } else if (((ExpressionAtomic*)this->lhs)->type == t_get_struct) {
+            Struct* strct = ((ExpressionAtomic*)this->lhs)->struct_t;
+            if (strct->struct_var_map.find(((ExpressionAtomic*)this->lhs)->str) == strct->struct_var_map.end()) {
+                return (Expression*)this;
+            }
+            strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->lhs)->str]];
+            f_name.append(strct->name);
+        } else {
+            f_name.append(type_string(ast, this->lhs->get_atomic_type(ast)));
+        }
+        std::cout << "RHS" << std::endl;
+        if (this->rhs->get_atomic_type_keep_identifier(ast) == t_identifier && this->rhs->get_atomic_type(ast) == t_struct) {
+            f_name.append(ast->scope->get_value_struct(((ExpressionAtomic*)this->rhs)->str));
+        } else if (((ExpressionAtomic*)this->rhs)->type == t_function_call) {
+            Function* func = ast->func_map[((ExpressionAtomic*)this->rhs)->str];
+            if (func->type != t_struct) {
+                f_name.append(type_string(ast, func->type));
+            } else {
+                f_name.append(func->struct_name);
+            }
+        } else if (((ExpressionAtomic*)this->rhs)->type == t_get_struct) {
+            Struct* strct = ((ExpressionAtomic*)this->rhs)->struct_t;
+            if (strct->struct_var_map.find(((ExpressionAtomic*)this->rhs)->str) == strct->struct_var_map.end()) {
+                return (Expression*)this;
+            }
+            strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->rhs)->str]];
+            f_name.append(strct->name);
+        } else {
+            f_name.append(type_string(ast, this->rhs->get_atomic_type(ast)));
+        }
+        
+        std::cout << "type" << std::endl;
+        switch (this->type) {
+            case op_add:           f_name.append("__add__"); break;
+            case op_sub:           f_name.append("__sub__"); break;
+            case op_mul:           f_name.append("__mul__"); break;
+            case op_div:           f_name.append("__div__"); break;
+            case op_equal:         f_name.append("__eq__"); break;
+            case op_not_equal:     f_name.append("__neq__"); break;
+            case op_greater:       f_name.append("__gt__"); break;
+            case op_less:          f_name.append("__lt__"); break;
+            case op_greater_equal: f_name.append("__ge__"); break;
+            case op_less_equal:    f_name.append("__le__"); break;
+            case op_and:           f_name.append("__and__"); break;
+            case op_or:            f_name.append("__or__"); break;
+        }
+        return new ExpressionAtomic(f_name, std::vector<Expression*>({this->lhs, this->rhs}));
+    }
     return (Expression*)this;
 }
 

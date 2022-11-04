@@ -145,24 +145,62 @@ void Struct::push_function(Function* func) {
         this->member_functions.push_back(func);
         return;
     }
-    if (((ExpressionAtomic*)func->indentifiers[0])->str.compare(std::string("self")) != 0 || func->indentifier_type[0] != t_struct) {
-        auto err_msg = std::string("All struct member functions must start with the argument self and matching type (");
-        err_msg.append(std::string(this->name));
-        err_msg.append(std::string(")\n"));
-        std::cout << "ERROR: " << err_msg << std::endl;
-        this->ast->push_err(err_msg);
+    bool bin_op = false;
+    if (func->name.compare("__add__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__sub__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__mul__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__div__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__eq__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__neq__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__gt__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__lt__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__ge__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__le__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__and__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__or__") == 0) {
+        bin_op = true;
     }
-    if (func->name.compare(this->name) == 0) {
-        this->constructors.push_back(func);
-        return;
+
+    if (!bin_op) {
+        std::cout << "not binop" << std::endl;
+        if (((ExpressionAtomic*)func->indentifiers[0])->str.compare(std::string("self")) != 0 || func->indentifier_type[0] != t_struct) {
+            auto err_msg = std::string("All struct member functions must start with the argument self and matching type (");
+            err_msg.append(std::string(this->name));
+            err_msg.append(std::string(")\n"));
+            std::cout << "ERROR: " << err_msg << std::endl;
+            this->ast->push_err(err_msg);
+        }
+        if (func->name.compare(this->name) == 0) {
+            this->constructors.push_back(func);
+            return;
+        }
+        std::string func_name = std::string(this->name).append(func->name);
+        this->func_idents.push_back(func_name);
+        this->gen_field_map[func_name] = -1;
+        int field_idx = this->member_functions.size();
+        this->field_map[func_name] = std::tuple<int, int>(1, field_idx);
+        func->name = func_name;
+        this->member_functions.push_back(func);
+    } else {
+        std::cout << "binop" << std::endl;
+        if (func->arg_count != 2)
+            this->ast->push_err(std::string("Binary operators only allow 2 arguments."));
+        std::string func_name = func->func_args_to_str();
+        func_name.append(func->name);
+        func->name = func_name;
+        this->member_functions.push_back(func);
     }
-    std::string func_name = std::string(this->name).append(func->name);
-    this->func_idents.push_back(func_name);
-    this->gen_field_map[func_name] = -1;
-    int field_idx = this->member_functions.size();
-    this->field_map[func_name] = std::tuple<int, int>(1, field_idx);
-    func->name = func_name;
-    this->member_functions.push_back(func);
 }
 
 llvm::Value* Struct::codegen_functions(AST* ast) {

@@ -211,4 +211,12 @@ extern "C" DLLEXPORT {
     double getvecf(void* vec, long idx) {
         return (*(std::vector<double>*)vec)[idx];
     }
+
+    void append_str_c(void* str, char* text) {
+        ((std::string*)str)->append(text);
+    }
+
+    void append_str_s(void* str, void* text) {
+        ((std::string*)str)->append((*((std::string*)text)));
+    }
 }
