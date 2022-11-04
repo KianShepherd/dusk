@@ -3,13 +3,47 @@ fn main() -> int {
     // value type is void*
     let mut vec: Vec<int> = Vec<int>();
 
+    // You can append values to a vector
     vec.append(1);
     vec.append(2);
     vec.append(3);
+    // Or prepend them to a vector
+    vec.prepend(6);
+    vec.prepend(5);
+    vec.prepend(4);
 
     for (let mut i: int = 0; i < vec.size(); i = i + 1) {
         // The get function can be used to get elements at the given index
         print("%ld\n", vec.get(i));
     }
+    del(vec);
+    print("\n");
+
+    let mut vec: Vec<int> = Vec<int>();
+    let mut vec2: Vec<int> = Vec<int>();
+    for (let mut i: int = 0; i < 5; i = i + 1) {
+        vec.append(6 - i);
+        vec2.append(i + 50);
+    }
+    // You can also use extend to append a vector to another vector
+    vec.extend(vec2);
+    for (let mut i: int = 0; i < vec.size(); i = i + 1) {
+        print("%ld\n", vec.get(i));
+    }
+    del(vec);
+    del(vec2);
+    print("\n");
+
+    let mut vec: Vec<float> = Vec<float>();
+
+    for (let mut i: int = 0; i < 25; i = i + 1) {
+        vec.append(itof(i + 1));
+    }
+
+    for (let mut i: int = 0; i < vec.size(); i = i + 1) {
+        print("%f\n", vec.get(i));
+    }
+
+    del(vec);
     return 0;
 }

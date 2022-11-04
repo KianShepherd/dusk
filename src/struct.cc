@@ -104,12 +104,6 @@ void Struct::debug(size_t depth) {
         }
         std::cout << " : " << this->gen_field_map[this->type_idents[i]] << "," << std::endl;
     }
-    std::cout << std::endl;
-    for (auto& f : this->member_functions) {
-        std::cout << "MEMBER FUNCTION:" << std::endl;
-        f->debug();
-    }
-    std::cout << std::endl;
     std::cout << "}" << std::endl;
 
 }
@@ -147,6 +141,10 @@ void Struct::push_var(std::string name, AtomType type, std::string struct_name) 
 }
 
 void Struct::push_function(Function* func) {
+    if (!func->statements) {
+        this->member_functions.push_back(func);
+        return;
+    }
     if (((ExpressionAtomic*)func->indentifiers[0])->str.compare(std::string("self")) != 0 || func->indentifier_type[0] != t_struct) {
         auto err_msg = std::string("All struct member functions must start with the argument self and matching type (");
         err_msg.append(std::string(this->name));
@@ -158,7 +156,7 @@ void Struct::push_function(Function* func) {
         this->constructors.push_back(func);
         return;
     }
-    auto func_name = std::string(this->name).append(func->name);
+    std::string func_name = std::string(this->name).append(func->name);
     this->func_idents.push_back(func_name);
     this->gen_field_map[func_name] = -1;
     int field_idx = this->member_functions.size();
@@ -169,7 +167,8 @@ void Struct::push_function(Function* func) {
 
 llvm::Value* Struct::codegen_functions(AST* ast) {
     for (auto& f : this->member_functions) {
-        this->funcs.push_back(f->codegen(ast));
+        if (f->statements)
+            this->funcs.push_back(f->codegen(ast));
     }
     return nullptr;
 }

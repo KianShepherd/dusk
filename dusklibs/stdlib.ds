@@ -51,11 +51,34 @@ fn split<float>(mut vec: void*, str: string, on: string){
     }
 }
 
-extern intvec() -> void*;
-extern ipush_back(vec: void*, val: int);
-extern getveci(vec: void*, idx: int) -> int;
+struct String {
+    extern new_str() -> void*;
+    extern new_str_preset(text: string) -> void*;
+    extern print_str(str: void*);
+
+    str: void*,
+
+    fn String(self: String) -> String {
+        self.str = new_str();
+        return self;
+    }
+
+    fn String(self: String, str: string) -> String {
+        self.str = new_str_preset(str);
+        return self;
+    }
+
+    fn print(self: String) {
+        print_str(self.str);
+    }
+}
 
 struct Vec<int> {
+    extern intvec() -> void*;
+    extern ipush_back(vec: void*, val: int);
+    extern ipush_front(vec: void*, val: int);
+    extern getveci(vec: void*, idx: int) -> int;
+
     vector: void*,
     size: int,
 
@@ -74,16 +97,29 @@ struct Vec<int> {
         self.size = self.size + 1;
     }
 
+    fn prepend(self: Vec<int>, n: int) {
+        ipush_front(self.vector, n);
+        self.size = self.size + 1;
+    }
+
     fn get(self: Vec<int>, idx: int) -> int {
         return getveci(self.vector, idx);
     }
+
+    fn extend(self: Vec<int>, vec: Vec<int>) {
+        let size: int = vec.size();
+        for (let mut i: int = 0; i < size; i = i + 1) {
+            ipush_back(self.vector, vec.get(i));
+        }
+    }
 }
 
-extern floatvec() -> void*;
-extern fpush_back(vec: void*, val: float);
-extern getvecf(vec: void*, idx: int) -> float;
-
 struct Vec<float> {
+    extern floatvec() -> void*;
+    extern fpush_back(vec: void*, val: float);
+    extern fpush_front(vec: void*, val: float);
+    extern getvecf(vec: void*, idx: int) -> float;
+
     vector: void*,
     size: int,
 
@@ -102,7 +138,19 @@ struct Vec<float> {
         self.size = self.size + 1;
     }
 
+    fn prepend(self: Vec<float>, n: float) {
+        fpush_front(self.vector, n);
+        self.size = self.size + 1;
+    }
+
     fn get(self: Vec<float>, idx: int) -> float {
         return getvecf(self.vector, idx);
+    }
+
+    fn extend(self: Vec<float>, vec: Vec<float>) {
+        let size: int = vec.size();
+        for (let mut i: int = 0; i < size; i = i + 1) {
+            fpush_back(self.vector, vec.get(i));
+        }
     }
 }

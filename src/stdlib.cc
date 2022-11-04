@@ -14,6 +14,11 @@
 #define DLLEXPORT
 #endif
 
+
+void im(std::vector<long>* vec, long n) {
+    vec->insert(vec->begin(), n);
+}
+
 extern "C" DLLEXPORT {
 
     long* copyi(long* arr, long n) {
@@ -92,6 +97,18 @@ extern "C" DLLEXPORT {
 
     double stof(char* a) {
         return std::atof(a);
+    }
+
+    void* new_str() {
+        return new std::string();
+    }
+
+    void* new_str_preset(char* text) {
+        return new std::string(text);
+    }
+
+    void print_str(void* s) {
+        std::cout << *((std::string*)s) << std::endl;
     }
     // To strings
     char* itos(long a) {
@@ -172,6 +189,10 @@ extern "C" DLLEXPORT {
         (*(std::vector<long>*)vec).push_back(n);
     }
 
+    void ipush_front(void* vec, long n) {
+        ((std::vector<long>*)vec)->insert(((std::vector<long>*)vec)->begin(), n);
+    }
+
     long getveci(void* vec, long idx) {
         return ((*(std::vector<long>*)vec)[idx]);
     }
@@ -181,6 +202,10 @@ extern "C" DLLEXPORT {
 
     void fpush_back(void* vec, double n) {
         (*(std::vector<double>*)vec).push_back(n);
+    }
+
+    void fpush_front(void* vec, double n) {
+        ((std::vector<double>*)vec)->insert(((std::vector<double>*)vec)->begin(), n);
     }
 
     double getvecf(void* vec, long idx) {
