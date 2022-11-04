@@ -180,6 +180,36 @@ extern "C" DLLEXPORT {
         va_end(args);
         return 0;
     }
+
+    char* ivec_str(void* vec) {
+        std::ostringstream str;
+        str << "[ ";
+        auto v = *((std::vector<long>*) vec);
+        for (int i = 0; i < v.size(); i++) {
+            str << v[i];
+            if (i != v.size() - 1) {
+                str << ", ";
+            }
+        }
+        str << " ]";
+        auto stri = new std::string(str.str());
+        return (char*)(void*)stri->c_str();
+    }
+
+    char* fvec_str(void* vec) {
+        std::ostringstream str;
+        str << "[ ";
+        auto v = *((std::vector<double>*) vec);
+        for (int i = 0; i < v.size(); i++) {
+            str << v[i];
+            if (i != v.size() - 1) {
+                str << ", ";
+            }
+        }
+        str << " ]";
+        auto stri = new std::string(str.str());
+        return (char*)(void*)stri->c_str();
+    }
     
     void* intvec() {
         return new std::vector<long>();
