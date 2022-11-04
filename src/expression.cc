@@ -558,6 +558,7 @@ void BinaryExpression::debug(size_t depth) {
         case op_and: std::cout << "and"; break;
         case op_or: std::cout << "or"; break;
         case op_modulo: std::cout << "%"; break;
+        case op_increment: break;
     }
     std::cout << std::endl;
     this->lhs->debug(depth + 1);
@@ -626,6 +627,7 @@ Expression* BinaryExpression::fold(AST* ast) {
             case op_and:           f_name.append("__and__"); break;
             case op_or:            f_name.append("__or__"); break;
             case op_modulo:        f_name.append("__mod__"); break;
+            case op_increment:     f_name.append("__increment__"); break;
         }
         return new ExpressionAtomic(f_name, std::vector<Expression*>({this->lhs, this->rhs}));
     }
@@ -676,6 +678,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_greater_equal:  return ast->Builder->CreateFCmpOGE(L, R);
             case op_less_equal:     return ast->Builder->CreateFCmpOLE(L, R);
             case op_modulo:         return ast->Builder->CreateFRem(L, R);
+            case op_increment:      return nullptr;
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
@@ -692,6 +695,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
             case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
             case op_modulo:         return ast->Builder->CreateSRem(L, R);
+            case op_increment:      return nullptr;
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
@@ -708,6 +712,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
             case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
             case op_modulo:         return ast->Builder->CreateSRem(L, R);
+            case op_increment:      return nullptr;
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
@@ -724,6 +729,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
             case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
             case op_modulo:         return ast->Builder->CreateSRem(L, R);
+            case op_increment:      return nullptr;
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
@@ -740,6 +746,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_greater_equal:  return nullptr;
             case op_less_equal:     return nullptr;
             case op_modulo:         return nullptr;
+            case op_increment:      return nullptr;
             case op_and:            return ast->Builder->CreateLogicalAnd(L, R);
             case op_or:             return ast->Builder->CreateLogicalOr(L, R);
         }
@@ -774,6 +781,15 @@ void UnaryExpression::debug(size_t depth) {
 }
 
 Expression* UnaryExpression::fold(AST* ast) {
+    this->operand = this->operand->fold(ast);
+    if (this->op.compare("++") == 0) {
+        if (this->operand->get_atomic_type_keep_identifier(ast) != t_identifier) {
+            ast->push_err("++ can only be applied to indentifiers.");
+            return (Expression*)this;
+        }
+        
+        return ((Expression*)new AssignmentExpression(this->operand, ((Expression*)new BinaryExpression(this->operand, new ExpressionAtomic((long)1), op_add))))->fold(ast);
+    }
     return (Expression*)this;
 }
 

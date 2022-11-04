@@ -65,7 +65,7 @@ struct Vec<int> {
 
     fn extend(self: Vec<int>, vec: Vec<int>) {
         let size: int = vec.size();
-        for (let mut i: int = 0; i < size; i = i + 1) {
+        for (let mut i: int = 0; i < size; i++) {
             ipush_back(self.vector, vec.get(i));
         }
     }
@@ -106,7 +106,7 @@ struct Vec<float> {
 
     fn extend(self: Vec<float>, vec: Vec<float>) {
         let size: int = vec.size();
-        for (let mut i: int = 0; i < size; i = i + 1) {
+        for (let mut i: int = 0; i < size; i++) {
             fpush_back(self.vector, vec.get(i));
         }
     }
@@ -139,7 +139,7 @@ struct String {
         let str: string = to_string(self.str);
         let count: int = count_substr(str, on) + 1;
         let split_str: string* = split(str, on);
-        for (let mut i: int = 0; i < count; i = i + 1) {
+        for (let mut i: int = 0; i < count; i++) {
             vec.append(stoi(split_str[i]));
         }
         return vec;
@@ -149,7 +149,7 @@ struct String {
         let str: string = to_string(self.str);
         let count: int = count_substr(str, on) + 1;
         let split_str: string* = split(str, on);
-        for (let mut i: int = 0; i < count; i = i + 1) {
+        for (let mut i: int = 0; i < count; i++) {
             vec.append(stof(split_str[i]));
         }
         return vec;

@@ -61,7 +61,8 @@ enum Operators {
     op_less_equal,
     op_and,
     op_or,
-    op_modulo
+    op_modulo,
+    op_increment
 };
 
 

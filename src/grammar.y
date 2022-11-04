@@ -944,6 +944,10 @@ exp: NOT exp %prec UNARY
     {
         $$ = new UnaryExpression(std::move($2), std::string("-"));
     }
+    | exp PLUS PLUS %prec UNARY
+    {
+        $$ = new UnaryExpression(std::move($1), std::string("++"));
+    }
     | LPAREN exp RPAREN
     {
         $$ = new UnaryExpression(std::move($2), std::string("()"));
