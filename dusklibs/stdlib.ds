@@ -54,7 +54,7 @@ fn split<float>(mut vec: void*, str: string, on: string){
 struct String {
     extern new_str() -> void*;
     extern new_str_preset(text: string) -> void*;
-    extern print_str(str: void*);
+    extern print_str(str: void*) -> string;
 
     str: void*,
 
@@ -68,8 +68,8 @@ struct String {
         return self;
     }
 
-    fn print(self: String) {
-        print_str(self.str);
+    fn __str__(self: String) -> string {
+        return print_str(self.str);
     }
 }
 

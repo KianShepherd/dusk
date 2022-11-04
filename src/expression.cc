@@ -277,8 +277,48 @@ Expression* ExpressionAtomic::fold(AST* ast) {
             }
         }
     } else if (this->type == t_function_call) {
-        for (auto& arg : this->args) {
+        for (int i = 0; i < this->args.size(); i++) {
+            auto arg = this->args[i];
             arg = arg->fold(ast);
+            if (this->str.compare("print") == 0) {
+                if (arg->get_atomic_type_keep_identifier(ast) == t_identifier && arg->get_atomic_type(ast) == t_struct) {
+                    std::string f_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
+                    f_name.append("__str__");
+                    ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
+                    std::cout << "new print def" << std::endl;
+                    f->debug(0);
+                    std::cout << "new print def" << std::endl;
+                    arg = f;
+                } else if (((ExpressionAtomic*)arg)->type == t_function_call) {
+                    Function* func = ast->func_map[((ExpressionAtomic*)arg)->str];
+                    if (func->type != t_struct) {
+                        continue;
+                    }
+                    std::string f_name = func->struct_name;
+
+                    f_name.append("__str__");
+                    ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
+                    std::cout << "new print def" << std::endl;
+                    f->debug(0);
+                    std::cout << "new print def" << std::endl;
+                    arg = f;
+                } else if (((ExpressionAtomic*)arg)->type == t_get_struct) {
+                    Struct* strct = ((ExpressionAtomic*)arg)->struct_t;
+                    if (strct->struct_var_map.find(((ExpressionAtomic*)this->base)->str) == strct->struct_var_map.end()) {
+                        continue;
+                    }
+                    strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->base)->str]];
+                    std::string f_name = strct->name;
+                    f_name.append("__str__");
+                    ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
+                    std::cout << "new print def" << std::endl;
+                    f->debug(0);
+                    std::cout << "new print def" << std::endl;
+                    arg = f;
+                }
+            }
+            this->args[i] = arg;
+            
         }
         if (ast->struct_map[this->str] != nullptr) {
             std::string s = std::string("");

@@ -107,8 +107,8 @@ extern "C" DLLEXPORT {
         return new std::string(text);
     }
 
-    void print_str(void* s) {
-        std::cout << *((std::string*)s) << std::endl;
+    char* print_str(void* s) {
+        return (char*)(void*)(((std::string*)s)->c_str());
     }
     // To strings
     char* itos(long a) {

@@ -1,5 +1,5 @@
 fn main(argc: int, argv: string*) -> int {
     let mut s: String = String("abcd");
-    s.print();
+    print("%s\n", s);
     return 0;
 }
