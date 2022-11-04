@@ -170,6 +170,8 @@ void Struct::push_function(Function* func) {
         bin_op = true;
     } else if (func->name.compare("__or__") == 0) {
         bin_op = true;
+    } else if (func->name.compare("__mod__") == 0) {
+        bin_op = true;
     }
 
     if (!bin_op) {

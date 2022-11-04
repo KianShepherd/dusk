@@ -9,5 +9,7 @@ fn main(argc: int, argv: string*) -> int {
         print("%ld\n", vec.get(i));
         print("%f\n", vecf.get(i));
     }
+
+    print("%d\n", 5 % 3);
     return 0;
 }

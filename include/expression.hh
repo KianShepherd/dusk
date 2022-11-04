@@ -60,7 +60,8 @@ enum Operators {
     op_greater_equal,
     op_less_equal,
     op_and,
-    op_or
+    op_or,
+    op_modulo
 };
 
 

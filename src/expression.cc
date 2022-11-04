@@ -557,6 +557,7 @@ void BinaryExpression::debug(size_t depth) {
         case op_less_equal: std::cout << "<="; break;
         case op_and: std::cout << "and"; break;
         case op_or: std::cout << "or"; break;
+        case op_modulo: std::cout << "%"; break;
     }
     std::cout << std::endl;
     this->lhs->debug(depth + 1);
@@ -624,6 +625,7 @@ Expression* BinaryExpression::fold(AST* ast) {
             case op_less_equal:    f_name.append("__le__"); break;
             case op_and:           f_name.append("__and__"); break;
             case op_or:            f_name.append("__or__"); break;
+            case op_modulo:        f_name.append("__mod__"); break;
         }
         return new ExpressionAtomic(f_name, std::vector<Expression*>({this->lhs, this->rhs}));
     }
@@ -673,6 +675,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_less:           return ast->Builder->CreateFCmpOLT(L, R);
             case op_greater_equal:  return ast->Builder->CreateFCmpOGE(L, R);
             case op_less_equal:     return ast->Builder->CreateFCmpOLE(L, R);
+            case op_modulo:         return ast->Builder->CreateFRem(L, R);
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
@@ -688,6 +691,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_less:           return ast->Builder->CreateICmpSLT(L, R);
             case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
             case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
+            case op_modulo:         return ast->Builder->CreateSRem(L, R);
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
@@ -703,6 +707,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_less:           return ast->Builder->CreateICmpSLT(L, R);
             case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
             case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
+            case op_modulo:         return ast->Builder->CreateSRem(L, R);
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
@@ -718,6 +723,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_less:           return ast->Builder->CreateICmpSLT(L, R);
             case op_greater_equal:  return ast->Builder->CreateICmpSGE(L, R);
             case op_less_equal:     return ast->Builder->CreateICmpSLE(L, R);
+            case op_modulo:         return ast->Builder->CreateSRem(L, R);
             case op_and:            return nullptr;
             case op_or:             return nullptr;
         }
@@ -733,6 +739,7 @@ llvm::Value* BinaryExpression::codegen(AST* ast, AtomType type) {
             case op_less:           return nullptr;
             case op_greater_equal:  return nullptr;
             case op_less_equal:     return nullptr;
+            case op_modulo:         return nullptr;
             case op_and:            return ast->Builder->CreateLogicalAnd(L, R);
             case op_or:             return ast->Builder->CreateLogicalOr(L, R);
         }

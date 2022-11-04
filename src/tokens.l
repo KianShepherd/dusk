@@ -26,6 +26,7 @@ Null                    { yylval.str = new std::string(yytext, yyleng); return N
 \-                      { return MINUS;      }
 \*                      { return TIMES;      }
 \/                      { return DIVIDE;     }
+\%                      { return MODULO;     }
 ==                      { return EQUALEQUAL; }
 !=                      { return BANGEQUAL;  }
 \<=                     { return LESSEQUAL;  }
