@@ -219,4 +219,8 @@ extern "C" DLLEXPORT {
     void append_str_s(void* str, void* text) {
         ((std::string*)str)->append((*((std::string*)text)));
     }
+
+    char* to_string(void* str) {
+        return (char*)(void*)(((std::string*)str)->c_str());
+    }
 }

@@ -1,5 +1,13 @@
 fn main(argc: int, argv: string*) -> int {
     let mut s: String = String("Hello") + " " + String("World!");
     print("%s\n", s);
+
+    let mut s: String = String("0 1 2 3 4 5 6 7 8 9");
+    let mut vec: Vec<int> = s.split<int>(" ");
+    let mut vecf: Vec<float> = s.split<float>(" ");
+    for (let mut i: int = 0; i < vec.size(); i = i + 1) {
+        print("%ld\n", vec.get(i));
+        print("%f\n", vecf.get(i));
+    }
     return 0;
 }

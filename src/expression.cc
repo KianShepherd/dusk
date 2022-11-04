@@ -287,38 +287,32 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                     std::string f_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
                     f_name.append("__str__");
                     ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
-                    std::cout << "new print def" << std::endl;
-                    f->debug(0);
-                    std::cout << "new print def" << std::endl;
                     arg = f;
                 } else if (((ExpressionAtomic*)arg)->type == t_function_call) {
                     Function* func = ast->func_map[((ExpressionAtomic*)arg)->str];
                     if (func->type != t_struct) {
+                        this->args[i] = arg;
                         continue;
                     }
                     std::string f_name = func->struct_name;
 
                     f_name.append("__str__");
                     ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
-                    std::cout << "new print def" << std::endl;
-                    f->debug(0);
-                    std::cout << "new print def" << std::endl;
                     arg = f;
                 } else if (((ExpressionAtomic*)arg)->type == t_get_struct) {
                     Struct* strct = ((ExpressionAtomic*)arg)->struct_t;
                     if (strct->struct_var_map.find(((ExpressionAtomic*)this->base)->str) == strct->struct_var_map.end()) {
+                        this->args[i] = arg;
                         continue;
                     }
                     strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->base)->str]];
                     std::string f_name = strct->name;
                     f_name.append("__str__");
                     ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
-                    std::cout << "new print def" << std::endl;
-                    f->debug(0);
-                    std::cout << "new print def" << std::endl;
                     arg = f;
                 }
             }
+            arg = arg->fold(ast);
             this->args[i] = arg;
             
         }
