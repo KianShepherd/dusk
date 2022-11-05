@@ -101,7 +101,6 @@ structdef: STRUCT IDENTIFIER LBRACE structfields RBRACE
                 s->push_function((Function*)p.second);
             }
         }
-        s->finalize();
         ast.push_struct(s);
     }
     ;

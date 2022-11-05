@@ -134,6 +134,11 @@ Options:
         - int array
         - float array
         - string arrays
+    - User Defined Structs
+        - Member fields
+        - Heap allocated
+        - Constructor overloading
+        - Operator overloading
 - Functions
     - `main` as entry point
         - accepts and handles command line arguments
@@ -156,11 +161,10 @@ Options:
     - `copy` functions to allocate on the heap
     - `del` function to delete heap allocated objects
     - `print` function, takes C style format strings
-- Structs
-    - Member fields
-    - Heap allocated
-    - Constructor overloading
-    - Operator overloading
+    - `String` struct for better string datatypes support
+    - Various `Vec` types.
+    - `print` and `input` functions
+    - `readfile` function
 
 ## Planned Functionality
 

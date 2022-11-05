@@ -58,13 +58,21 @@ void AST::push_requires(std::string file) {
 }
 
 void AST::push_struct(Struct* s) {
-    this->structs.push_back(s);
-    this->struct_map[s->name] = s;
-
-    for (int i = 0; i < (int)s->member_functions.size(); i++) {
-        this->func_definitions.push_back(s->member_functions[i]->get_meta());
-        this->func_map[s->member_functions[i]->name] = s->member_functions[i];
-        this->functions.push_back(s->member_functions[i]);
+    if (!this->struct_map[s->name]) {
+        this->structs.push_back(s);
+        this->struct_map[s->name] = s;
+    } else {
+        for (int i = 0; i < (int)s->type_idents.size(); i++) {
+            if (s->struct_var_map.count(s->type_idents[i])) {
+                this->struct_map[s->name]->push_var(s->type_idents[i], s->types[i], s->struct_var_map[s->type_idents[i]]);
+            } else {
+                this->struct_map[s->name]->push_var(s->type_idents[i], s->types[i]);
+            }
+        }
+        for (int i = 0; i < (int)s->member_functions.size(); i++) {
+            s->member_functions[i]->name = s->member_functions[i]->name.substr(s->name.size(), s->member_functions[i]->name.size() - 1);
+            this->struct_map[s->name]->push_function(s->member_functions[i]);
+        }
     }
 }
 
@@ -92,6 +100,13 @@ void AST::debug() {
 }
 
 void AST::static_checking() {
+    for (auto& s : this->structs) {
+        s->finalize();
+        for (int i = 0; i < (int)s->member_functions.size(); i++) {
+            this->func_map[s->member_functions[i]->name] = s->member_functions[i];
+            this->functions.push_back(s->member_functions[i]);
+        }
+    }
     bool found_entrypoint = false;
     for (int i = 0; i < (int)this->functions.size(); i++) {
         auto meta = this->functions[i]->get_meta();

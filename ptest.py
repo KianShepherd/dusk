@@ -24,7 +24,7 @@ def run_example(file_name):
     op_res = subprocess.run(['./out'], stdout=subprocess.PIPE, text=True).stdout
 
     expected = ''
-    with open(f'./example_outputs/{file_name}.txt') as f:
+    with open(f'./examples/example_outputs/{file_name}.txt') as f:
         expected = f.read()
 
     print(f'Unoptimized {file_name}.ds: ', end='')

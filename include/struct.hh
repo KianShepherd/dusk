@@ -38,6 +38,8 @@ public:
     llvm::Type* struct_type;
     std::vector<Function*> member_functions;
     std::vector<Function*> constructors;
+    std::vector<std::string> type_idents;
+    std::vector<AtomType> types;
     std::map<std::string, int> gen_field_map; // Field map for llvm to use
     std::map<std::string, std::string> struct_var_map; // map of field name to struct name
     std::map<std::string, AtomType> struct_var_type_map; // map of field name to struct name
@@ -47,9 +49,7 @@ private:
 
     int mem_size;
 
-    std::vector<std::string> type_idents;
     std::vector<std::string> func_idents;
-    std::vector<AtomType> types;
     std::vector<llvm::Type*> llvm_types;
     std::vector<llvm::Function*> funcs;
 

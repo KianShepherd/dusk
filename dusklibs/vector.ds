@@ -1,5 +1,28 @@
 require "duskvec"
 
+struct String {
+    fn split<int>(self: String, on: string) -> Vec<int> {
+        let mut vec: Vec<int> = Vec<int>();
+        let str: string = to_string(self.str);
+        let count: int = count_substr(str, on) + 1;
+        let split_str: string* = split(str, on);
+        for (let mut i: int = 0; i < count; i++) {
+            vec.append(stoi(split_str[i]));
+        }
+        return vec;
+    }
+    fn split<float>(self: String, on: string) -> Vec<float> {
+        let mut vec: Vec<float> = Vec<float>();
+        let str: string = to_string(self.str);
+        let count: int = count_substr(str, on) + 1;
+        let split_str: string* = split(str, on);
+        for (let mut i: int = 0; i < count; i++) {
+            vec.append(stof(split_str[i]));
+        }
+        return vec;
+    }
+}
+
 struct Vec<int> {
     extern intvec() -> void*;
     extern ipush_back(vec: void*, val: int);
