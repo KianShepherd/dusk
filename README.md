@@ -142,12 +142,15 @@ Options:
     - Can pass arguments to and from
     - Can be void
     - Variables are properly scoped to be function and block specific
+- `extern` keyword to load `C` functions from libraries
+- `import` and `require` keywords
+    - Can import other `.ds` files without including them in the CLI
+    - Can require `C` libraries at link time
 - Static checking
     - Ensure `main` function is present and only one exists
     - Checks for non mutable vairables being mutated
 - CLI for dusk executable
     - Can print help info on how to use it
-- `extern` keyword to load `C` functions from libraries
 - stdlib
     - Casting functions
     - `copy` functions to allocate on the heap
@@ -166,7 +169,6 @@ Options:
     - Automatic Reference Counting
 -  stdlib improvements
     - More abstract datatypes
-        - Blocked until structs are functional
     - More general functionality
         - IO
         - Math functions
@@ -177,7 +179,6 @@ Options:
     - show line that error occured on
 - Tests
 - Documentation webpage
-- Refcounting for heap allocated objects to free them automatically when they go out of scope
 
 ## License
 
