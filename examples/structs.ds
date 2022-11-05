@@ -1,23 +1,3 @@
-struct Bar {
-    //struct fields must have a name and type and a following comma
-    z: int,
-
-    // Constructors can be overloaded for structs
-    fn Bar(self: Bar) -> Bar {
-        self.z = 15;
-        return self;
-    }
-
-    fn Bar(self: Bar, n: int) -> Bar {
-        self.z = n;
-        return self;
-    }
-
-    fn inc(self: Bar) -> Bar {
-        self.z = self.z + 1;
-        return self;
-    }
-}
 struct Foo {
     a: int,
     b: int,
@@ -34,33 +14,35 @@ struct Foo {
         return self;
     }
 
-    fn Foo(self: Foo, n: Bar) -> Foo {
-        self.a = n.z;
-        self.b = 10;
-        return self;
-    }
-
     fn inc(self: Foo) -> Foo {
         self.a = self.a + 1;
         self.b = self.b + 2;
         return self;
     }
+
+    fn _geta(self: Foo) -> int {
+        return self.a;
+    }
+
+    fn _getb(self: Foo) -> int {
+        return self.b;
+    }
+
+    fn __str__(self: Foo) -> string {
+        let mut str: String = String(self._geta()) + String(", ") + String(self._getb());
+        return print_str(str.str);
+    }
 }
 
 
 fn main(argc: int, argv: string*) -> int {
-    let mut b: Bar = Bar(5);
-    let mut s: Foo = Foo(b);
-    print("%ld\n", s.a);
-    print("%ld\n", s.b);
+    let mut s: Foo = Foo(5);
+    print("%s\n", s);
     s.inc();
-    print("%ld\n", s.a);
-    print("%ld\n", s.b);
-    s = s.inc();
-    print("%ld\n", s.a);
-    print("%ld\n", s.b);
-    b.inc(); // The value from b was copied it is not a reference
-    print("%ld\n", s.a);
-    print("%ld\n", s.b);
+    print("%s\n", s);
+    s.inc();
+    print("%s\n", s);
+    s.inc();
+    print("%s\n", s);
     return 0;
 }

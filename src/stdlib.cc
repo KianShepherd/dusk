@@ -110,9 +110,9 @@ extern "C" DLLEXPORT {
     char* itos(long a) {
         std::ostringstream oss;
         oss << a;
-        std::string s = oss.str();
-        const char* b = s.c_str();
-        return copycs(b, s.size() + 1);
+        std::string* s = new std::string(oss.str());
+        const char* b = s->c_str();
+        return copycs(b, s->size() + 1);
     }
 
     char* ltos(long long a) {

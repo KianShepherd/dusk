@@ -1,3 +1,4 @@
+include "vector.ds"
 require "stddusk"
 
 extern copyi(arr: int*, n: int) -> int*;
@@ -51,6 +52,12 @@ struct String {
 
     fn String(self: String, str: string) -> String {
         self.str = new_str_preset(str);
+        return self;
+    }
+
+    fn String(self: String, num: int) -> String {
+        self.str = new_str();
+        self = self + itos(num);
         return self;
     }
 

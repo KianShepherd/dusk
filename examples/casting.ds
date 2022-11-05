@@ -20,14 +20,6 @@ fn main() -> int {
     // string to float
     print("%f\n", stof(str));
 
-    print("To long\n");
-    // int to long
-    print("%ld\n", itol(integer));
-    // float to long
-    print("%ld\n", ftol(floating));
-    // string to long
-    print("%ld\n", stol(str));
-
     print("To string\n");
     // To string methods return heap allocated objects and need to be free when no longer used.
     // int to string
