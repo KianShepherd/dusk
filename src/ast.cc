@@ -49,6 +49,14 @@ void AST::push_function(Function* function) {
     this->func_map[function->name] = function;
 }
 
+void AST::push_include(std::string file) {
+    this->includes.push_back(file);
+}
+
+void AST::push_requires(std::string file) {
+    this->require.push_back(file);
+}
+
 void AST::push_struct(Struct* s) {
     this->structs.push_back(s);
     this->struct_map[s->name] = s;

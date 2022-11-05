@@ -85,9 +85,7 @@ int main(int argc, char** argv) {
     compiler_args.c_compiler = std::string("g++");
     compiler_args.outfile = std::string("out");
 
-    if (development) {
-        compiler_args.sources.push_back("stdlib.ds");
-    }
+    compiler_args.sources.push_back("stdlib.ds");
 
     AST ast = AST();
     if (argc == 1) {
@@ -188,32 +186,47 @@ int main(int argc, char** argv) {
         compiler_args.include_paths.push_back(std::string("/usr/local/include/dusk"));
         compiler_args.sources.push_back("./dusklibs/stdlib.ds");
     }
-    if (compiler_args.debug_compile_command)
-        for (auto& s : compiler_args.sources)
-            std::cout << "Source: " << s << std::endl;
 
-    compiler_args.sources = resolve_paths(&ast, compiler_args.include_paths, compiler_args.sources);
+    std::vector<std::string> already_parsed;
+    int rc = 0;
+    while (true) {
+        if (compiler_args.sources.size() == 0)
+            break;
+        compiler_args.sources = resolve_paths(&ast, compiler_args.include_paths, compiler_args.sources);
 
-    if (compiler_args.debug_compile_command)
-        for (auto& s : compiler_args.sources)
-            std::cout << "Source: " << s << std::endl;
+        for (auto& file : compiler_args.sources) {
+            bool parsed = false;
+            for (auto& p : already_parsed) {
+                if (p.compare(file) == 0)
+                    parsed = true;
+            }
+            if (parsed)
+                continue;
+            yyin = fopen(file.data(), "r");
+            if (!yyin) {
+                std::cerr << "Unable to open " << file << ": " << strerror(errno) << '\n';
+                return 1;
+            }
+            yylineno = 1;
+            rc = yyparse(ast);
+            auto parse_err = std::string("Parse Error in ").append(file.data()).append(": ");
+            if (ast.check_error(parse_err))
+                return rc;
+            already_parsed.push_back(file);
+        }
+        compiler_args.sources = ast.includes;
+        ast.includes.clear();
+    }
 
     if (ast.check_error(std::string("Could not file file: ")))
         return 5;
 
-    int rc = 0;
-    for (auto& file : compiler_args.sources) {
-        yyin = fopen(file.data(), "r");
-        if (!yyin) {
-                std::cerr << "Unable to open " << file << ": " << strerror(errno) << '\n';
-            return 1;
-        }
-        yylineno = 1;
-        rc = yyparse(ast);
-        auto parse_err = std::string("Parse Error in ").append(file.data()).append(": ");
-        if (ast.check_error(parse_err))
-            return rc;
+    for (auto& req : ast.require) {
+        std::string lib = std::string("-l");
+        lib.append(req);
+        compiler_args.libs.push_back(lib);
     }
+
     if (compiler_args.debug_ast) {
         ast.debug();
     }
@@ -240,7 +253,6 @@ int main(int argc, char** argv) {
             compile_str.append("-O3 ");
         for (auto& lib_path : compiler_args.lib_paths)
             compile_str.append(lib_path).append(" ");
-        compile_str.append("-lstddusk ");
         for (auto& lib : compiler_args.libs)
             compile_str.append(lib).append(" ");
 

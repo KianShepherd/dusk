@@ -40,7 +40,7 @@ void yyerror(AST&, const char*);
 
 %token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS MODULO NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
-%token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW DOT
+%token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW DOT INCLUDE REQUIRE
 %token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT
 
 %type<expr>  exp;
@@ -71,6 +71,18 @@ program: %empty
     | error
     | program globalfunction
     | program structdef
+    | program INCLUDE STRING
+    {
+        std::string str = std::string(*($3));
+        str = str.substr(1, str.size() - 2);
+        ast.push_include(str);
+    }
+    | program REQUIRE STRING
+    {
+        std::string str = std::string(*($3));
+        str = str.substr(1, str.size() - 2);
+        ast.push_requires(str);
+    }
     ;
 
 structdef: STRUCT IDENTIFIER LBRACE structfields RBRACE

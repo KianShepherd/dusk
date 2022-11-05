@@ -115,6 +115,8 @@ public:
     AST();
 
     void push_function(Function* function);
+    void push_include(std::string file);
+    void push_requires(std::string file);
     void push_struct(Struct* s);
     void push_err(std::string msg);
 
@@ -138,6 +140,8 @@ public:
     std::vector<std::tuple<std::string, AtomType, std::vector<AtomType>>> func_definitions;
     std::map<std::string, Struct*> struct_map;
     std::map<std::string, Function*> func_map;
+    std::vector<std::string> includes;
+    std::vector<std::string> require;
 private:
     std::vector<Function*> functions;
     std::vector<Struct*> structs;

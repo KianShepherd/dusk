@@ -105,6 +105,9 @@ Usage: dusk [options] file...
 Options:
 -h                Display this information.
 -d                Print out debug information about the AST and LLVM IR.
+-da               Print out debug information about the AST.
+-di               Print out debug information about the LLVM IR.
+-dc               Print out debug information about the compile commands.
 -O                Optimize the generated object / executable.
 -c                Only compile the sources do not link into executable.
 
@@ -113,6 +116,7 @@ Options:
 
 -l<library>       Add library to link to executable at compile time.
 -L<path>          Add path to library link paths.
+-I<path>          Add path to include file paths.
 ```
 
 ## Current Functionality
@@ -149,10 +153,17 @@ Options:
     - `copy` functions to allocate on the heap
     - `del` function to delete heap allocated objects
     - `print` function, takes C style format strings
+- Structs
+    - Member fields
+    - Heap allocated
+    - Constructor overloading
+    - Operator overloading
 
 ## Planned Functionality
 
 - Structs
+    - Overloading for all methods
+    - Automatic Reference Counting
 -  stdlib improvements
     - More abstract datatypes
         - Blocked until structs are functional
