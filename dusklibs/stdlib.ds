@@ -1,4 +1,5 @@
 require "stddusk"
+include "types.ds"
 
 extern copyi(arr: int*, n: int) -> int*;
 extern copyd(arr: float*, n: int) -> float*;
@@ -30,52 +31,3 @@ extern stof(a: string) -> float;
 
 extern input() -> string;
 extern readfile(filename: string) -> string;
-
-
-struct String {
-    extern new_str() -> void*;
-    extern new_str_preset(text: string) -> void*;
-    extern print_str(str: void*) -> string;
-    extern append_str_c(str: void*, text: string);
-    extern append_str_s(str: void*, text: void*);
-    extern to_string(str: void*) -> string;
-    extern count_substr(str: string, substr: string) -> int;
-    extern split(str: string, on: string) -> string*;
-
-    str: void*,
-
-    fn String(self: String) -> String {
-        self.str = new_str();
-        return self;
-    }
-
-    fn String(self: String, str: string) -> String {
-        self.str = new_str_preset(str);
-        return self;
-    }
-
-    fn String(self: String, num: int) -> String {
-        self.str = new_str();
-        self = self + itos(num);
-        return self;
-    }
-
-    fn __str__(self: String) -> string {
-        return print_str(self.str);
-    }
-
-    fn __add__(self: String, text: string) -> String {
-        append_str_c(self.str, text);
-        return self;
-    }
-
-    fn __add__(self: String, text: String) -> String {
-        append_str_s(self.str, text.str);
-        return self;
-    }
-
-    fn __add__(text: string, self: String) -> String {
-        append_str_s(self.str, text);
-        return self;
-    }
-}
