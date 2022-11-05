@@ -20,7 +20,7 @@ LLVM is used as a backend to generate machine specific object files which are th
 
 ## Dependencies
 
-This project requires `flex`, `bison`, `llvm`, `clang` and a `c`/`c++` compiler.
+This project requires `flex`, `bison`, `llvm`, and a `c`/`c++` compiler.
 
 The examples for building this project also include `ninja`, but that is an optional dependency.
 
