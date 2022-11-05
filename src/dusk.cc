@@ -2,6 +2,7 @@
 #include "ast.hh"
 #include "expression.hh"
 #include <string>
+#include <fstream>
 
 #define development 1
 
@@ -19,6 +20,7 @@ void print_help() {
     std::cout << "-d                Print out debug information about the AST and LLVM IR." << std::endl;
     std::cout << "-da               Print out debug information about the AST." << std::endl;
     std::cout << "-di               Print out debug information about the LLVM IR." << std::endl;
+    std::cout << "-dc               Print out debug information about the compile commands." << std::endl;
     std::cout << "-O                Optimize the generated object / executable." << std::endl;
     std::cout << "-c                Only compile the sources do not link into executable." << std::endl << std::endl;
 
@@ -27,6 +29,35 @@ void print_help() {
 
     std::cout << "-l<library>       Add library to link to executable at compile time." << std::endl;
     std::cout << "-L<path>          Add path to library link paths." << std::endl;
+    std::cout << "-I<path>          Add path to include file paths." << std::endl;
+}
+
+inline bool file_exists(std::string path) {
+    std::ifstream f(path.c_str());
+    return f.good();
+}
+
+std::vector<std::string> resolve_paths(AST* ast, std::vector<std::string> load_paths, std::vector<std::string> sources) {
+    std::vector<std::string> resolved_paths = std::vector<std::string>();
+
+    for (int i = 0; i < sources.size(); i++) {
+        if (file_exists(sources[i])) {
+            resolved_paths.push_back(sources[i]);
+        } else {
+            for (int j = 0; j < load_paths.size(); j++) {
+                std::string tmp_path = load_paths[j];
+                tmp_path.append(sources[i]);
+                if (file_exists(tmp_path)) {
+                    resolved_paths.push_back(tmp_path);
+                    break;
+                }
+            }
+        }
+    }
+    if (sources.size() !=  resolved_paths.size())
+        ast->push_err("Could not find all files specified.");
+
+    return resolved_paths;
 }
 
 int main(int argc, char** argv) {
@@ -37,26 +68,25 @@ int main(int argc, char** argv) {
         std::vector<std::string> sources;
         std::vector<std::string> libs;
         std::vector<std::string> lib_paths;
+        std::vector<std::string> include_paths;
         std::string outfile;
         std::string c_compiler;
         bool only_compile;
         bool optimizations;
         bool debug_ast;
         bool debug_ir;
+        bool debug_compile_command;
     } compiler_args;
     compiler_args.optimizations = false;
     compiler_args.debug_ast = false;
     compiler_args.debug_ir = false;
+    compiler_args.debug_compile_command = false;
     compiler_args.only_compile = false;
     compiler_args.c_compiler = std::string("g++");
     compiler_args.outfile = std::string("out");
 
     if (development) {
-        compiler_args.sources.push_back("./dusklibs/stdlib.ds");
-        compiler_args.lib_paths.push_back("-L./CMake ");
-    } else {
-        // TODO: Actually install this somewhere and load from there.
-        compiler_args.sources.push_back("./dusklibs/stdlib.ds");
+        compiler_args.sources.push_back("stdlib.ds");
     }
 
     AST ast = AST();
@@ -82,6 +112,7 @@ int main(int argc, char** argv) {
         if (cur_arg.compare("-d") == 0) {
             compiler_args.debug_ast = true;
             compiler_args.debug_ir = true;
+            compiler_args.debug_compile_command = true;
             args++;
             continue;
         }
@@ -92,6 +123,11 @@ int main(int argc, char** argv) {
         }
         if (cur_arg.compare("-di") == 0) {
             compiler_args.debug_ir = true;
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-dc") == 0) {
+            compiler_args.debug_compile_command = true;
             args++;
             continue;
         }
@@ -115,6 +151,14 @@ int main(int argc, char** argv) {
             args++;
             continue;
         }
+        if (cur_arg.substr(0, 2).compare("-I") == 0) {
+            std::string path = cur_arg.substr(2, cur_arg.size() - 2);
+            if (path.back() != '/')
+                path.append("/");
+            compiler_args.include_paths.push_back(path);
+            args++;
+            continue;
+        }
         if (cur_arg.compare("-cc") == 0) {
             args++;
             if (args == argc) {
@@ -133,6 +177,29 @@ int main(int argc, char** argv) {
         compiler_args.sources.push_back(cur_arg);
         args++;
     }
+    if (development) {
+        compiler_args.include_paths.push_back(std::string("./dusklibs/"));
+        compiler_args.lib_paths.push_back("-L./CMake ");
+    } else {
+        // TODO: Actually install this somewhere and load from there.
+        // This will have to be done for all std libraries
+        // /usr/local/lib/libstddusk.a
+        // /usr/local/include/dusk/stdlib.ds
+        compiler_args.include_paths.push_back(std::string("/usr/local/include/dusk"));
+        compiler_args.sources.push_back("./dusklibs/stdlib.ds");
+    }
+    if (compiler_args.debug_compile_command)
+        for (auto& s : compiler_args.sources)
+            std::cout << "Source: " << s << std::endl;
+
+    compiler_args.sources = resolve_paths(&ast, compiler_args.include_paths, compiler_args.sources);
+
+    if (compiler_args.debug_compile_command)
+        for (auto& s : compiler_args.sources)
+            std::cout << "Source: " << s << std::endl;
+
+    if (ast.check_error(std::string("Could not file file: ")))
+        return 5;
 
     int rc = 0;
     for (auto& file : compiler_args.sources) {
@@ -179,7 +246,7 @@ int main(int argc, char** argv) {
 
         compile_str.append("-o ").append(compiler_args.outfile);
 
-        if (compiler_args.debug_ast && compiler_args.debug_ir)
+        if (compiler_args.debug_compile_command)
             std::cout << compile_str << std::endl;
 
         // Compile the generated object file into an executable

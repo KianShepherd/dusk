@@ -570,7 +570,6 @@ Expression* BinaryExpression::fold(AST* ast) {
     this->lhs = this->lhs->fold(ast);
     this->rhs = this->rhs->fold(ast);
     if (this->lhs->get_atomic_type(ast) == t_struct || this->rhs->get_atomic_type(ast) == t_struct) {
-        std::cout << "LHS" << std::endl;
         std::string f_name = std::string("");
         if (this->lhs->get_atomic_type_keep_identifier(ast) == t_identifier && this->lhs->get_atomic_type(ast) == t_struct) {
             f_name.append(ast->scope->get_value_struct(((ExpressionAtomic*)this->lhs)->str));
@@ -591,7 +590,6 @@ Expression* BinaryExpression::fold(AST* ast) {
         } else {
             f_name.append(type_string(ast, this->lhs->get_atomic_type(ast)));
         }
-        std::cout << "RHS" << std::endl;
         if (this->rhs->get_atomic_type_keep_identifier(ast) == t_identifier && this->rhs->get_atomic_type(ast) == t_struct) {
             f_name.append(ast->scope->get_value_struct(((ExpressionAtomic*)this->rhs)->str));
         } else if (((ExpressionAtomic*)this->rhs)->type == t_function_call) {
@@ -612,7 +610,6 @@ Expression* BinaryExpression::fold(AST* ast) {
             f_name.append(type_string(ast, this->rhs->get_atomic_type(ast)));
         }
         
-        std::cout << "type" << std::endl;
         switch (this->type) {
             case op_add:           f_name.append("__add__"); break;
             case op_sub:           f_name.append("__sub__"); break;

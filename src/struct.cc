@@ -175,7 +175,6 @@ void Struct::push_function(Function* func) {
     }
 
     if (!bin_op) {
-        std::cout << "not binop" << std::endl;
         if (((ExpressionAtomic*)func->indentifiers[0])->str.compare(std::string("self")) != 0 || func->indentifier_type[0] != t_struct) {
             auto err_msg = std::string("All struct member functions must start with the argument self and matching type (");
             err_msg.append(std::string(this->name));
@@ -195,7 +194,6 @@ void Struct::push_function(Function* func) {
         func->name = func_name;
         this->member_functions.push_back(func);
     } else {
-        std::cout << "binop" << std::endl;
         if (func->arg_count != 2)
             this->ast->push_err(std::string("Binary operators only allow 2 arguments."));
         std::string func_name = func->func_args_to_str();
