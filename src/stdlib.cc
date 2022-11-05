@@ -15,10 +15,6 @@
 #endif
 
 
-void im(std::vector<long>* vec, long n) {
-    vec->insert(vec->begin(), n);
-}
-
 extern "C" DLLEXPORT {
 
     long* copyi(long* arr, long n) {
@@ -179,67 +175,6 @@ extern "C" DLLEXPORT {
         vprintf(fmt, args);
         va_end(args);
         return 0;
-    }
-
-    char* ivec_str(void* vec) {
-        std::ostringstream str;
-        str << "[ ";
-        auto v = *((std::vector<long>*) vec);
-        for (int i = 0; i < v.size(); i++) {
-            str << v[i];
-            if (i != v.size() - 1) {
-                str << ", ";
-            }
-        }
-        str << " ]";
-        auto stri = new std::string(str.str());
-        return (char*)(void*)stri->c_str();
-    }
-
-    char* fvec_str(void* vec) {
-        std::ostringstream str;
-        str << "[ ";
-        auto v = *((std::vector<double>*) vec);
-        for (int i = 0; i < v.size(); i++) {
-            str << v[i];
-            if (i != v.size() - 1) {
-                str << ", ";
-            }
-        }
-        str << " ]";
-        auto stri = new std::string(str.str());
-        return (char*)(void*)stri->c_str();
-    }
-    
-    void* intvec() {
-        return new std::vector<long>();
-    }
-
-    void ipush_back(void* vec, long n) {
-        (*(std::vector<long>*)vec).push_back(n);
-    }
-
-    void ipush_front(void* vec, long n) {
-        ((std::vector<long>*)vec)->insert(((std::vector<long>*)vec)->begin(), n);
-    }
-
-    long getveci(void* vec, long idx) {
-        return ((*(std::vector<long>*)vec)[idx]);
-    }
-    void* floatvec() {
-        return new std::vector<double>();
-    }
-
-    void fpush_back(void* vec, double n) {
-        (*(std::vector<double>*)vec).push_back(n);
-    }
-
-    void fpush_front(void* vec, double n) {
-        ((std::vector<double>*)vec)->insert(((std::vector<double>*)vec)->begin(), n);
-    }
-
-    double getvecf(void* vec, long idx) {
-        return (*(std::vector<double>*)vec)[idx];
     }
 
     void append_str_c(void* str, char* text) {

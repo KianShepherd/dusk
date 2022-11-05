@@ -1,3 +1,5 @@
+include "vector.ds"
+
 fn main() -> int {
     // All vectors are heap allocated and therefore need to be freed their type regardless of stored
     // value type is void*
