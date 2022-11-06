@@ -26,6 +26,12 @@ struct String {
         return self;
     }
 
+    fn String(self: String, num: float) -> String {
+        self.str = new_str();
+        self = self + ftos(num);
+        return self;
+    }
+
     fn __str__(self: String) -> string {
         return print_str(self.str);
     }

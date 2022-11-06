@@ -117,51 +117,49 @@ std::tuple<std::string, AtomType, std::vector<AtomType>> Function::get_meta() {
     return std::make_tuple(this->name, this->type, this->indentifier_type);
 }
 void Function::debug() {
-    switch (this->type) {
-        case t_number: std::cout << "int"; break;
-        case t_long: std::cout << "long"; break;
-        case t_char: std::cout << "char"; break;
-        case t_float: std::cout << "float"; break;
-        case t_string: std::cout << "str"; break;
-        case t_struct: std::cout << "struct " << this->struct_name; break;
-        case t_null: std::cout << "void"; break;
-        case t_bool: std::cout << "bool"; break;
-        case t_number_arr: std::cout << " int*"; break;
-        case t_float_arr: std::cout << " float*"; break;
-        case t_bool_arr: std::cout << " bool*"; break;
-        case t_string_arr: std::cout << " string*"; break;
-        default: std::cerr << "Unknown function type"; break;
-    }
-    std::cout << " function " << this->name <<  std::endl;
-    std::cout << this->arg_count << " argument" << ((this->arg_count != 1)? std::string("s") : std::string("")) << std::endl;
-    int struct_count = 0;
-    for (size_t i = 0; i < this->arg_count; i++) {
-        if (i != 0)
-            std::cout << ", ";
-        if (this->indentifiers_mutability[i]) {
-            std::cout << "mut ";
-        }
-        std::cout << ((ExpressionAtomic*)this->indentifiers[i])->str << " :";
-        switch (this->indentifier_type[i]) {
-            case t_number: std::cout << " int"; break;
-            case t_long: std::cout << " long"; break;
-            case t_char: std::cout << " char"; break;
-            case t_float: std::cout << " float"; break;
-            case t_bool: std::cout << " bool"; break;
-            case t_string: std::cout << " string"; break;
-            case t_struct: std::cout << " struct " << this->struct_names[struct_count++]; break;
+    if (this->statements) {
+        switch (this->type) {
+            case t_number: std::cout << "int"; break;
+            case t_long: std::cout << "long"; break;
+            case t_char: std::cout << "char"; break;
+            case t_float: std::cout << "float"; break;
+            case t_string: std::cout << "str"; break;
+            case t_struct: std::cout << "struct " << this->struct_name; break;
+            case t_null: std::cout << "void"; break;
+            case t_bool: std::cout << "bool"; break;
             case t_number_arr: std::cout << " int*"; break;
             case t_float_arr: std::cout << " float*"; break;
             case t_bool_arr: std::cout << " bool*"; break;
             case t_string_arr: std::cout << " string*"; break;
-            default: break;
+            default: std::cerr << "Unknown function type"; break;
         }
-    }
-    std::cout << std::endl;
-    if (this->statements) {
+        std::cout << " function " << this->name <<  std::endl;
+        std::cout << this->arg_count << " argument" << ((this->arg_count != 1)? std::string("s") : std::string("")) << std::endl;
+        int struct_count = 0;
+        for (size_t i = 0; i < this->arg_count; i++) {
+            if (i != 0)
+                std::cout << ", ";
+            if (this->indentifiers_mutability[i]) {
+                std::cout << "mut ";
+            }
+            std::cout << ((ExpressionAtomic*)this->indentifiers[i])->str << " :";
+            switch (this->indentifier_type[i]) {
+                case t_number: std::cout << " int"; break;
+                case t_long: std::cout << " long"; break;
+                case t_char: std::cout << " char"; break;
+                case t_float: std::cout << " float"; break;
+                case t_bool: std::cout << " bool"; break;
+                case t_string: std::cout << " string"; break;
+                case t_struct: std::cout << " struct " << this->struct_names[struct_count++]; break;
+                case t_number_arr: std::cout << " int*"; break;
+                case t_float_arr: std::cout << " float*"; break;
+                case t_bool_arr: std::cout << " bool*"; break;
+                case t_string_arr: std::cout << " string*"; break;
+                default: break;
+            }
+        }
+        std::cout << std::endl;
         this->statements->debug(0);
-    } else {
-        std::cout << "PROTO\n";
     }
 }
 

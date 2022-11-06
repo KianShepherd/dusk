@@ -11,6 +11,7 @@ struct String {
         }
         return vec;
     }
+
     fn split<float>(self: String, on: string) -> Vec<float> {
         let mut vec: Vec<float> = Vec<float>();
         let str: string = to_string(self.str);
