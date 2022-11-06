@@ -197,6 +197,15 @@ AtomType ExpressionAtomic::get_atomic_type(AST* ast) {
         AtomType value = ast->scope->get_value(this->str);
         if (value == t_null)
             ast->push_err("Attempted to lookup unknown identifier.");
+        if (this->index) {
+            if (value == t_string_arr) {
+                value = t_string;
+            } else if (value == t_number_arr) {
+                value = t_string;
+            } else if (value == t_float_arr) {
+                value = t_string;
+            }
+        }
         return value;
     } else if (this->type == t_function_call) {
         for (auto &func : ast->func_definitions) {
@@ -282,7 +291,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
         for (int i = 0; i < this->args.size(); i++) {
             auto arg = this->args[i];
             arg = arg->fold(ast);
-            if (this->str.compare("print") == 0) {
+            if (this->str.compare("print") == 0 || this->str.compare("println") == 0) {
                 if (arg->get_atomic_type_keep_identifier(ast) == t_identifier && arg->get_atomic_type(ast) == t_struct) {
                     std::string f_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
                     f_name.append("__str__");
@@ -439,7 +448,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
 
             std::vector<llvm::Value*> ArgsV;
             for (unsigned i = 0, e = this->args.size(); i != e; ++i) {
-                if (this->str.compare("print") != 0) {
+                if (this->str.compare("print") != 0 && this->str.compare("println") != 0) {
                     ArgsV.push_back(this->args[i]->codegen(ast, arg_type[i]));
                 } else {
                     ArgsV.push_back(this->args[i]->codegen(ast, t_null));

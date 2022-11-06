@@ -155,6 +155,14 @@ void AST::stdlib() {
         "print",
         this->TheModule.get()
     );
+    func_args = std::vector<llvm::Type*>();
+    func_args.push_back(llvm::Type::getInt8PtrTy(*(this->TheContext)));
+    llvm::Function::Create(
+        llvm::FunctionType::get(llvm::Type::getInt64Ty(*(this->TheContext)), func_args, true),
+        llvm::Function::ExternalLinkage,
+        "println",
+        this->TheModule.get()
+    );
 }
 
 void AST::codegen(char debug, bool optimizations, std::string outfile) {

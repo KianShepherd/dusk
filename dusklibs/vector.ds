@@ -22,6 +22,74 @@ struct String {
         }
         return vec;
     }
+
+    fn split<String>(self: String, on: string) -> Vec<String> {
+        let mut vec: Vec<String> = Vec<String>();
+        let str: string = to_string(self.str);
+        let count: int = count_substr(str, on) + 1;
+        let split_str: string* = split(str, on);
+        for (let mut i: int = 0; i < count; i++) {
+            let mut tmp_ss: string = split_str[i];
+            let mut ss: String = String(tmp_ss);
+            vec.append(ss);
+        }
+        return vec;
+    }
+}
+
+struct Vec<String> {
+    extern vpvec() -> void*;
+    extern vppush_back(vec: void*, val: void*);
+    extern vppush_front(vec: void*, val: void*);
+    extern getvecvp(vec: void*, idx: int) -> void*;
+
+    vector: void*,
+    size: int,
+
+    fn Vec<String>(self: Vec<String>) -> Vec<String> {
+        self.vector = vpvec();
+        self.size = 0;
+        return self;
+    }
+    
+    fn size(self: Vec<String>) -> int {
+        return self.size;
+    }
+
+    fn append(self: Vec<String>, n: String) {
+        vppush_back(self.vector, n);
+        self.size = self.size + 1;
+    }
+
+    fn prepend(self: Vec<String>, n: String) {
+        vppush_front(self.vector, n);
+        self.size = self.size + 1;
+    }
+
+    fn get(self: Vec<String>, idx: int) -> String {
+        return getvecvp(self.vector, idx);
+    }
+
+    fn extend(self: Vec<String>, vec: Vec<String>) {
+        let size: int = vec.size();
+        for (let mut i: int = 0; i < size; i++) {
+            vppush_back(self.vector, vec.get(i));
+        }
+    }
+
+    fn __str__(self: Vec<String>) -> string {
+        let size: int = self.size();
+        let mut ret: String = String("[ ");
+        for (let mut i: int = 0; i < size; i++) {
+            let mut tmp_str: String = self.get(i); 
+            ret = ret + "'" + print_str(tmp_str.str) + "'";
+            if (i < self.size() - 1) {
+                ret = ret + ", ";
+            }
+        }
+        ret = ret + " ]";
+        return print_str(ret.str);
+    }
 }
 
 struct Vec<int> {

@@ -177,6 +177,15 @@ extern "C" DLLEXPORT {
         return 0;
     }
 
+    long println(char* fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        vprintf(fmt, args);
+        va_end(args);
+        printf("\n");
+        return 0;
+    }
+
     void append_str_c(void* str, char* text) {
         ((std::string*)str)->append(text);
     }

@@ -134,6 +134,10 @@ Options:
         - int array
         - float array
         - string arrays
+    - Vector Types under `vector.ds`
+        - String
+        - int
+        - float
     - User Defined Structs
         - Member fields
         - Heap allocated

@@ -75,4 +75,20 @@ extern "C" {
     double getvecf(void* vec, long idx) {
         return (*(std::vector<double>*)vec)[idx];
     }
+
+    void* vpvec() {
+        return new std::vector<void*>();
+    }
+
+    void vppush_back(void* vec, void* n) {
+        (*(std::vector<void*>*)vec).push_back(n);
+    }
+
+    void vppush_front(void* vec, void* n) {
+        ((std::vector<void*>*)vec)->insert(((std::vector<void*>*)vec)->begin(), n);
+    }
+
+    void* getvecvp(void* vec, long idx) {
+        return ((*(std::vector<void*>*)vec)[idx]);
+    }
 }
