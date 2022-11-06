@@ -14,7 +14,31 @@
 #define DLLEXPORT
 #endif
 
+void* newstruct(long size) {
+    return calloc(1, (size_t)size);
+}
+
+struct __InternString {
+    void* str;
+};
+
 extern "C" {
+    long vec_split(char* str, char* split_on, void* vec) {
+        std::stringstream test(str);
+        std::string segment;
+        while(std::getline(test, segment, (char)split_on[0]))
+        {
+            __InternString* string_struct = new __InternString();
+            string_struct->str = (void*)new std::string(segment);
+            (*(std::vector<void*>*)vec).push_back((void*)string_struct);
+        }
+        return (long)((std::vector<void*>*)vec)->size();
+    }
+
+    long vec_size(void* vec) {
+        return (long)((std::vector<void*>*)vec)->size();
+    }
+
     char* ivec_str(void* vec) {
         std::ostringstream str;
         str << "[ ";

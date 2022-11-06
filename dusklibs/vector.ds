@@ -1,6 +1,8 @@
 require "duskvec"
 
 struct String {
+    extern vec_split(str: string, on: string, vec: void*) -> int;
+
     fn split<int>(self: String, on: string) -> Vec<int> {
         let mut vec: Vec<int> = Vec<int>();
         let str: string = to_string(self.str);
@@ -26,11 +28,7 @@ struct String {
     fn split<String>(self: String, on: string) -> Vec<String> {
         let mut vec: Vec<String> = Vec<String>();
         let str: string = to_string(self.str);
-        let count: int = count_substr(str, on) + 1;
-        let split_str: string* = split(str, on);
-        for (let mut i: int = 0; i < count; i++) {
-            vec.append(String(split_str[i]));
-        }
+        vec.size = vec_split(str, on, vec.vector);
         return vec;
     }
 }

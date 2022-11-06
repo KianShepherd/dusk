@@ -70,7 +70,8 @@ void AST::push_struct(Struct* s) {
             }
         }
         for (int i = 0; i < (int)s->member_functions.size(); i++) {
-            s->member_functions[i]->name = s->member_functions[i]->name.substr(s->name.size(), s->member_functions[i]->name.size() - 1);
+            if (s->member_functions[i]->statements)
+                s->member_functions[i]->name = s->member_functions[i]->name.substr(s->name.size(), s->member_functions[i]->name.size() - 1);
             this->struct_map[s->name]->push_function(s->member_functions[i]);
         }
     }
