@@ -120,6 +120,7 @@ void Struct::push_var(std::string name, AtomType type) {
     this->mem_size += atom_to_size(type);
     this->field_type_map[name] = llvm_type;
     this->struct_var_map[name] = type;
+    this->struct_var_type_map[name] = type;
 
 }
 
@@ -138,6 +139,7 @@ void Struct::push_var(std::string name, AtomType type, std::string struct_name) 
     }
     this->field_type_map[name] = llvm_type;
     this->struct_var_map[name] = type;
+    this->struct_var_type_map[name] = type;
 }
 
 void Struct::push_function(Function* func) {

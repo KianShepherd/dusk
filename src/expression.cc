@@ -213,7 +213,7 @@ AtomType ExpressionAtomic::get_atomic_type(AST* ast) {
                 return std::get<1>(func);
         }
     } else if (this->type == t_get_struct) {
-        // TODO
+        return this->struct_t->struct_var_type_map[this->str];
     }
     return this->type;
 }
@@ -341,7 +341,17 @@ std::string ExpressionAtomic::type_str(AST* ast) {
         case t_identifier: {
             if (ast->scope->get_value(this->str) == t_struct)
                 return ast->scope->get_value_struct(this->str);
-            return type_string(ast, ast->scope->get_value(this->str));
+            auto type = type_string(ast, ast->scope->get_value(this->str));
+            if (this->index) {
+                if (type.compare("string*") == 0) {
+                    type = std::string("string");
+                } else if (type.compare("int*") == 0) {
+                    type = std::string("int");
+                } else if (type.compare("float*") == 0) {
+                    type = std::string("float");
+                }
+            }
+            return type;
         }
         case t_function_call: {
             if (ast->struct_map[this->str] != nullptr)

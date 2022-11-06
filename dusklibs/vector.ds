@@ -29,9 +29,7 @@ struct String {
         let count: int = count_substr(str, on) + 1;
         let split_str: string* = split(str, on);
         for (let mut i: int = 0; i < count; i++) {
-            let mut tmp_ss: string = split_str[i];
-            let mut ss: String = String(tmp_ss);
-            vec.append(ss);
+            vec.append(String(split_str[i]));
         }
         return vec;
     }
@@ -80,10 +78,9 @@ struct Vec<String> {
     fn __str__(self: Vec<String>) -> string {
         let size: int = self.size();
         let mut ret: String = String("[ ");
-        for (let mut i: int = 0; i < size; i++) {
-            let mut tmp_str: String = self.get(i); 
-            ret = ret + "'" + print_str(tmp_str.str) + "'";
-            if (i < self.size() - 1) {
+        for (let mut i: int = 0; i < self.size; i++) {
+            ret = ret + "'" + self.get(i) + "'";
+            if (i < self.size - 1) {
                 ret = ret + ", ";
             }
         }
@@ -127,8 +124,7 @@ struct Vec<int> {
     }
 
     fn extend(self: Vec<int>, vec: Vec<int>) {
-        let size: int = vec.size();
-        for (let mut i: int = 0; i < size; i++) {
+        for (let mut i: int = 0; i < vec.size; i++) {
             ipush_back(self.vector, vec.get(i));
         }
     }
@@ -173,8 +169,7 @@ struct Vec<float> {
     }
 
     fn extend(self: Vec<float>, vec: Vec<float>) {
-        let size: int = vec.size();
-        for (let mut i: int = 0; i < size; i++) {
+        for (let mut i: int = 0; i < vec.size; i++) {
             fpush_back(self.vector, vec.get(i));
         }
     }
