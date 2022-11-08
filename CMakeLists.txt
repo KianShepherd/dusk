@@ -54,10 +54,10 @@ set(HEADER_FILES
     include/struct.hh
 )
 
-add_library(stddusk src/stdlib.cc)
-add_library(duskvec src/duskvec.cc)
-add_library(duskio src/duskio.cc)
-add_library(duskmath src/duskmath.cc)
+add_library(stddusk stdlib/stdlib.cc)
+add_library(duskvec stdlib/duskvec.cc)
+add_library(duskio stdlib/duskio.cc)
+add_library(duskmath stdlib/duskmath.cc)
 add_executable(dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
 
 llvm_map_components_to_libnames(all)
