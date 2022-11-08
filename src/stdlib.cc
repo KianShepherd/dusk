@@ -153,38 +153,6 @@ extern "C" DLLEXPORT {
         return out;
     }
 
-    char* input() {
-        std::string strtmp;
-        std::getline(std::cin, strtmp);
-        char* tmp = copycs(strtmp.c_str(), (int)strtmp.size());
-        return tmp;
-    }
-    
-    char* readfile(char* filename) {
-        std::ifstream t(filename);
-        std::stringstream buffer;
-        buffer << t.rdbuf();
-        std::string content = buffer.str();
-        return copycs(content.c_str(), content.size());
-    }
-
-    // print
-    long print(char* fmt, ...) {
-        va_list args;
-        va_start(args, fmt);
-        vprintf(fmt, args);
-        va_end(args);
-        return 0;
-    }
-
-    long println(char* fmt, ...) {
-        va_list args;
-        va_start(args, fmt);
-        vprintf(fmt, args);
-        va_end(args);
-        printf("\n");
-        return 0;
-    }
 
     void append_str_c(void* str, char* text) {
         ((std::string*)str)->append(text);

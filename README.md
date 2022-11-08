@@ -143,6 +143,7 @@ Options:
         - Heap allocated
         - Constructor overloading
         - Operator overloading
+        - Method Overloading
 - Functions
     - `main` as entry point
         - accepts and handles command line arguments
@@ -160,20 +161,26 @@ Options:
     - Checks for non mutable vairables being mutated
 - CLI for dusk executable
     - Can print help info on how to use it
-- stdlib
-    - Casting functions
-    - `copy` functions to allocate on the heap
-    - `del` function to delete heap allocated objects
-    - `print` function, takes C style format strings
-    - `String` struct for better string datatypes support
-    - Various `Vec` types.
-    - `print` and `input` functions
-    - `readfile` function
+- Standard Library
+    - Base standard library functions
+        - Casting functions
+        - `copy` functions to allocate on the heap
+        - `del` function to delete heap allocated objects
+    - `types.ds` (Part of the base standard library)
+        - `String` struct for better string datatypes support
+    - `stdio.ds` (Part of the base standart library)
+        - `print` function, takes C style format strings
+        - `print` and `input` functions
+        - `readfile` function
+    - `vector.ds`
+        - Various `Vec` types.
+            - Vec<int>
+            - Vec<float>
+            - Vec<String>
 
 ## Planned Functionality
 
 - Structs
-    - Overloading for all methods
     - Automatic Reference Counting
 -  stdlib improvements
     - More abstract datatypes

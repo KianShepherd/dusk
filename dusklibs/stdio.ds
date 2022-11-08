@@ -1,0 +1,4 @@
+require "stdio"
+
+extern input() -> string;
+extern readfile(filename: string) -> string;

@@ -1,5 +1,6 @@
 require "stddusk"
 include "types.ds"
+include "stdio.ds"
 
 extern copyi(arr: int*, n: int) -> int*;
 extern copyd(arr: float*, n: int) -> float*;
@@ -29,5 +30,3 @@ extern ltos(a: long) -> string;
 extern stoi(a: string) -> int;
 extern stof(a: string) -> float;
 
-extern input() -> string;
-extern readfile(filename: string) -> string;
