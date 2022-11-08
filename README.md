@@ -168,6 +168,7 @@ Options:
         - `del` function to delete heap allocated objects
     - `types.ds` (Part of the base standard library)
         - `String` struct for better string datatypes support
+        - `BigInt` struct for numbers of unbounded size
     - `stdio.ds` (Part of the base standard library)
         - `print` function, takes C style format strings
         - `input` function
