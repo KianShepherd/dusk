@@ -76,6 +76,8 @@ public:
 
     virtual llvm::Value* codegen(AST* ast, AtomType type) = 0;
     virtual std::string type_str(AST* ast) { return std::string(""); };
+
+    virtual std::string get_atomic_type_str(AST* ast) { return std::string(""); };
 };
 
 class ExpressionAtomic : public Expression {
@@ -104,6 +106,7 @@ public:
 
     llvm::Value* codegen(AST* ast, AtomType type) override;
     std::string type_str(AST* ast) override;
+    std::string get_atomic_type_str(AST* ast) override;
 
     std::string str;
     double floating;
@@ -135,6 +138,7 @@ public:
 
     llvm::Value* codegen(AST* ast, AtomType type) override;
     std::string type_str(AST* ast) override;
+    std::string get_atomic_type_str(AST* ast) override;
 private:
     Expression* lhs;
     Expression* rhs;
@@ -153,6 +157,7 @@ public:
 
     llvm::Value* codegen(AST* ast, AtomType type) override;
     std::string type_str(AST* ast) override;
+    std::string get_atomic_type_str(AST* ast) override;
 private:
     Expression* operand;
     std::string op;
@@ -172,6 +177,7 @@ public:
 
     llvm::Value* codegen(AST* ast, AtomType type) override;
     std::string type_str(AST* ast) override;
+    std::string get_atomic_type_str(AST* ast) override;
 private:
     class Expression* identifier;
     class Expression* value;
@@ -192,4 +198,5 @@ public:
 
     llvm::Value* codegen(AST* ast, AtomType type) override;
     std::string type_str(AST* ast) override;
+    std::string get_atomic_type_str(AST* ast) override;
 };

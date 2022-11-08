@@ -70,9 +70,10 @@ void AST::push_struct(Struct* s) {
             }
         }
         for (int i = 0; i < (int)s->member_functions.size(); i++) {
-            if (s->member_functions[i]->statements)
-                s->member_functions[i]->name = s->member_functions[i]->name.substr(s->name.size(), s->member_functions[i]->name.size() - 1);
-            this->struct_map[s->name]->push_function(s->member_functions[i]);
+            this->struct_map[s->name]->push_function_pre(s->member_functions[i]);
+        }
+        for (int i = 0; i < (int)s->constructors.size(); i++) {
+            this->struct_map[s->name]->push_constructor(s->constructors[i]);
         }
     }
 }

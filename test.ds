@@ -1,8 +1,37 @@
 include "vector.ds"
 
+struct Foo {
+    a: int,
+    b: float,
+
+    fn Foo(self: Foo) -> Foo {
+        self.a = 0;
+        self.b = 0.0;
+        return self;
+    }
+
+    fn inc(self: Foo, n: int) {
+        self.a = self.a + n;
+    }
+
+    fn inc(self: Foo, n: float) {
+        self.b = self.b + n;
+    }
+
+    fn __str__(self: Foo) -> string {
+        return (String(self.a) + " " + String(self.b)).to_str();
+    }
+}
+
 fn main(argc: int, argv: string*) -> int {
     let mut str: String = String("abc def ghi jkl mno pqr");
     let mut vec: Vec<String> = str.split<String>(" ");
     println(vec);
+
+    let mut f: Foo = Foo();
+    println(f);
+    f.inc(3);
+    f.inc(2.5);
+    println(f);
     return 0;
 }

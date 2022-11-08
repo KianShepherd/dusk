@@ -142,6 +142,14 @@ void Struct::push_var(std::string name, AtomType type, std::string struct_name) 
     this->struct_var_type_map[name] = type;
 }
 
+void Struct::push_function_pre(Function* func) {
+    this->member_functions.push_back(func);
+}
+
+void Struct::push_constructor(Function* func) {
+    this->constructors.push_back(func);
+}
+
 void Struct::push_function(Function* func) {
     if (!func->statements) {
         this->member_functions.push_back(func);
@@ -189,11 +197,13 @@ void Struct::push_function(Function* func) {
             return;
         }
         std::string func_name = std::string(this->name).append(func->name);
+        if (func->name.compare("__str__") != 0)
+            func_name.append(func->func_args_to_str());
         this->func_idents.push_back(func_name);
+        func->name = func_name;
         this->gen_field_map[func_name] = -1;
         int field_idx = this->member_functions.size();
         this->field_map[func_name] = std::tuple<int, int>(1, field_idx);
-        func->name = func_name;
         this->member_functions.push_back(func);
     } else {
         if (func->arg_count != 2)

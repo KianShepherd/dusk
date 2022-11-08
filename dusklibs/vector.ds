@@ -74,7 +74,6 @@ struct Vec<String> {
     }
 
     fn __str__(self: Vec<String>) -> string {
-        let size: int = self.size();
         let mut ret: String = String("[ ");
         for (let mut i: int = 0; i < self.size; i++) {
             ret = ret + "'" + self.get(i) + "'";
@@ -83,7 +82,7 @@ struct Vec<String> {
             }
         }
         ret = ret + " ]";
-        return print_str(ret.str);
+        return ret.to_str();
     }
 }
 

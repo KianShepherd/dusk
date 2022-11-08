@@ -27,6 +27,8 @@ public:
     void push_var(std::string name, AtomType);
     void push_var(std::string name, AtomType, std::string struct_name);
     void push_function(Function* func);
+    void push_constructor(Function* func);
+    void push_function_pre(Function* func);
     void finalize();
 
     void debug(size_t depth);
