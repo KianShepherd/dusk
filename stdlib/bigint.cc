@@ -1,20 +1,24 @@
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <sstream>
+#include <gmp.h>
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT
 #endif
 
-const long BASE = 10;
+struct __InternBig {
+    void* num;
+};
 
 class BigInt {
 public:
-    std::vector<long> data;
-    std::string str;
+    mpz_t num;
 
     BigInt(long n);
+    BigInt(mpz_t n);
 
     char* to_str();
 
@@ -24,108 +28,49 @@ public:
     void* div(BigInt& rhs);
 };
 
-void insert_a_zero(std::vector<long>& num) {
-    num.push_back(0);
-}
-
-void insert_zeros(std::vector<long>& num, int new_size) {
-    while (num.size() < new_size)
-        insert_a_zero(num);
-}
-
-void remove_zeros(std::vector<long>& num) {
-    while (num.back() == 0)
-        num.pop_back();
-}
-
 BigInt::BigInt(long n) {
-    this->data = std::vector<long>({n});
+    mpz_init_set_si(this->num, n);
+}
+
+BigInt::BigInt(mpz_t n) {
+    mpz_init_set(this->num, n);
 }
 
 char* BigInt::to_str() {
-    std::stringstream str;
-    for (int i = 0; i < this->data.size(); i++)
-        str << this->data[i];
-    this->str = str.str();
-    return (char*)(void*)this->str.data();
+    return mpz_get_str(NULL, 10, this->num);
 }
 
 void* BigInt::add(BigInt& rhs) {
-    std::vector<long>* res = new std::vector<long>();
-    reverse(this->data.begin(), this->data.end());
-    reverse(rhs.data.begin(), rhs.data.end());
-    int common_size = std::max(this->data.size(), rhs.data.size());
-    insert_zeros(this->data, common_size);
-    insert_zeros(rhs.data, common_size);
-    for (int i = 0; i < common_size; i++) 
-        res->push_back(this->data[i] + rhs.data[i]);
-    insert_a_zero(*res);
-    for (int i = 0 ;i < common_size; i++)
-    {
-        (*res)[i + 1] += (*res)[i] / BASE;
-        (*res)[i] %= BASE;
-    }
-    remove_zeros(*res);
-    reverse(res->begin(), res->end());
-    return res;
+    mpz_t nres;
+    mpz_init(nres);
+    mpz_add(nres, this->num, rhs.num);
+    return new __InternBig{.num = new BigInt(nres)};
 }
 
 void* BigInt::sub(BigInt& rhs) {
-    std::vector<long>* res = new std::vector<long>();
-    reverse(this->data.begin(), this->data.end());
-    reverse(rhs.data.begin(), rhs.data.end());
-    int common_size = std::max(this->data.size(), rhs.data.size());
-    insert_zeros(this->data, common_size);
-    insert_zeros(rhs.data, common_size);
-    for (int i = 0; i < common_size; i++) 
-        res->push_back(this->data[i] + rhs.data[i]);
-    insert_a_zero(*res);
-    for (int i = 0; i < common_size; i++)
-    {
-        if ((*res)[i] < 0)
-        {
-            (*res)[i] += BASE;
-            (*res)[i + 1]--;
-        }
-    }
-    
-    remove_zeros(*res);
-    reverse(res->begin(), res->end());
-    return res;
+    mpz_t nres;
+    mpz_init(nres);
+    mpz_sub(nres, this->num, rhs.num);
+    return new __InternBig{.num = new BigInt(nres)};
 }
 
 void* BigInt::mul(BigInt& rhs) {
-    int max_size = this->data.size() + rhs.data.size();
-
-    std::vector<long>* res = new std::vector<long>(max_size);
-    for (int i = this->data.size() - 1; i >= 0; i--) {
-        for (int j = rhs.data.size() - 1; j >= 0; j--)
-         (*res)[max_size - 2 - i - j] += this->data[i] * rhs.data[j];
-    }
-    
-    for (int i=0; i<res->size() - 1;i++) {
-        (*res)[i+1] += (*res)[i] / BASE;
-        (*res)[i] %= BASE;
-    }
-    
-    remove_zeros(*res);
-    reverse(res->begin(), res->end());
-    return res;
+    mpz_t nres;
+    mpz_init(nres);
+    mpz_mul(nres, this->num, rhs.num);
+    return new __InternBig{.num = new BigInt(nres)};
 }
 
 void* BigInt::div(BigInt& rhs) {
-    return new BigInt(0);
+    mpz_t nres;
+    mpz_init(nres);
+    mpz_div(nres, this->num, rhs.num);
+    return new __InternBig{.num = new BigInt(nres)};
 }
 
 extern "C" {
     void* new_bigint(long n) {
         return new BigInt(n);
-    }
-
-    void* copy_bigint(void* v) {
-        auto b = new BigInt(0);
-        b->data = ((BigInt*)v)->data;
-        return b;
     }
 
     char* big_to_str(void* b) {
@@ -154,5 +99,41 @@ extern "C" {
         BigInt* lhs = (BigInt*)l;
         BigInt* rhs = (BigInt*)r;
         return lhs->div(*rhs);
+    }
+
+    void* mod_bigint(void* l, void* r) {
+        mpz_t nres;
+        mpz_init(nres);
+        mpz_mod(nres, ((BigInt*)l)->num, ((BigInt*)r)->num);
+        return new __InternBig{.num = new BigInt(nres)};
+    }
+
+    void* pow_bigint(void* b, long p) {
+        mpz_t nres;
+        mpz_init(nres);
+        mpz_pow_ui(nres, ((BigInt*)b)->num, p);
+        return new __InternBig{.num = new BigInt(nres)};
+    }
+
+    void* neg_bigint(void* b) {
+        mpz_t nres;
+        mpz_init(nres);
+        mpz_neg(nres, ((BigInt*)b)->num);
+        return new __InternBig{.num = new BigInt(nres)};
+    }
+
+    void* abs_bigint(void* b) {
+        mpz_t nres;
+        mpz_init(nres);
+        mpz_abs(nres, ((BigInt*)b)->num);
+        return new __InternBig{.num = new BigInt(nres)};
+    }
+
+    long big_to_long(void* n) {
+        return mpz_get_si(((BigInt*)n)->num);
+    }
+
+    long cmp_bigint(void* l, void* r) {
+        return mpz_cmp(((BigInt*)l)->num, ((BigInt*)r)->num);
     }
 }

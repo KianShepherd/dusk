@@ -1,3 +1,5 @@
+include "bignum.ds"
+
 fn fact_tail(n: int, acc: int) -> int {
     if (n < 2) {
         return acc;
@@ -13,7 +15,7 @@ fn fact_tail_big(n: int, acc: BigInt) -> BigInt{
     if (n < 2) {
         return acc;
     }
-    return fact_tail_big(n - 1, BigInt(n) * acc);
+    return fact_tail_big(n - 1, n * acc);
 }
 
 fn fact_big(n: int) -> BigInt {

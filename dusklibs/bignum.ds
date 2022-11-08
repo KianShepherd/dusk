@@ -1,0 +1,188 @@
+require "bigint"
+require "gmp"
+
+struct BigInt {
+    extern new_bigint(n: int) -> void*;
+    extern big_to_str(n: void*) -> string;
+    extern big_to_long(n: void*) -> int;
+
+    extern add_bigint(lhs: void* , rhs: void* ) -> void*;
+    extern sub_bigint(lhs: void* , rhs: void* ) -> void*;
+    extern mul_bigint(lhs: void* , rhs: void* ) -> void*;
+    extern div_bigint(lhs: void* , rhs: void* ) -> void*;
+    extern mod_bigint(lhs: void* , rhs: void* ) -> void*;
+    extern cmp_bigint(lhs: void* , rhs: void* ) -> int;
+
+    extern pow_bigint(b: void*, p: int) -> void*;
+    extern abs_bigint(b: void*) -> void*;
+    extern neg_bigint(b: void*) -> void*;
+
+    num: void*,
+
+    fn BigInt(self: BigInt) -> BigInt {
+        self.num = new_bigint(0);
+        return self;
+    }
+
+    fn BigInt(self: BigInt, to_copy: BigInt) -> BigInt {
+        self.num = copy_bigint(to_copy.num);
+        return self;
+    }
+
+    fn BigInt(self: BigInt, n: int) -> BigInt {
+        self.num = new_bigint(n);
+        return self;
+    }
+
+    fn pow(self: BigInt, n: int) -> BigInt {
+        return pow_bigint(self.num, n);
+    }
+
+    fn pow(self: BigInt, n: BigInt) -> BigInt {
+        return pow_bigint(self.num, big_to_long(n.num));
+    }
+     
+    fn abs(self: BigInt) -> BigInt {
+        return abs_bigint(self.num);
+    }
+
+    fn neg(self: BigInt) -> BigInt {
+        return neg_bigint(self.num);
+    }
+
+    fn __str__(self: BigInt) -> string {
+        return big_to_str(self.num);
+    }
+
+    fn __add__(self: BigInt, rhs: BigInt) -> BigInt {
+        return add_bigint(self.num, rhs.num);
+    }
+
+    fn __add__(rhs: int, self: BigInt) -> BigInt {
+        return add_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __add__(self: BigInt, rhs: int) -> BigInt {
+        return add_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __sub__(self: BigInt, rhs: BigInt) -> BigInt {
+        return sub_bigint(self.num, rhs.num);
+    }
+
+    fn __sub__(rhs: int, self: BigInt) -> BigInt {
+        return sub_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __sub__(self: BigInt, rhs: int) -> BigInt {
+        return sub_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __mul__(self: BigInt, rhs: BigInt) -> BigInt {
+        return mul_bigint(self.num, rhs.num);
+    }
+
+    fn __mul__(rhs: int, self: BigInt) -> BigInt {
+        return mul_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __mul__(self: BigInt, rhs: int) -> BigInt {
+        return mul_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __div__(self: BigInt, rhs: BigInt) -> BigInt {
+        return div_bigint(self.num, rhs.num);
+    }
+
+    fn __div__(rhs: int, self: BigInt) -> BigInt {
+        return div_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __div__(self: BigInt, rhs: int) -> BigInt {
+        return div_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __mod__(self: BigInt, rhs: BigInt) -> bool {
+        return mod_bigint(self.num, rhs.num);
+    }
+
+    fn __mod__(rhs: int, self: BigInt) -> bool {
+        return mod_bigint(BigInt(rhs).num, self.num);
+    }
+
+    fn __mod__(self: BigInt, rhs: int) -> bool {
+        return mod_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __eq__(self: BigInt, rhs: BigInt) -> bool {
+        return 0 == cmp_bigint(self.num, rhs.num);
+    }
+
+    fn __eq__(rhs: int, self: BigInt) -> bool {
+        return 0 == cmp_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __eq__(self: BigInt, rhs: int) -> bool {
+        return 0 == cmp_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __neq__(self: BigInt, rhs: BigInt) -> bool {
+        return 0 != cmp_bigint(self.num, rhs.num);
+    }
+
+    fn __neq__(rhs: int, self: BigInt) -> bool {
+        return 0 != cmp_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __neq__(self: BigInt, rhs: int) -> bool {
+        return 0 != cmp_bigint(self.num, BigInt(rhs).num);
+    }
+
+    fn __gt__(self: BigInt, rhs: BigInt) -> bool {
+        return cmp_bigint(self.num, rhs.num) > 0;
+    }
+
+    fn __gt__(rhs: int, self: BigInt) -> bool {
+        return cmp_bigint(BigInt(rhs).num, self.num) > 0;
+    }
+
+    fn __gt__(self: BigInt, rhs: int) -> bool {
+        return cmp_bigint(self.num, BigInt(rhs).num) > 0;
+    }
+
+    fn __ge__(self: BigInt, rhs: BigInt) -> bool {
+        return cmp_bigint(self.num, rhs.num) >= 0;
+    }
+
+    fn __ge__(rhs: int, self: BigInt) -> bool {
+        return cmp_bigint(BigInt(rhs).num, self.num) >= 0;
+    }
+
+    fn __ge__(self: BigInt, rhs: int) -> bool {
+        return cmp_bigint(self.num, BigInt(rhs).num) >= 0;
+    }
+
+    fn __lt__(self: BigInt, rhs: BigInt) -> bool {
+        return cmp_bigint(self.num, rhs.num) < 0;
+    }
+
+    fn __lt__(rhs: int, self: BigInt) -> bool {
+        return cmp_bigint(BigInt(rhs).num, self.num) < 0;
+    }
+
+    fn __lt__(self: BigInt, rhs: int) -> bool {
+        return cmp_bigint(self.num, BigInt(rhs).num) < 0;
+    }
+
+    fn __le__(self: BigInt, rhs: BigInt) -> bool {
+        return cmp_bigint(self.num, rhs.num) <= 0;
+    }
+
+    fn __le__(rhs: int, self: BigInt) -> bool {
+        return cmp_bigint(BigInt(rhs).num, self.num) <= 0;
+    }
+
+    fn __le__(self: BigInt, rhs: int) -> bool {
+        return cmp_bigint(self.num, BigInt(rhs).num) <= 0;
+    }
+}

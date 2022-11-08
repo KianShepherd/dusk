@@ -38,10 +38,11 @@ set(SOURCES
     src/struct.cc
 )
 
+link_directories(/usr/local/lib)
+include_directories(/usr/local/include/gmp)
 if(APPLE)
     include_directories(/usr/local/include/llvm)
     include_directories(/opt/homebrew/include)
-    link_directories(/usr/local/lib)
     link_directories(/opt/homebrew/lib)
 endif()
 
@@ -60,6 +61,7 @@ add_library(duskvec stdlib/duskvec.cc)
 add_library(duskio stdlib/duskio.cc)
 add_library(duskmath stdlib/duskmath.cc)
 add_library(bigint stdlib/bigint.cc)
+
 add_executable(dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
 
 llvm_map_components_to_libnames(all)
