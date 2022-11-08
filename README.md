@@ -168,15 +168,18 @@ Options:
         - `del` function to delete heap allocated objects
     - `types.ds` (Part of the base standard library)
         - `String` struct for better string datatypes support
-    - `stdio.ds` (Part of the base standart library)
+    - `stdio.ds` (Part of the base standard library)
         - `print` function, takes C style format strings
-        - `print` and `input` functions
+        - `input` function
         - `readfile` function
     - `vector.ds`
         - Various `Vec` types.
             - Vec<int>
             - Vec<float>
             - Vec<String>
+    - `math.ds`
+        - `pow` for int types
+        - `fpow` for floating power
 
 ## Planned Functionality
 

@@ -1,0 +1,8 @@
+require "duskmath"
+
+extern ipow(n: int, m: int) -> int;
+extern fpow(n: float, m: float) -> float;
+
+fn pow(base: int, power: int) -> int {
+    return ipow(base, power);
+}

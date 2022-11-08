@@ -1,4 +1,4 @@
-require "stdio"
+require "duskio"
 
 extern input() -> string;
 extern readfile(filename: string) -> string;

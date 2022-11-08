@@ -16,7 +16,6 @@
 
 
 extern "C" DLLEXPORT {
-
     long* copyi(long* arr, long n) {
         long* heap_arr = (long*)malloc(sizeof(long) * n);
         memcpy(heap_arr, arr, n * sizeof(long));
