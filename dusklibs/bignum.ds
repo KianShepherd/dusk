@@ -1,10 +1,186 @@
 require "bigint"
 require "gmp"
+require "gmpxx"
+
+struct BigFloat {
+    extern new_bigfloat(n: float) -> void*;
+    extern bigf_to_str(n: void*) -> string;
+    extern big_to_float(n: void*) -> float;
+    extern copy_bigfloat(n: void*) -> void*;
+
+    extern add_bigfloat(lhs: void* , rhs: void* ) -> void*;
+    extern sub_bigfloat(lhs: void* , rhs: void* ) -> void*;
+    extern mul_bigfloat(lhs: void* , rhs: void* ) -> void*;
+    extern div_bigfloat(lhs: void* , rhs: void* ) -> void*;
+    extern cmp_bigfloat(lhs: void* , rhs: void* ) -> int;
+
+    extern pow_bigfloat(b: void*, p: int) -> void*;
+    extern abs_bigfloat(b: void*) -> void*;
+    extern neg_bigfloat(b: void*) -> void*;
+
+    num: void*,
+
+    fn BigFloat(self: BigFloat) -> BigFloat {
+        self.num = new_bigfloat(0.0);
+        return self;
+    }
+
+    fn BigFloat(self: BigFloat, n: float) -> BigFloat {
+        self.num = new_bigfloat(n);
+        return self;
+    }
+
+    fn BigFloat(self: BigFloat, to_copy: BigFloat) -> BigFloat {
+        self.num = copy_bigfloat(to_copy.num);
+        return self;
+    }
+
+    fn pow(self: BigFloat, n: int) -> BigFloat{
+        return pow_bigfloat(self.num, n);
+    }
+
+    fn pow(self: BigFloat, n: BigFloat) -> BigFloat {
+        return pow_bigfloat(self.num, big_to_long(n.num));
+    }
+     
+    fn abs(self: BigFloat) -> BigFloat {
+        return abs_bigfloat(self.num);
+    }
+
+    fn neg(self: BigFloat) -> BigFloat {
+        return neg_bigfloat(self.num);
+    }
+
+    fn __str__(self: BigFloat) -> string {
+        return bigf_to_str(self.num);
+    }
+
+    fn __add__(self: BigFloat, rhs: BigFloat) -> BigFloat {
+        return add_bigfloat(self.num, rhs.num);
+    }
+
+    fn __add__(rhs: float, self: BigFloat) -> BigFloat {
+        return add_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __add__(self: BigFloat, rhs: float) -> BigFloat {
+        return add_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __sub__(self: BigFloat, rhs: BigFloat) -> BigFloat {
+        return sub_bigfloat(self.num, rhs.num);
+    }
+
+    fn __sub__(rhs: float, self: BigFloat) -> BigFloat {
+        return sub_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __sub__(self: BigFloat, rhs: float) -> BigFloat {
+        return sub_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __mul__(self: BigFloat, rhs: BigFloat) -> BigFloat {
+        return mul_bigfloat(self.num, rhs.num);
+    }
+
+    fn __mul__(rhs: float, self: BigFloat) -> BigFloat {
+        return mul_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __mul__(self: BigFloat, rhs: float) -> BigFloat {
+        return mul_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __div__(self: BigFloat, rhs: BigFloat) -> BigFloat {
+        return div_bigfloat(self.num, rhs.num);
+    }
+
+    fn __div__(rhs: float, self: BigFloat) -> BigFloat {
+        return div_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __div__(self: BigFloat, rhs: float) -> BigFloat {
+        return div_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __eq__(self: BigFloat, rhs: BigFloat) -> bool {
+        return 0 == cmp_bigfloat(self.num, rhs.num);
+    }
+
+    fn __eq__(rhs: float, self: BigFloat) -> bool {
+        return 0 == cmp_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __eq__(self: BigFloat, rhs: float) -> bool {
+        return 0 == cmp_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __neq__(self: BigFloat, rhs: BigFloat) -> bool {
+        return 0 != cmp_bigfloat(self.num, rhs.num);
+    }
+
+    fn __neq__(rhs: float, self: BigFloat) -> bool {
+        return 0 != cmp_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __neq__(self: BigFloat, rhs: float) -> bool {
+        return 0 != cmp_bigfloat(self.num, BigFloat(rhs).num);
+    }
+
+    fn __gt__(self: BigFloat, rhs: BigFloat) -> bool {
+        return cmp_bigfloat(self.num, rhs.num) > 0;
+    }
+
+    fn __gt__(rhs: float, self: BigFloat) -> bool {
+        return cmp_bigfloat(BigFloat(rhs).num, self.num) > 0;
+    }
+
+    fn __gt__(self: BigFloat, rhs: float) -> bool {
+        return cmp_bigfloat(self.num, BigFloat(rhs).num) > 0;
+    }
+
+    fn __ge__(self: BigFloat, rhs: BigFloat) -> bool {
+        return cmp_bigfloat(self.num, rhs.num) >= 0;
+    }
+
+    fn __ge__(rhs: float, self: BigFloat) -> bool {
+        return cmp_bigfloat(BigFloat(rhs).num, self.num) >= 0;
+    }
+
+    fn __ge__(self: BigFloat, rhs: float) -> bool {
+        return cmp_bigfloat(self.num, BigFloat(rhs).num) >= 0;
+    }
+
+    fn __lt__(self: BigFloat, rhs: BigFloat) -> bool {
+        return cmp_bigfloat(self.num, rhs.num) < 0;
+    }
+
+    fn __lt__(rhs: float, self: BigFloat) -> bool {
+        return cmp_bigfloat(BigFloat(rhs).num, self.num) < 0;
+    }
+
+    fn __lt__(self: BigFloat, rhs: float) -> bool {
+        return cmp_bigfloat(self.num, BigFloat(rhs).num) < 0;
+    }
+
+    fn __le__(self: BigFloat, rhs: BigFloat) -> bool {
+        return cmp_bigfloat(self.num, rhs.num) <= 0;
+    }
+
+    fn __le__(rhs: float, self: BigFloat) -> bool {
+        return cmp_bigfloat(BigFloat(rhs).num, self.num) <= 0;
+    }
+
+    fn __le__(self: BigFloat, rhs: float) -> bool {
+        return cmp_bigfloat(self.num, BigFloat(rhs).num) <= 0;
+    }
+}
 
 struct BigInt {
     extern new_bigint(n: int) -> void*;
     extern big_to_str(n: void*) -> string;
     extern big_to_long(n: void*) -> int;
+    extern copy_bigint(n: void*) -> void*;
 
     extern add_bigint(lhs: void* , rhs: void* ) -> void*;
     extern sub_bigint(lhs: void* , rhs: void* ) -> void*;

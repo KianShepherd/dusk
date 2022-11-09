@@ -193,7 +193,8 @@ Options:
         - `input` function
         - `readfile` function
     - `bignum.ds`
-        - `BigInt` struct for numbers of unbounded size
+        - `BigInt` struct for integer numbers of unbounded size
+        - `BigFloat` struct for floating point numbers of unbounded size
     - `vector.ds`
         - Various `Vec` types.
             - Vec<int>
