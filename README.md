@@ -20,7 +20,7 @@ LLVM is used as a backend to generate machine specific object files which are th
 
 ## Dependencies
 
-This project requires `flex`, `bison`, `llvm`, and a `c`/`c++` compiler.
+This project requires `flex`, `bison`, `llvm`, `GNU GMP`, and a `c`/`c++` compiler.
 
 The examples for building this project also include `ninja`, but that is an optional dependency.
 
@@ -36,6 +36,26 @@ cd build
 cmake -G Ninja -DLLVM_ENABLE_ASSERTIONS=On -DCMAKE_BUILD_TYPE=Release ../llvm
 ninja
 ninja install
+```
+
+To use the `bignum.ds` library you also need the [`GNU Multiple Precision Arithmetic Library`](https://gmplib.org/)
+You can find the [most recent version here](https://gmplib.org/#DOWNLOAD).
+
+```
+./configure --disable-shared --enable-fat
+make
+```
+
+ Run the tests before installing
+
+ ```
+make check
+ ```
+
+Finally install GMP
+
+```
+make install
 ```
 
 ### Ubuntu:
