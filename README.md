@@ -38,7 +38,7 @@ ninja
 ninja install
 ```
 
-To use the `bignum.ds` library you also need the [`GNU Multiple Precision Arithmetic Library`](https://gmplib.org/)
+To use the `bignum.ds` library you also need the [GNU Multiple Precision Arithmetic Library](https://gmplib.org/)
 You can find the [most recent version here](https://gmplib.org/#DOWNLOAD).
 
 ```
@@ -188,11 +188,12 @@ Options:
         - `del` function to delete heap allocated objects
     - `types.ds` (Part of the base standard library)
         - `String` struct for better string datatypes support
-        - `BigInt` struct for numbers of unbounded size
     - `stdio.ds` (Part of the base standard library)
         - `print` function, takes C style format strings
         - `input` function
         - `readfile` function
+    - `bignum.ds`
+        - `BigInt` struct for numbers of unbounded size
     - `vector.ds`
         - Various `Vec` types.
             - Vec<int>
