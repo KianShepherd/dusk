@@ -82,7 +82,7 @@ def run_example(file_name):
     while len(preamble) < 20:
         preamble = preamble + " "
     print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"},'
-          ' optimized {"PASS" if no_op_pass else "FAIL"}')
+          f' optimized {"PASS" if no_op_pass else "FAIL"}')
     if not (no_op_pass and op_pass):
         print(op_res)
         print(no_op_res)

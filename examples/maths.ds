@@ -1,0 +1,7 @@
+include "math.ds"
+
+fn main() -> int {
+    println("%f", fpow(2.5, 5.0));
+    println("%d", pow(2, 5));
+    return 0;
+}
