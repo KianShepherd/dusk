@@ -1,19 +1,31 @@
 include "bignum.ds"
 
-fn fact_tail(n: float, acc: BigFloat) -> BigFloat {
+fn factf_tail(n: float, acc: BigFloat) -> BigFloat {
     if (n < 2.0) {
         return acc;
     }
-    return fact_tail(n - 1.0, n * acc);
+    return factf_tail(n - 1.0, n * acc);
 }
 
-fn fact(n: float) -> BigFloat{
-    return fact_tail(n, BigFloat(1.0));
+fn factf(n: float) -> BigFloat{
+    return factf_tail(n, BigFloat(1.0));
+}
+
+fn fact_tail(n: int, acc: BigInt) -> BigInt {
+    if (n < 2) {
+        return acc;
+    }
+    return fact_tail(n - 1, n * acc);
+}
+
+fn fact(n: int) -> BigInt {
+    return fact_tail(n, BigInt(1));
 }
 
 fn main(argc: int, argv: string*) -> int {
     for (let mut i: int = 0; i < 40; i++) {
-        println(fact(itof(i)));
+        println(factf(itof(i)));
+        println(fact(i));
     }
     return 0;
 }

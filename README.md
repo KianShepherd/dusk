@@ -148,12 +148,16 @@ Options:
         - i64: int   (equivalent to C long)
         - i128: long (equivalent to C long long)
         - f64: float (equivalent to C double)
+        - String struct for easier managing of string like objects
+        - `bignum.ds` also provides these for handling of float and integer numbers of unbounded size
+            - BigInt
+            - BigFloat
     - Array Types
         - boolean array
         - strings
         - int array
         - float array
-        - string arrays
+        - string arrays (array of char's)
     - Vector Types under `vector.ds`
         - String
         - int
@@ -172,7 +176,7 @@ Options:
     - Can pass arguments to and from
     - Can be void
     - Variables are properly scoped to be function and block specific
-- `extern` keyword to load `C` functions from libraries
+- `extern` keyword to load `C` functions from libraries (included them in the compilation using `requires` or `-l` on the command line)
 - `import` and `require` keywords
     - Can import other `.ds` files without including them in the CLI
     - Can require `C` libraries at link time
@@ -207,6 +211,7 @@ Options:
 ## Planned Functionality
 
 - Structs
+    - Destructors
     - Automatic Reference Counting
 -  stdlib improvements
     - More abstract datatypes
