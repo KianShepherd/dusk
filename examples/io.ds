@@ -1,0 +1,8 @@
+
+fn main() -> int {
+    print("Hello, ");
+    println("World!");
+    println(String(readfile("./examples/example_outputs/test.txt")));
+    println("%s", input());
+    return 0;
+}
