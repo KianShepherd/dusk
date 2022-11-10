@@ -1,38 +1,29 @@
 fn main() -> int {
-    let integer: int = 5;
     let longint: long = 10;
-    let floating: float = 7.5;
-    let str: string = "6";
 
     print("To int\n");
     // float to int
-    print("%d\n", ftoi(floating));
+    print("%d\n", ftoi(7.5));
     // long to int
     print("%d\n", ltoi(longint));
     // string to int
-    print("%d\n", stoi(str));
+    print("%d\n", stoi("6"));
 
     print("To float\n");
     // int to float
-    print("%f\n", itof(integer));
+    print("%f\n", itof(5));
     // long to float
     print("%f\n", ltof(longint));
     // string to float
-    print("%f\n", stof(str));
+    print("%f\n", stof("6"));
 
     print("To string\n");
     // To string methods return heap allocated objects and need to be free when no longer used.
     // int to string
-    let s: string = itos(integer);
-    print("%s\n", s);
-    del(s);
+    println(itos(5));
     // long to string
-    let s: string = ltos(longint);
-    print("%s\n", s);
-    del(s);
+    println(ltos(longint));
     // float to string
-    let s: string = ftos(floating);
-    print("%s\n", s);
-    del(s);
+    println(ftos(7.5));
     return 1;
 }
