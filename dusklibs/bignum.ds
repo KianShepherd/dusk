@@ -1,9 +1,10 @@
-require "bigint"
+require "bignum"
 require "gmp"
 require "gmpxx"
 
 struct BigFloat {
     extern new_bigfloat(n: float) -> void*;
+    extern new_bigfloat_prec(n: float, precision: int) -> void*;
     extern bigf_to_str(n: void*) -> string;
     extern big_to_float(n: void*) -> float;
     extern copy_bigfloat(n: void*) -> void*;
@@ -30,17 +31,30 @@ struct BigFloat {
         return self;
     }
 
-    fn BigFloat(self: BigFloat, to_copy: BigFloat) -> BigFloat {
-        self.num = copy_bigfloat(to_copy.num);
+    fn BigFloat(self: BigFloat, precision: int) -> BigFloat {
+        self.num = new_bigfloat_prec(0.0, precision);
         return self;
+    }
+
+    fn BigFloat(self: BigFloat, n: float, precision: int) -> BigFloat {
+        self.num = new_bigfloat_prec(n, precision);
+        return self;
+    }
+
+    fn BigFloat(self: BigFloat, to_copy: BigFloat) -> BigFloat {
+        return copy_bigfloat(to_copy.num);
     }
 
     fn pow(self: BigFloat, n: int) -> BigFloat{
         return pow_bigfloat(self.num, n);
     }
 
+    fn pow(self: BigFloat, n: float) -> BigFloat{
+        return pow_bigfloat(self.num, ftoi(n));
+    }
+
     fn pow(self: BigFloat, n: BigFloat) -> BigFloat {
-        return pow_bigfloat(self.num, big_to_long(n.num));
+        return pow_bigfloat(self.num, ftoi(big_to_float(n.num)));
     }
      
     fn abs(self: BigFloat) -> BigFloat {
@@ -49,6 +63,10 @@ struct BigFloat {
 
     fn neg(self: BigFloat) -> BigFloat {
         return neg_bigfloat(self.num);
+    }
+
+    fn to_float(self: BigFloat) -> float {
+        return big_to_float(self.num);
     }
 
     fn __str__(self: BigFloat) -> string {
@@ -72,7 +90,7 @@ struct BigFloat {
     }
 
     fn __sub__(rhs: float, self: BigFloat) -> BigFloat {
-        return sub_bigfloat(self.num, BigFloat(rhs).num);
+        return sub_bigfloat(BigFloat(rhs).num, self.num);
     }
 
     fn __sub__(self: BigFloat, rhs: float) -> BigFloat {
@@ -96,7 +114,7 @@ struct BigFloat {
     }
 
     fn __div__(rhs: float, self: BigFloat) -> BigFloat {
-        return div_bigfloat(self.num, BigFloat(rhs).num);
+        return div_bigfloat(BigFloat(rhs).num, self.num);
     }
 
     fn __div__(self: BigFloat, rhs: float) -> BigFloat {
@@ -201,8 +219,7 @@ struct BigInt {
     }
 
     fn BigInt(self: BigInt, to_copy: BigInt) -> BigInt {
-        self.num = copy_bigint(to_copy.num);
-        return self;
+        return copy_bigint(to_copy.num);
     }
 
     fn BigInt(self: BigInt, n: int) -> BigInt {
@@ -226,6 +243,10 @@ struct BigInt {
         return neg_bigint(self.num);
     }
 
+    fn to_int(self: BigInt) -> int {
+        return big_to_long(self.num);
+    }
+
     fn __str__(self: BigInt) -> string {
         return big_to_str(self.num);
     }
@@ -247,7 +268,7 @@ struct BigInt {
     }
 
     fn __sub__(rhs: int, self: BigInt) -> BigInt {
-        return sub_bigint(self.num, BigInt(rhs).num);
+        return sub_bigint(BigInt(rhs).num, self.num);
     }
 
     fn __sub__(self: BigInt, rhs: int) -> BigInt {
@@ -271,22 +292,22 @@ struct BigInt {
     }
 
     fn __div__(rhs: int, self: BigInt) -> BigInt {
-        return div_bigint(self.num, BigInt(rhs).num);
+        return div_bigint(BigInt(rhs).num, self.num);
     }
 
     fn __div__(self: BigInt, rhs: int) -> BigInt {
         return div_bigint(self.num, BigInt(rhs).num);
     }
 
-    fn __mod__(self: BigInt, rhs: BigInt) -> bool {
+    fn __mod__(self: BigInt, rhs: BigInt) -> BigInt {
         return mod_bigint(self.num, rhs.num);
     }
 
-    fn __mod__(rhs: int, self: BigInt) -> bool {
+    fn __mod__(rhs: int, self: BigInt) -> BigInt {
         return mod_bigint(BigInt(rhs).num, self.num);
     }
 
-    fn __mod__(self: BigInt, rhs: int) -> bool {
+    fn __mod__(self: BigInt, rhs: int) -> BigInt {
         return mod_bigint(self.num, BigInt(rhs).num);
     }
 

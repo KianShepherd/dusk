@@ -1,0 +1,77 @@
+include "bignum.ds"
+
+fn main() -> int {
+    println("BigFloat constructors tests");
+    println("0 : %s", BigFloat());
+    println("1.5 : %s", BigFloat(1.5));
+    println("2.5 : %s", BigFloat(BigFloat(2.5)));
+    println("0 prec 100: %s", BigFloat(100));
+    println("3.5 prec 100: %s", BigFloat(3.5, 100));
+
+
+    println("\nBigFloat methods tests");
+    println("-3.5 : %s", BigFloat(-3.5));
+    println("abs(-3.5) : %s", BigFloat(-3.5).abs());
+    println("neg(-35) : %s", BigFloat(-3.5).neg());
+    println("4.5 : %s", BigFloat(4.5));
+    println("abs(4.5) : %s", BigFloat(4.5).abs());
+    println("neg(4.5) : %s", BigFloat(4.5).neg());
+    println("2.5 ^ 3 : %s", BigFloat(2.5).pow(3.0));
+    println("2.5 ^ 4 : %s", BigFloat(2.5).pow(4.0));
+    println("2.5 ^ 5 : %s", BigFloat(2.5).pow(BigFloat(5.0)));
+    println("to_float : %f", BigFloat(5.5).to_float());
+
+    println("\nBigFloat math operators tests");
+    println("1.5 + 1.0 : %s", BigFloat(1.5) + BigFloat(1.0));
+    println("1.5 + 2.0 : %s", BigFloat(1.5) + 2.0);
+    println("1.5 + 3.0 : %s", 3.5 + BigFloat(1.0));
+    println("1.5 - 1.0 : %s", BigFloat(1.5) - BigFloat(1.0));
+    println("2.5 - 1.0 : %s", BigFloat(2.5) - 1.0);
+    println("3.5 - 1.0 : %s", 3.5 - BigFloat(1.0));
+    println("2.5 * 2.0 : %s", BigFloat(2.5) * BigFloat(2.0));
+    println("2.5 * 3.0 : %s", BigFloat(2.5) * 3.0);
+    println("2.5 * 4.0 : %s", 2.5 * BigFloat(4.0));
+    println("3.0 / 2.0 : %s", BigFloat(3.0) / BigFloat(2.0));
+    println("5.0 / 3.0 : %s", BigFloat(5.0) / 3.0);
+    println("7.0 / 4.0 : %s", 7.0 / BigFloat(4.0));
+
+    println("\nBigFloat bool operators tests");
+    println("1.0 == 1.0 : %d", BigFloat(1.0) == BigFloat(1.0));
+    println("2.0 == 2.0 : %d", BigFloat(2.0) == 2.0);
+    println("3.0 == 3.0 : %d", 3.0 == BigFloat(3.0));
+    println("0.0 == 1.0 : %d", BigFloat(0.0) == BigFloat(1.0));
+    println("0.0 == 2.0 : %d", BigFloat(0.0) == 2.0);
+    println("0.0 == 3.0 : %d", 0.0 == BigFloat(3.0));
+    println("1.0 != 1.0 : %d", BigFloat(1.0) != BigFloat(1.0));
+    println("2.0 != 2.0 : %d", BigFloat(2.0) != 2.0);
+    println("3.0 != 3.0 : %d", 3.0 != BigFloat(3.0));
+    println("0.0 != 1.0 : %d", BigFloat(0.0) != BigFloat(1.0));
+    println("0.0 != 2.0 : %d", BigFloat(0.0) != 2.0);
+    println("0.0 != 3.0 : %d", 0.0 != BigFloat(3.0));
+    println("1.0 > 1.0 : %d", BigFloat(1.0) > BigFloat(1.0));
+    println("2.0 > 2.0 : %d", BigFloat(2.0) > 2.0);
+    println("3.0 > 3.0 : %d", 3.0 > BigFloat(3.0));
+    println("5.0 > 1.0 : %d", BigFloat(5.0) > BigFloat(1.0));
+    println("5.0 > 2.0 : %d", BigFloat(5.0) > 2.0);
+    println("5.0 > 3.0 : %d", 5.0 > BigFloat(3.0));
+    println("1.0 >= 1.0 : %d", BigFloat(1.0) >= BigFloat(1.0));
+    println("2.0 >= 2.0 : %d", BigFloat(2.0) >= 2.0);
+    println("2.0 >= 3.0 : %d", 3.0 >= BigFloat(3.0));
+    println("0.0 >= 1.0 : %d", BigFloat(0.0) >= BigFloat(1.0));
+    println("0.0 >= 2.0 : %d", BigFloat(0.0) >= 2.0);
+    println("0.0 >= 3.0 : %d", 0.0 >= BigFloat(3.0));
+    println("1.0 < 1.0 : %d", BigFloat(1.0) < BigFloat(1.0));
+    println("2.0 < 2.0 : %d", BigFloat(2.0) < 2.0);
+    println("3.0 < 3.0 : %d", 3.0 < BigFloat(3.0));
+    println("0.0 < 1.0 : %d", BigFloat(0.0) < BigFloat(1.0));
+    println("0.0 < 2.0 : %d", BigFloat(0.0) < 2.0);
+    println("0.0 < 3.0 : %d", 0.0 < BigFloat(3.0));
+    println("1.0 <= 1.0 : %d", BigFloat(1.0) <= BigFloat(1.0));
+    println("2.0 <= 2.0 : %d", BigFloat(2.0) <= 2.0);
+    println("2.0 <= 3.0 : %d", 3.0 <= BigFloat(3.0));
+    println("1.0 <= 0.0 : %d", BigFloat(1.0) <= BigFloat(0.0));
+    println("2.0 <= 0.0 : %d", BigFloat(2.0) <= 0.0);
+    println("3.0 <= 0.0 : %d", 3.0 <= BigFloat(0.0));
+
+    return 0;
+}

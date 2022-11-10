@@ -60,7 +60,7 @@ add_library(stddusk stdlib/stdlib.cc)
 add_library(duskvec stdlib/duskvec.cc)
 add_library(duskio stdlib/duskio.cc)
 add_library(duskmath stdlib/duskmath.cc)
-add_library(bigint stdlib/bigint.cc)
+add_library(bignum stdlib/bignum.cc)
 
 add_executable(dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
 

@@ -78,6 +78,7 @@ public:
     std::string str;
 
     BigFloat(double n);
+    BigFloat(double n, long precision);
     BigFloat(mpf_t n);
 
     char* to_str();
@@ -90,6 +91,11 @@ public:
 
 BigFloat::BigFloat(double n) {
     mpf_init_set_d(this->num, n);
+}
+
+BigFloat::BigFloat(double n, long precision) {
+    mpf_init2(this->num, precision);
+    mpf_set_d(this->num, n);
 }
 
 BigFloat::BigFloat(mpf_t n) {
@@ -206,6 +212,10 @@ extern "C" {
     
     void* new_bigfloat(double n) {
         return new BigFloat(n);
+    }
+
+    void* new_bigfloat_prec(double n, long precision) {
+        return new BigFloat(n, precision);
     }
 
     void* copy_bigfloat(void* n) {
