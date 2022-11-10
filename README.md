@@ -42,7 +42,7 @@ To use the `bignum.ds` library you also need the [GNU Multiple Precision Arithme
 You can find the [most recent version here](https://gmplib.org/#DOWNLOAD).
 
 ```
-./configure --disable-shared --enable-fat
+./configure --disable-shared --enable-fat --enable-cxx
 make
 ```
 
@@ -201,9 +201,9 @@ Options:
         - `BigFloat` struct for floating point numbers of unbounded size
     - `vector.ds`
         - Various `Vec` types.
-            - Vec<int>
-            - Vec<float>
-            - Vec<String>
+            - `Vec<int>`
+            - `Vec<float>`
+            - `Vec<String>`
     - `math.ds`
         - `pow` for int types
         - `fpow` for floating power
