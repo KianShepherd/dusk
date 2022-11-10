@@ -1,3 +1,5 @@
+include "bignum.ds"
+
 // Functions declaring no return type are void functions
 // No return statement is required
 fn print_square(n: int) {
@@ -21,9 +23,20 @@ fn fact_tail(n: int, acc: int) -> int {
     return fact_tail(n - 1, n * acc);
 }
 
-// All functions must have a return statement, and no two functions may have the same name
+// All non-void functions must have a return statement, and no two functions may have the same name
 fn factorial(n: int) -> int {
     return fact_tail(n, 1);
+}
+
+fn fib_tail(n: int, acc1: BigInt, acc2: BigInt) -> BigInt {
+    if n <= 0 {
+        return acc1;
+    }
+    return fib_tail(n - 1, acc2, acc2 + acc1);
+}
+
+fn fib(n: int) -> BigInt {
+    return fib_tail(n, BigInt(1), BigInt(1));
 }
 
 // A main function must be found within the compiled files, and it will be used as the entrypoint.
@@ -43,5 +56,8 @@ fn main(argc: int, argv: string*) -> int {
     print_first(3);
     print("\n");
     print_first(7);
+    for (let mut i: int = 0; i < 100; i++) {
+        println(fib(i));
+    }
     return 1;
 }
