@@ -1,23 +1,33 @@
 #!/usr/bin/env python
+"""Test suit for dusk functionality.
+
+Runs examples found in ./examples/ against known good
+output files found in ./examples/example_outputs/
+"""
 import os
 import subprocess
 import time
-
 from os.path import isfile, join
 
 example_path = './examples/'
 
-test_cases = [str(f).split('.')[0] for f in os.listdir(example_path) if isfile(join(example_path, f))]
+test_cases = [
+    str(f).split('.')[0]
+    for f in os.listdir(example_path)
+    if isfile(join(example_path, f))
+]
 
 print('Cleaning old files.')
-subprocess.call(['sh', f'./clean.sh'],
+subprocess.call(
+    ['sh', './clean.sh'],
     stdout=subprocess.DEVNULL,
     stderr=subprocess.DEVNULL,
 )
 print('Done.')
 print('Building dusk.')
 s = time.time()
-subprocess.call(['sh', f'./build.sh'],
+subprocess.call(
+    ['sh', './build.sh'],
     stdout=subprocess.DEVNULL,
     stderr=subprocess.DEVNULL,
 )
@@ -26,26 +36,39 @@ print(f'Done, took {e - s} seconds.')
 
 
 def run_output(file_name, *, opt=None, expected=False):
+    """Run test case."""
     if expected:
         with open(f'./examples/example_outputs/{file_name}.txt') as f:
             return f.read()
 
-    command = [f'./CMake/dusk']
-    if not opt is None:
+    command = ['./CMake/dusk']
+    if opt is not None:
         command.append('-O')
     command.append(f'./examples/{file_name}.ds')
-    subprocess.run(command,
+    subprocess.run(
+        command,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
     if file_name == 'io':
-        return subprocess.run(['./out'], stdout=subprocess.PIPE, input='Hello input()', text=True).stdout
+        return subprocess.run(
+            ['./out'],
+            stdout=subprocess.PIPE,
+            input='Hello input()',
+            text=True
+        ).stdout
     else:
-        return subprocess.run(['./out'], stdout=subprocess.PIPE, text=True).stdout
+        return subprocess.run(
+            ['./out'],
+            stdout=subprocess.PIPE,
+            text=True
+        ).stdout
 
 
 def run_example(file_name):
-    subprocess.run([f'./CMake/dusk', f'./examples/{file_name}.ds'],
+    """Run test cases for file."""
+    subprocess.run(
+        ['./CMake/dusk', f'./examples/{file_name}.ds'],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
@@ -58,7 +81,8 @@ def run_example(file_name):
     preamble = f'{file_name}.ds: '
     while len(preamble) < 20:
         preamble = preamble + " "
-    print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"}, optimized {"PASS" if no_op_pass else "FAIL"}')
+    print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"},'
+          ' optimized {"PASS" if no_op_pass else "FAIL"}')
     if not (no_op_pass and op_pass):
         print(op_res)
         print(no_op_res)
