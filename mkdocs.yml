@@ -1,0 +1,8 @@
+site_name: Dusk
+site_url: https://kian_shepherd.gitlab.io/Dusk/
+repo_url: https://gitlab.com/kian_shepherd/Dusk
+site_author: Kian Shepherd
+site_description: Dusk Language Documentation
+site_dir: public
+nav:
+  - 'index.md'
