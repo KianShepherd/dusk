@@ -1,6 +1,6 @@
 # Dusk Language Reference
 
-Dusk is a `C` like toy programming language, that was created as a personal project for fun. It will
+Dusk is a `C` like toy programming language with `Rust` like syntax, that was created as a personal project for fun. It will
 likely never be stable / feature rich enough to used. But I would like to get it to the point where
 it is functional enough to solve various programming problems with. I like to participate in
 [Advent of Code](https://adventofcode.com/) each year and my goal is to complete as much of it as

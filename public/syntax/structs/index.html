@@ -80,6 +80,12 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Struct Syntax</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#member-values">Member Values</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#member-functions">Member Functions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#operators">Operators</a>
+    </li>
     </ul>
                   </li>
               </ul>
@@ -113,7 +119,109 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="struct-syntax">Struct Syntax</h1>
-<p>TODO</p>
+<p>Structs are heap allocated objects that contain various named values, and collections of methods.</p>
+<p>All functions within a struct support operator overloading.</p>
+<p>Structs are also extandable, including structs defined within the standard library, if you define
+a struct again with the same name the definitions of each struct will be merged together.</p>
+<p>For example this would be merged into a single <code>Foo</code> struct with both <code>a</code> and <code>b</code> member values.</p>
+<pre><code>struct Foo {
+    a: int,
+}
+
+struct Foo {
+    b: float,
+}
+</code></pre>
+<h2 id="member-values">Member Values</h2>
+<p>Structs allow you to define multiple values that are contained within one object.</p>
+<p>The syntax for declaring a member value named <code>a</code> that is of type <code>int</code> is. All member value definitions
+must be follwed by a comma. A struct may contain any number of member values.</p>
+<pre><code>a: int,
+</code></pre>
+<h2 id="member-functions">Member Functions</h2>
+<p>Member functions are called using the <code>.</code> syntax off of a struct type object (e.g. <code>FooStruct.bar()</code>).</p>
+<p>All  member functions support operator overloading.</p>
+<p>Creating functions that have the same name as the Struct type will be used as constructors and must
+take the first parameter <code>self</code> of the type of the struct and return the structs type.</p>
+<p>You may also include external functions within a struct.</p>
+<p>Here is an example of a struct constructor.</p>
+<pre><code>struct Foo {
+    a: int,
+    b: float,
+
+    fn Foo(self: Foo) -&gt; Foo {
+        self.a = 0;
+        self.b = 0.0;
+        return self;
+    }
+
+    fn Foo(self: Foo, n: int) -&gt; Foo {
+        self.a = n;
+        self.b = 0.0;
+        return self;
+    }
+}
+</code></pre>
+<p>Member functions can also be declared and overloaded.</p>
+<pre><code>struct Foo {
+    a: int,
+    b: float,
+
+    fn inc(self: Foo, n: int) {
+        self.a = n;
+    }
+
+    fn inc(self: Foo, n: float) {
+        self.b = n;
+    }
+}
+</code></pre>
+<h2 id="operators">Operators</h2>
+<p>Structs also support operator overloading using specific function names to define the behaviour.</p>
+<p>These functions may also be overloaded.</p>
+<p>Here is a list of the operator functions that may be overloaded.</p>
+<ul>
+<li><code>__add__</code></li>
+<li><code>__sub__</code></li>
+<li><code>__mul__</code></li>
+<li><code>__div__</code></li>
+<li><code>__mod__</code></li>
+<li><code>__eq__</code></li>
+<li><code>__neq__</code></li>
+<li><code>__lt__</code></li>
+<li><code>__gt__</code></li>
+<li><code>__le__</code></li>
+<li><code>__ge__</code></li>
+<li><code>__and__</code></li>
+<li><code>__or__</code></li>
+</ul>
+<p>There is also one more internal functions that can be overloaded.</p>
+<p><code>__str__</code>, this function is called with the struct instance as the only parameter and must return a
+string type. It is called automatically if a struct is found as an argument to <code>print</code> or <code>printf</code>.</p>
+<pre><code>struct Foo {
+
+    fn __str__(self: Foo) -&gt; string {
+        return &quot;Foo Struct&quot;;
+    }
+}
+</code></pre>
+<p>For example implementing the add operator for a struct.</p>
+<pre><code>struct Foo {
+    a: int,
+
+    fn __add__(self: Foo, n: int) -&gt; int {
+        return self.a + n;
+    }
+
+    fn __add__(self: Foo, n: Foo) -&gt; int {
+        return self.a + n.a;
+    }
+
+    fn __add__(n: int, self: Foo) -&gt; int {
+        return self.a + n;
+    }
+}
+</code></pre>
               
             </div>
           </div><footer>

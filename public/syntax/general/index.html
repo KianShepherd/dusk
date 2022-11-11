@@ -76,6 +76,38 @@
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">General Syntax</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#expressions">Expressions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#expression-atomic">Expression Atomic</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#binary-operator">Binary Operator</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#unary-operators">Unary Operators</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#assignment-expressions">Assignment Expressions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#break-expression">Break Expression</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#statements">Statements</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#expression-statement">Expression Statement</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#assignment-statement">Assignment Statement</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#return-statement">Return Statement</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#if-statement">If Statement</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#for-loop-statement">For Loop Statement</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#while-loop-statement">While Loop Statement</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#statement-blocks">Statement Blocks</a>
+    </li>
+        </ul>
+    </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../functions/">Function Syntax</a>
@@ -113,7 +145,168 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="general-syntax">General Syntax</h1>
+<p>This page covers the two most basic nodes in the abstract syntax tree that <code>Dusk</code> creates, Expressions
+and Statements. These types make up what the average 'line' of code is in <code>Dusk</code>.</p>
+<p>The other two constructs that make up a <code>Dusk</code> program are <code>Functions</code> and <code>Structs</code>, each of these are
+used to create the overall structure of the program.</p>
+<h2 id="expressions">Expressions</h2>
+<p>Expressions are the smallest unit of the abstract syntax tree that Dusk creates.</p>
+<h3 id="expression-atomic">Expression Atomic</h3>
+<p>Expression Atomics are the simplest unit of the Expressions, they all produce a single atomic value.</p>
+<p>Here is a list of the various atomic expressions.</p>
+<ul>
+<li>Booleans<ul>
+<li><code>True</code></li>
+<li><code>Flase</code></li>
+</ul>
+</li>
+<li>Integers<ul>
+<li><code>123</code></li>
+</ul>
+</li>
+<li>Floats<ul>
+<li><code>1.5</code></li>
+</ul>
+</li>
+<li>Strings<ul>
+<li><code>"Hello"</code></li>
+</ul>
+</li>
+<li>Array Literals<ul>
+<li>TODO</li>
+</ul>
+</li>
+<li>Struct Objects<ul>
+<li>Method Calls <code>Foo.bar()</code></li>
+<li>Member Values <code>Foo.a</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="binary-operator">Binary Operator</h3>
+<p>Binary operators are used for various math operations and boolean operations.</p>
+<p>Here is a list of the various binary operators, each have and expression on the left and the
+right of the operator.</p>
+<ul>
+<li><code>+</code> Add</li>
+<li><code>-</code> Subtract</li>
+<li><code>*</code> Multiply</li>
+<li><code>/</code> Divide</li>
+<li><code>%</code> Modulo</li>
+<li><code>==</code> Equal</li>
+<li><code>!=</code> Not Equal</li>
+<li><code>&lt;</code> Less Than</li>
+<li><code>&gt;</code> Greater Than</li>
+<li><code>&lt;=</code> Less Than Or Equal To</li>
+<li><code>&gt;=</code> Greater Than Or Equal To</li>
+<li><code>||</code> Logical Or</li>
+<li><code>&amp;&amp;</code> Logical And</li>
+</ul>
+<h3 id="unary-operators">Unary Operators</h3>
+<p>Unary Expressions can be used to modify a single expression.</p>
+<p>Here is a list of the various unary operators.</p>
+<ul>
+<li><code>-&lt;expression&gt;</code> Negate the expression (Integral / Floating numbers only)</li>
+<li><code>!&lt;expression&gt;</code> Not the expression (boolean types only)</li>
+<li><code>&lt;expression&gt;++</code> Increment the expression, equivalent to <code>&lt;expression&gt; = &lt;expression&gt; + 1</code></li>
+</ul>
+<h3 id="assignment-expressions">Assignment Expressions</h3>
+<p>Assignment expressions modify already created variables.</p>
+<p>For example this sets the variable foo to the value of the expression.</p>
+<p><code>foo = &lt;expression&gt;</code></p>
+<p>You can also use <code>[</code> and <code>]</code> to assign to a specific index if the variable is an array type.</p>
+<p>For example this would set the <code>bar</code> objects array at the index of the value <code>expression 1</code> produces,
+to the value <code>expression 2</code> produces.</p>
+<p><code>bar[&lt;expression 1&gt;] = &lt;expression 2&gt;</code></p>
+<h3 id="break-expression">Break Expression</h3>
+<p>Not Yet Implemented.</p>
+<h2 id="statements">Statements</h2>
+<p>Statements make up the body of functions, and there are various types.</p>
+<h3 id="expression-statement">Expression Statement</h3>
+<p>Expression statments are most often used to invoke expressions that have side effects. They are any
+Expression followed by a semicolon.</p>
+<p><code>&lt;expression&gt;;</code></p>
+<p>Call a function <code>foo</code>.</p>
+<pre><code>foo()
+</code></pre>
+<p>Change the value of a variable.</p>
+<pre><code>a = 10;
+</code></pre>
+<h3 id="assignment-statement">Assignment Statement</h3>
+<p>Assignment statements initialize new variables, and may or may not set them to an initial value.
+They also specify the mutability of the resulting variable.</p>
+<p>Types of Variables <code>&lt;type&gt;</code>
+- <code>bool</code>
+- <code>char</code>
+- <code>int</code>
+- <code>long</code>
+- <code>float</code>
+- <code>string</code>
+- <code>bool*</code>
+- <code>int*</code>
+- <code>float*</code>
+- <code>string*</code>
+- <code>Struct Types (Foo for a struct named Foo)</code></p>
+<p>For example this would initialise a mutable variable named <code>a</code> of type <code>int</code> with no initial value.</p>
+<pre><code>let mut a: int;
+</code></pre>
+<p>This would initialise a static float named <code>b</code> to the value <code>3.14</code>.</p>
+<pre><code>let b: float = 3.14;
+</code></pre>
+<p>This would initialise a static string named <code>c</code> to the value <code>Hello World!</code>.</p>
+<pre><code>let c: string = &quot;Hello World!&quot;;
+</code></pre>
+<p>Finally this would initialise a mutable struct named <code>Foo</code> into the variable <code>d</code>.</p>
+<pre><code>let mut d: Foo = Foo();
+</code></pre>
+<h3 id="return-statement">Return Statement</h3>
+<p>Return expressions are used to return a value / expression from a function.</p>
+<p>An example of a return statement is.</p>
+<pre><code>return &lt;expression&gt;;
+</code></pre>
+<h3 id="if-statement">If Statement</h3>
+<p>If statments are used as control flow to execute different pieces of code based on a condition.</p>
+<p>This is an example of an if statment.</p>
+<pre><code>if &lt;expression&gt; {
+    &lt;statements&gt;
+}
+</code></pre>
+<p>You can also create If-Else statements.</p>
+<pre><code>if &lt;expression&gt; {
+    &lt;statements&gt;
+} else {
+    &lt;statements&gt;
+}
+</code></pre>
+<p>If-ElseIf</p>
 <p>TODO</p>
+<h3 id="for-loop-statement">For Loop Statement</h3>
+<p>For loops can be used to iterate over a range of values.</p>
+<p>Here is an example of one.</p>
+<pre><code>for (&lt;assignment statment&gt;; &lt;comparison expression&gt;; &lt;increment expression&gt;) {
+    &lt;statments&gt;
+}
+</code></pre>
+<h3 id="while-loop-statement">While Loop Statement</h3>
+<p>While loops can be used to iterate over a range of values.</p>
+<p>Here is an example of one.</p>
+<pre><code>while &lt;comparison expression&gt; {
+    &lt;statements&gt;
+}
+</code></pre>
+<h3 id="statement-blocks">Statement Blocks</h3>
+<p>Statment blocks can be used to control the scope of variables.</p>
+<p>Anything inbetween a block of <code>{</code> and <code>}</code> will have its own local scope that will be destroyed at the
+end of the block.</p>
+<pre><code>{
+    // Scope A
+    {
+        // Scope B
+    } // Scope B Destroyed
+    {
+        // Scope C
+    } // Scope C Destroyed
+} // Scope A Destroyed
+</code></pre>
               
             </div>
           </div><footer>

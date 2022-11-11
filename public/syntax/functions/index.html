@@ -78,6 +78,26 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Function Syntax</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#global-functions">Global Functions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#external-functions">External Functions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#examples_1">Examples</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#include-and-requires-keywords">Include and Requires keywords</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#include">Include</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#require">Require</a>
+    </li>
+        </ul>
+    </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../structs/">Struct Syntax</a>
@@ -113,7 +133,78 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="function-syntax">Function Syntax</h1>
-<p>TODO</p>
+<p>This page outlines the various ways to create functions and load functions declared in other files /
+libraries.</p>
+<h2 id="global-functions">Global Functions</h2>
+<p>Functions are all part of the Global scope of a dusk program.</p>
+<p>There are a few rules around the defninitions of functions.</p>
+<ul>
+<li>They must all have a name</li>
+<li>They must all have a body (excluding <code>external</code> functions)</li>
+<li>They may take 0 to N arguments<ul>
+<li>Arguments may be static or mutable</li>
+</ul>
+</li>
+<li>They may have a void return type or have a specified return type<ul>
+<li><code>void</code></li>
+<li><code>bool</code></li>
+<li><code>char</code></li>
+<li><code>int</code></li>
+<li><code>long</code></li>
+<li><code>float</code></li>
+<li><code>string</code></li>
+<li><code>bool*</code></li>
+<li><code>int*</code></li>
+<li><code>float*</code></li>
+<li><code>string*</code></li>
+<li><code>Struct Types (Foo for a struct named Foo)</code></li>
+</ul>
+</li>
+</ul>
+<p>All non heap allocated objects are deallocated upon returning from a function.</p>
+<h3 id="examples">Examples</h3>
+<p>A void function that has no arguments.</p>
+<pre><code>fn foo() -&gt; void {
+    1 + 1;
+    return;
+}
+</code></pre>
+<p>Functions that return void may exclude the functions return type. They may also exclude the return
+at the end of the function, early returns must still be manually called with <code>return;</code>.</p>
+<pre><code>fn foo() {
+    1 + 1;
+}
+</code></pre>
+<p>Here is an example of a function that takes two arguments one is a mutable struct <code>Foo</code> named <code>a</code> the other
+is a static <code>int</code> named <code>b</code> and returns an <code>int</code>.</p>
+<pre><code>fn bar(mut a: Foo, b: int) -&gt; int {
+    a.x = b;
+    return b;
+}
+</code></pre>
+<h2 id="external-functions">External Functions</h2>
+<p>If you wish to use functions from a library compiled to be <code>C</code> compatible you may use the <code>extern</code> keyword
+to load that function from a library included at compile time.</p>
+<p>You must specify the name of the function and the arguments it takes an returns. However the types
+used must match the <code>C</code> types of the function you are importing.</p>
+<h3 id="examples_1">Examples</h3>
+<p>Here is and example of including the C functions malloc.</p>
+<pre><code>extern malloc(n: int) -&gt; void*;
+</code></pre>
+<h2 id="include-and-requires-keywords">Include and Requires keywords</h2>
+<h3 id="include">Include</h3>
+<p>The include keyword is used to load other <code>Dusk</code> source files (<code>.ds</code>). Including a file on the
+include path will automatically add it to the list of files to be compiiled without having to
+manually specify it.</p>
+<p>For example this would automaticall add the file <code>vector.ds</code> to the list of files to be compile.</p>
+<pre><code>include &quot;vector.ds&quot;
+</code></pre>
+<h3 id="require">Require</h3>
+<p>The require keyword adds a <code>C</code> library to be linked against automatically at compile time. The library
+will be searched for on you <code>C</code> library path.</p>
+<p>For example this would automatically add the <code>-lmylibrary</code> to the list of libraries to link against.</p>
+<pre><code>require &quot;mylibrary&quot;
+</code></pre>
               
             </div>
           </div><footer>
