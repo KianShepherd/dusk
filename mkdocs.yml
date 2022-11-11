@@ -4,5 +4,25 @@ repo_url: https://gitlab.com/kian_shepherd/Dusk
 site_author: Kian Shepherd
 site_description: Dusk Language Documentation
 site_dir: public
+theme:
+    name: readthedocs
 nav:
   - 'index.md'
+  - 'Types':
+    - 'standard_types/integer_types.md'
+    - 'standard_types/floating_types.md'
+    - 'standard_types/string_types.md'
+    - 'standard_types/array_types.md'
+    - 'standard_types/struct_types.md'
+  - 'Standard Library':
+    - 'standard_library/base.md'
+    - 'standard_library/types.md'
+    - 'standard_library/io.md'
+    - 'standard_library/math.md'
+    - 'standard_library/vectors.md'
+    - 'standard_library/bignums.md'
+  - 'Syntax':
+    - 'syntax/general.md'
+    - 'syntax/functions.md'
+    - 'syntax/structs.md'
+  - 'license.md'
