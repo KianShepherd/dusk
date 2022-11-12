@@ -88,6 +88,7 @@ void Struct::finalize() {
         con->name.append(std::to_string(((int)con->indentifiers.size())));
         con->name.append(con->func_args_to_str());
 
+        // Set refcount to 2 on init (one ref is dropped on func return);
         ((StatementBlock*)con->statements)->statements.insert(
             ((StatementBlock*)con->statements)->statements.begin(),
             new ExpressionStatement(
@@ -99,7 +100,7 @@ void Struct::finalize() {
                         std::string("_rc")
                     ),
                     new ExpressionAtomic((long)1),
-                    1
+                    2
                 )
             )
         );
@@ -197,7 +198,7 @@ void Struct::finalize() {
                                         std::string("_rc")
                                         ),
                                     new ExpressionAtomic((long)0),
-                                    op_equal
+                                    op_less_equal
                                 ),
                                 new StatementBlock(
                                     std::vector<Statement*>({

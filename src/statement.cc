@@ -9,8 +9,9 @@ void ExpressionStatement::debug(size_t depth) {
     this->expr->debug(depth);
 }
 
-void ExpressionStatement::fold(AST* ast) {
+void ExpressionStatement::fold(AST* ast, std::vector<Statement*>& block) {
     this->expr = this->expr->fold(ast);
+    block.push_back(this);
 }
 
 llvm::Value* ExpressionStatement::codegen(AST* ast) {
@@ -30,12 +31,15 @@ void StatementBlock::debug(size_t depth) {
     std::cout << std::string(depth * 4, ' ') << "}" << std::endl;
 }
 
-void StatementBlock::fold(AST* ast) {
+void StatementBlock::fold(AST* ast, std::vector<Statement*>& block) {
+    std::vector<Statement*>* new_stats = new std::vector<Statement*>();;
     ast->push_scope();
     for (size_t i = 0; i < this->statements.size(); i++) {
-        this->statements[i]->fold(ast);
+        this->statements[i]->fold(ast, *new_stats);
     }
     ast->pop_scope();
+    this->statements = *new_stats;
+    block.push_back(this);
 }
 
 llvm::Value* StatementBlock::codegen(AST* ast) {
@@ -64,9 +68,25 @@ void ReturnStatement::debug(size_t depth) {
     }
 }
 
-void ReturnStatement::fold(AST* ast) {
+void ReturnStatement::fold(AST* ast, std::vector<Statement*>& block) {
+   /* 
+    * TODO ARC
+    std::map<std::string, ScopeValue*> m = ast->scope->get_all();
+    std::vector<std::string> key;
+    std::vector<ScopeValue*> value;
+    std::map<std::string, std::string> structs_to_drop;
+    for(std::map<std::string, ScopeValue*>::iterator it = m.begin(); it != m.end(); ++it) {
+        key.push_back(it->first);
+        value.push_back(it->second);
+        if (it->second->type == t_struct) {
+            structs_to_drop[it->first] = it->second->struct_name;
+        }
+    }
+    */
+
     if (this->expr)
         this->expr = this->expr->fold(ast);
+    block.push_back(this);
 }
 
 llvm::Value* ReturnStatement::codegen(AST* ast) {
@@ -164,7 +184,7 @@ void AssignmentStatement::debug(size_t depth) {
     }
 }
 
-void AssignmentStatement::fold(AST* ast) {
+void AssignmentStatement::fold(AST* ast, std::vector<Statement*>& block) {
     if (this->value) {
         this->value = this->value->fold(ast);
         if (this->type == t_struct) {
@@ -179,6 +199,7 @@ void AssignmentStatement::fold(AST* ast) {
             ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->type, std::string("")));
         }
     }
+    block.push_back(this);
 }
 
 llvm::Value* AssignmentStatement::codegen(AST* ast) {
@@ -263,14 +284,16 @@ void IfStatement::debug(size_t depth) {
     }
 }
 
-void IfStatement::fold(AST* ast) {
+void IfStatement::fold(AST* ast, std::vector<Statement*>& block) {
     this->condition = this->condition->fold(ast);
+    std::vector<Statement*> null_block;
     if (this->block1) {
-        this->block1->fold(ast);
+        this->block1->fold(ast, null_block);
     }
     if (this->block2) {
-        this->block2->fold(ast);
+        this->block2->fold(ast, null_block);
     }
+    block.push_back(this);
 }
 
 llvm::Value* IfStatement::codegen(AST* ast) {
@@ -352,9 +375,11 @@ void WhileStatement::debug(size_t depth) {
     this->block->debug(depth + 1);
 }
 
-void WhileStatement::fold(AST* ast) {
+void WhileStatement::fold(AST* ast, std::vector<Statement*>& _block) {
+    std::vector<Statement*> null_block;
     this->condition = this->condition->fold(ast);
-    this->block->fold(ast);
+    this->block->fold(ast, null_block);
+    _block.push_back(this);
 }
 
 llvm::Value* WhileStatement::codegen(AST* ast) {

@@ -84,6 +84,8 @@ public:
     ScopeFrame* new_scope();
 
     AtomType get_value(std::string identifier);
+    std::map<std::string, ScopeValue*> get_all();
+
     std::string get_value_struct(std::string identifier);
     void push_value(std::string identifier, ScopeValue* value);
     void update_value(AST* ast, std::string identifier, ScopeValue* value);
@@ -131,6 +133,8 @@ public:
 
     void codegen(char debug, bool optimizations, std::string outfile);
     void stdlib();
+
+    Statement* current_block;
 
     ScopeFrame* scope;
     CodegenScopeFrame* NamedValues;

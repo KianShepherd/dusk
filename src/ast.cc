@@ -330,6 +330,10 @@ AtomType ScopeFrame::get_value(std::string identifier) {
     return this->prev_frame->get_value(identifier);
 }
 
+std::map<std::string, ScopeValue*> ScopeFrame::get_all() {
+    return this->variables;
+}
+
 std::string ScopeFrame::get_value_struct(std::string identifier) {
     auto iter = this->variables.find(identifier);
     if (iter != this->variables.end() ) {

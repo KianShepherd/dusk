@@ -170,8 +170,10 @@ void Function::fold(AST* ast) {
     for (size_t i = 0; i < this->arg_count; i++) {
         ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(this->indentifiers_mutability[i], this->indentifier_type[i], ((this->indentifier_type[i] != t_struct)?std::string(""):this->struct_names[struct_count++])));
     }
-    if (this->statements)
-        this->statements->fold(ast);
+    if (this->statements) {
+        std::vector<Statement*> stats;
+        this->statements->fold(ast, stats);
+    }
 }
 
 

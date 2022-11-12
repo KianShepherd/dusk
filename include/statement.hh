@@ -22,7 +22,7 @@ class ScopeValue;
 class Statement {
 public:
     virtual void debug(size_t depth) {};
-    virtual void fold(AST* ast) {};
+    virtual void fold(AST* ast, std::vector<Statement*>& block) {};
     virtual llvm::Value* codegen(AST* ast) = 0;
 };
 
@@ -32,7 +32,7 @@ public:
     ExpressionStatement(Expression* exp);
 
     void debug(size_t depth) override;
-    void fold(AST* ast) override;
+    void fold(AST* ast, std::vector<Statement*>& block) override;
     llvm::Value* codegen(AST* ast) override;
 private:
     Expression* expr;
@@ -43,7 +43,7 @@ public:
     StatementBlock(std::vector<Statement*> statements);
 
     void debug(size_t depth) override;
-    void fold(AST* ast) override;
+    void fold(AST* ast, std::vector<Statement*>& block) override;
     llvm::Value* codegen(AST* ast) override;
 
     std::vector<Statement*> statements;
@@ -54,7 +54,7 @@ public:
     ReturnStatement(Expression* exp);
 
     void debug(size_t depth) override;
-    void fold(AST* ast) override;
+    void fold(AST* ast, std::vector<Statement*>& block) override;
     llvm::Value* codegen(AST* ast) override;
 private:
     Expression* expr;
@@ -66,7 +66,7 @@ public:
     AssignmentStatement(Expression* identifier, Expression* value, bool mut, AtomType type, std::string struct_name);
 
     void debug(size_t depth) override;
-    void fold(AST* ast) override;
+    void fold(AST* ast, std::vector<Statement*>& block) override;
     llvm::Value* codegen(AST* ast) override;
 private:
     Expression* identifier;
@@ -82,7 +82,7 @@ public:
     IfStatement(Expression* condition, Statement* block1, Statement* block2);
 
     void debug(size_t depth) override;
-    void fold(AST* ast) override;
+    void fold(AST* ast, std::vector<Statement*>& block) override;
     llvm::Value* codegen(AST* ast) override;
 private:
     Expression* condition;
@@ -95,7 +95,7 @@ public:
     WhileStatement(Expression* cond, Statement* block);
 
     void debug(size_t depth) override;
-    void fold(AST* ast) override;
+    void fold(AST* ast, std::vector<Statement*>& block) override;
     llvm::Value* codegen(AST* ast) override;
 private:
     Expression* condition;
