@@ -116,6 +116,7 @@ std::string Function::func_args_to_str() {
 std::tuple<std::string, AtomType, std::vector<AtomType>> Function::get_meta() {
     return std::make_tuple(this->name, this->type, this->indentifier_type);
 }
+
 void Function::debug() {
     if (this->statements) {
         switch (this->type) {

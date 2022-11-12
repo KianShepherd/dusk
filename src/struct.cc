@@ -55,6 +55,7 @@ Struct::Struct(std::string name, AST* ast) {
 }
 
 void Struct::finalize() {
+    this->push_var(std::string("_rc"), t_number);
     auto base_const_name = std::string("~").append(this->name).append("~");
     this->member_functions.push_back(
         new Function(
@@ -87,10 +88,176 @@ void Struct::finalize() {
         con->name.append(std::to_string(((int)con->indentifiers.size())));
         con->name.append(con->func_args_to_str());
 
+        ((StatementBlock*)con->statements)->statements.insert(
+            ((StatementBlock*)con->statements)->statements.begin(),
+            new ExpressionStatement(
+                new AssignmentExpression(
+                    new ExpressionAtomic(
+                        new ExpressionAtomic(std::string("self"), true),
+                        this,
+                        this->gen_field_map["_rc"],
+                        std::string("_rc")
+                    ),
+                    new ExpressionAtomic((long)1),
+                    1
+                )
+            )
+        );
         // First line of function declares self
-        ((StatementBlock*)con->statements)->statements.insert(((StatementBlock*)con->statements)->statements.begin(), new AssignmentStatement(new ExpressionAtomic("self", true), new ExpressionAtomic(base_const_name, std::vector<Expression*>()), true, t_struct, this->name));
+        ((StatementBlock*)con->statements)->statements.insert(
+            ((StatementBlock*)con->statements)->statements.begin(),
+            new AssignmentStatement(
+                new ExpressionAtomic("self", true),
+                new ExpressionAtomic(base_const_name, std::vector<Expression*>()),
+                true,
+                t_struct,
+                this->name
+            )
+        );
+        this->member_functions.push_back(con);
         this->member_functions.push_back(con);
     }
+    bool has_del = false;
+    bool has_dec = false;
+    bool has_inc = false;
+    for (auto& f : this->member_functions) {
+        if (f->name.compare(std::string(this->name).append("__del__")) == 0) {
+            has_del = true;
+            ((StatementBlock*)f->statements)->statements.push_back(
+                new ExpressionStatement(
+                    new ExpressionAtomic(
+                        "del",
+                        std::vector<Expression*>({ new ExpressionAtomic(std::string("self"), true) })
+                    )
+                )
+            );
+        } else if (f->name.compare(std::string(this->name).append("__DECREF__")) == 0) {
+            has_dec = true;
+        } else if (f->name.compare(std::string(this->name).append("__INCREF__")) == 0) {
+            has_inc = true;
+        }
+    }
+    if (!has_del) {
+        this->member_functions.push_back(
+            new Function(
+                std::string(this->name).append("__del__"),
+                new StatementBlock(
+                    std::vector<Statement*>(
+                        {
+                            new ExpressionStatement(
+                                new ExpressionAtomic(
+                                    "del",
+                                    std::vector<Expression*>({ new ExpressionAtomic(std::string("self"), true) })
+                            )
+                        )
+                    }
+                )
+                ),
+                t_null,
+                std::vector<std::vector<std::string>>({{std::string("self"), std::string("struct"), std::string("t"), std::string(this->name)}})
+            )
+        );
+    }
+
+    if (!has_dec) {
+        this->member_functions.push_back(
+            new Function(
+                std::string(this->name).append("__DECREF__"),
+                new StatementBlock(
+                    std::vector<Statement*>(
+                        {
+                            new ExpressionStatement(
+                                new AssignmentExpression(
+                                    new ExpressionAtomic(
+                                        new ExpressionAtomic(std::string("self"), true),
+                                        this,
+                                        this->gen_field_map["_rc"],
+                                        std::string("_rc")
+                                    ),
+                                    new BinaryExpression(
+                                        new ExpressionAtomic(
+                                            new ExpressionAtomic(std::string("self"), true),
+                                            this,
+                                            this->gen_field_map["_rc"],
+                                            std::string("_rc")
+                                            ),
+                                        new ExpressionAtomic((long)1),
+                                        op_sub
+                                    ),
+                                    1
+                                )
+                            ), 
+                            
+                                    
+                            new IfStatement(
+                                new BinaryExpression(
+                                    new ExpressionAtomic(
+                                        new ExpressionAtomic(std::string("self"), true),
+                                        this,
+                                        this->gen_field_map["_rc"],
+                                        std::string("_rc")
+                                        ),
+                                    new ExpressionAtomic((long)0),
+                                    op_equal
+                                ),
+                                new StatementBlock(
+                                    std::vector<Statement*>({
+                                        new ExpressionStatement(
+                                            new ExpressionAtomic(
+                                                std::string(this->name).append("__del__"),
+                                                std::vector<Expression*>({
+                                                    new ExpressionAtomic("self", true)
+                                                })
+                                            )
+                                        )
+                                    })
+                                ),
+                                nullptr
+                            )
+                        }
+                    )
+                ),
+                t_null,
+                std::vector<std::vector<std::string>>({{std::string("self"), std::string("struct"), std::string("t"), std::string(this->name)}})
+            )
+        );
+    }
+
+    if (!has_inc) {
+        this->member_functions.push_back(
+            new Function(
+                std::string(this->name).append("__INCREF__"),
+                new StatementBlock(
+                    std::vector<Statement*>({
+                        new ExpressionStatement(
+                                new AssignmentExpression(
+                                    new ExpressionAtomic(
+                                        new ExpressionAtomic(std::string("self"), true),
+                                        this,
+                                        this->gen_field_map["_rc"],
+                                        std::string("_rc")
+                                        ),
+                                    new BinaryExpression(
+                                        new ExpressionAtomic(
+                                            new ExpressionAtomic(std::string("self"), true),
+                                            this,
+                                            this->gen_field_map["_rc"],
+                                            std::string("_rc")
+                                            ),
+                                        new ExpressionAtomic((long)1),
+                                        op_add
+                                        ),
+                                    1
+                                    )
+                                )
+                        })
+                ),
+                t_null,
+                std::vector<std::vector<std::string>>({{std::string("self"), std::string("struct"), std::string("t"), std::string(this->name)}})
+            )
+        );
+    }
+
     this->struct_type = llvm::StructType::create(*(this->ast->TheContext), this->llvm_types, this->name, true);
 }
 
@@ -182,6 +349,8 @@ void Struct::push_function(Function* func) {
         bin_op = true;
     } else if (func->name.compare("__mod__") == 0) {
         bin_op = true;
+    } else if (func->name.compare("__del__") == 0) {
+        bin_op = true;
     }
 
     if (!bin_op) {
@@ -206,12 +375,22 @@ void Struct::push_function(Function* func) {
         this->field_map[func_name] = std::tuple<int, int>(1, field_idx);
         this->member_functions.push_back(func);
     } else {
-        if (func->arg_count != 2)
+        if (func->arg_count == 1) {
+            if (func->name.compare("__del__") == 0) {
+                std::string func_name = std::string(this->name).append(func->name);
+                func->name = func_name;
+                this->member_functions.push_back(func);
+                return;
+            }
             this->ast->push_err(std::string("Binary operators only allow 2 arguments."));
-        std::string func_name = func->func_args_to_str();
-        func_name.append(func->name);
-        func->name = func_name;
-        this->member_functions.push_back(func);
+        } else if (func->arg_count == 2) {
+            std::string func_name = func->func_args_to_str();
+            func_name.append(func->name);
+            func->name = func_name;
+            this->member_functions.push_back(func);
+        } else {
+            this->ast->push_err(std::string("Binary operators only allow 2 arguments."));
+        }
     }
 }
 
