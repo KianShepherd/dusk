@@ -95,7 +95,7 @@ void Struct::finalize() {
                     new ExpressionAtomic(
                         new ExpressionAtomic(std::string("self"), true),
                         this,
-                        this->gen_field_map["_rc"],
+                        this->gen_field_map[std::string("_rc")],
                         std::string("_rc")
                     ),
                     new ExpressionAtomic((long)1),
@@ -115,13 +115,12 @@ void Struct::finalize() {
             )
         );
         this->member_functions.push_back(con);
-        this->member_functions.push_back(con);
     }
     bool has_del = false;
     bool has_dec = false;
     bool has_inc = false;
     for (auto& f : this->member_functions) {
-        if (f->name.compare(std::string(this->name).append("__del__")) == 0) {
+        if (f->name.compare(std::string(this->name).append("__del__").append(this->name)) == 0) {
             has_del = true;
             ((StatementBlock*)f->statements)->statements.push_back(
                 new ExpressionStatement(
@@ -131,9 +130,9 @@ void Struct::finalize() {
                     )
                 )
             );
-        } else if (f->name.compare(std::string(this->name).append("__DECREF__")) == 0) {
+        } else if (f->name.compare(std::string(this->name).append("__DECREF__").append(this->name)) == 0) {
             has_dec = true;
-        } else if (f->name.compare(std::string(this->name).append("__INCREF__")) == 0) {
+        } else if (f->name.compare(std::string(this->name).append("__INCREF__").append(this->name)) == 0) {
             has_inc = true;
         }
     }
@@ -171,14 +170,14 @@ void Struct::finalize() {
                                     new ExpressionAtomic(
                                         new ExpressionAtomic(std::string("self"), true),
                                         this,
-                                        this->gen_field_map["_rc"],
+                                        this->gen_field_map[std::string("_rc")],
                                         std::string("_rc")
                                     ),
                                     new BinaryExpression(
                                         new ExpressionAtomic(
                                             new ExpressionAtomic(std::string("self"), true),
                                             this,
-                                            this->gen_field_map["_rc"],
+                                            this->gen_field_map[std::string("_rc")],
                                             std::string("_rc")
                                             ),
                                         new ExpressionAtomic((long)1),
@@ -194,7 +193,7 @@ void Struct::finalize() {
                                     new ExpressionAtomic(
                                         new ExpressionAtomic(std::string("self"), true),
                                         this,
-                                        this->gen_field_map["_rc"],
+                                        this->gen_field_map[std::string("_rc")],
                                         std::string("_rc")
                                         ),
                                     new ExpressionAtomic((long)0),
@@ -286,7 +285,6 @@ void Struct::push_var(std::string name, AtomType type) {
     this->field_map[name] = std::tuple<int, int>(0, field_idx);
     this->mem_size += atom_to_size(type);
     this->field_type_map[name] = llvm_type;
-    this->struct_var_map[name] = type;
     this->struct_var_type_map[name] = type;
 
 }
@@ -305,7 +303,6 @@ void Struct::push_var(std::string name, AtomType type, std::string struct_name) 
         this->struct_var_map[name] = struct_name;
     }
     this->field_type_map[name] = llvm_type;
-    this->struct_var_map[name] = type;
     this->struct_var_type_map[name] = type;
 }
 
@@ -349,6 +346,10 @@ void Struct::push_function(Function* func) {
         bin_op = true;
     } else if (func->name.compare("__mod__") == 0) {
         bin_op = true;
+    } else if (func->name.compare("__INCREF__") == 0) {
+        bin_op = true;
+    } else if (func->name.compare("__DECREF__") == 0) {
+        bin_op = true;
     } else if (func->name.compare("__del__") == 0) {
         bin_op = true;
     }
@@ -376,20 +377,20 @@ void Struct::push_function(Function* func) {
         this->member_functions.push_back(func);
     } else {
         if (func->arg_count == 1) {
-            if (func->name.compare("__del__") == 0) {
-                std::string func_name = std::string(this->name).append(func->name);
+            if (func->name.compare("__del__") == 0 || func->name.compare("__INCREF__") != 0 || func->name.compare("__DECREF__") != 0) {
+                std::string func_name = std::string(this->name).append(func->name).append(this->name);
                 func->name = func_name;
                 this->member_functions.push_back(func);
                 return;
             }
-            this->ast->push_err(std::string("Binary operators only allow 2 arguments."));
+            this->ast->push_err(std::string("Builtin operators only allow 1 argument self.\n"));
         } else if (func->arg_count == 2) {
             std::string func_name = func->func_args_to_str();
             func_name.append(func->name);
             func->name = func_name;
             this->member_functions.push_back(func);
         } else {
-            this->ast->push_err(std::string("Binary operators only allow 2 arguments."));
+            this->ast->push_err(std::string("Binary operators only allow 2 arguments.\n"));
         }
     }
 }

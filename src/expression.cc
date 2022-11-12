@@ -391,7 +391,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                     arg = f;
                 } else if (((ExpressionAtomic*)arg)->type == t_get_struct) {
                     Struct* strct = ((ExpressionAtomic*)arg)->struct_t;
-                    if (strct->struct_var_map.find(((ExpressionAtomic*)this->base)->str) == strct->struct_var_map.end()) {
+                    if (strct->struct_var_map.find(((ExpressionAtomic*)((ExpressionAtomic*)arg)->base)->str) == strct->struct_var_map.end()) {
                         this->args[i] = arg;
                         continue;
                     }

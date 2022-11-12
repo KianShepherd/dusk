@@ -1,31 +1,39 @@
-include "bignum.ds"
+struct Foo {
+    a: int,
 
-fn factf_tail(n: float, acc: BigFloat) -> BigFloat {
-    if (n < 2.0) {
-        return acc;
+    fn Foo(self: Foo) -> Foo {
+        println("Init Foo: rc = %d", self._rc);
+        return self;
     }
-    return factf_tail(n - 1.0, n * acc);
-}
 
-fn factf(n: float) -> BigFloat{
-    return factf_tail(n, BigFloat(1.0));
-}
-
-fn fact_tail(n: int, acc: BigInt) -> BigInt {
-    if (n < 2) {
-        return acc;
+    fn __del__(self: Foo) {
+        println("Del Foo");
     }
-    return fact_tail(n - 1, n * acc);
+
+    fn __INCREF__(self: Foo) {
+        println("__INCREF__ Foo: %d", self._rc);
+        self._rc = self._rc + 1;
+        println("__INCREF__ Foo: %d", self._rc);
+    }
+
+    fn __DECREF__(self: Foo) {
+        println("__DECREF__ Foo: %d", self._rc);
+        self._rc = self._rc - 1;
+        println("__DECREF__ Foo: %d", self._rc);
+        if self._rc == 0 {
+            println("DELETING");
+            self.__del__();
+            println("DELETED");
+        }
+    }
 }
 
-fn fact(n: int) -> BigInt {
-    return fact_tail(n, BigInt(1));
-}
 
 fn main(argc: int, argv: string*) -> int {
-    for (let mut i: int = 0; i < 40; i++) {
-        println(factf(itof(i)));
-        println(fact(i));
-    }
+    let mut a: Foo = Foo();
+    a.__INCREF__();
+    a.__DECREF__();
+    a.__DECREF__();
+    println("done");
     return 0;
 }

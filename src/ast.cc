@@ -101,7 +101,7 @@ void AST::debug() {
     std::cout << "----- DEBUG AST -----" << std::endl;
 }
 
-void AST::static_checking() {
+void AST::finalize_structs() {
     for (auto& s : this->structs) {
         s->finalize();
         for (int i = 0; i < (int)s->member_functions.size(); i++) {
@@ -109,6 +109,9 @@ void AST::static_checking() {
             this->functions.push_back(s->member_functions[i]);
         }
     }
+}
+
+void AST::static_checking() {
     bool found_entrypoint = false;
     for (int i = 0; i < (int)this->functions.size(); i++) {
         auto meta = this->functions[i]->get_meta();

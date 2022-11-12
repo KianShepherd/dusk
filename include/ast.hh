@@ -125,6 +125,7 @@ public:
 
     bool check_error(std::string stage);
     void debug();
+    void finalize_structs();
     void static_checking();
     llvm::Value* LogErrorV(const char *Str);
 

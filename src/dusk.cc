@@ -227,6 +227,8 @@ int main(int argc, char** argv) {
         compiler_args.libs.push_back(lib);
     }
 
+    ast.finalize_structs();
+
     if (compiler_args.debug_ast) {
         ast.debug();
     }
