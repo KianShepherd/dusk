@@ -20,6 +20,7 @@ void* newstruct(long size) {
 
 struct __InternString {
     void* str;
+    int _rc;
 };
 
 extern "C" {
@@ -30,6 +31,7 @@ extern "C" {
         {
             __InternString* string_struct = new __InternString();
             string_struct->str = (void*)new std::string(segment);
+            string_struct->_rc = 1;
             (*(std::vector<void*>*)vec).push_back((void*)string_struct);
         }
         return (long)((std::vector<void*>*)vec)->size();

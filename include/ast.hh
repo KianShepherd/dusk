@@ -134,7 +134,10 @@ public:
     void codegen(char debug, bool optimizations, std::string outfile);
     void stdlib();
 
-    Statement* current_block;
+    std::vector<Statement*>* current_block;
+    std::string current_function_name;
+    bool block_returned;
+
 
     ScopeFrame* scope;
     CodegenScopeFrame* NamedValues;

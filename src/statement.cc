@@ -11,6 +11,7 @@ void ExpressionStatement::debug(size_t depth) {
 
 void ExpressionStatement::fold(AST* ast, std::vector<Statement*>& block) {
     this->expr = this->expr->fold(ast);
+    // TODO: ARC call DECREF on struct if expr returns a struct
     block.push_back(this);
 }
 
@@ -20,6 +21,7 @@ llvm::Value* ExpressionStatement::codegen(AST* ast) {
 
 StatementBlock::StatementBlock(std::vector<Statement*> statements) {
     this->statements = statements;
+    this->returned = false;
 }
 
 void StatementBlock::debug(size_t depth) {
@@ -33,12 +35,34 @@ void StatementBlock::debug(size_t depth) {
 
 void StatementBlock::fold(AST* ast, std::vector<Statement*>& block) {
     std::vector<Statement*>* new_stats = new std::vector<Statement*>();;
+    auto prev_block = ast->current_block;
+    auto prev_returned = ast->block_returned;
+    ast->current_block = new_stats;
+    ast->block_returned = false;
     ast->push_scope();
     for (size_t i = 0; i < this->statements.size(); i++) {
         this->statements[i]->fold(ast, *new_stats);
     }
+    this->returned = ast->block_returned;
+    if (!ast->block_returned) {
+        std::map<std::string, ScopeValue*> m = ast->scope->get_all();
+        for(std::map<std::string, ScopeValue*>::iterator it = m.begin(); it != m.end(); ++it) {
+            if (it->second->type == t_struct) {
+                new_stats->push_back(
+                    new ExpressionStatement(
+                        new ExpressionAtomic(
+                            std::string(it->second->struct_name).append("__DECREF__").append(std::string(it->second->struct_name)),
+                            std::vector<Expression*>({ new ExpressionAtomic(std::string(it->first), true) })
+                        )
+                    )
+                );
+            }
+        }
+    }
     ast->pop_scope();
     this->statements = *new_stats;
+    ast->current_block = prev_block;
+    ast->block_returned = prev_returned;
     block.push_back(this);
 }
 
@@ -69,23 +93,51 @@ void ReturnStatement::debug(size_t depth) {
 }
 
 void ReturnStatement::fold(AST* ast, std::vector<Statement*>& block) {
-   /* 
-    * TODO ARC
-    std::map<std::string, ScopeValue*> m = ast->scope->get_all();
+    ast->block_returned = true;
+    if (this->expr) {
+        this->expr = this->expr->fold(ast);
+        if (this->expr->get_atomic_type_keep_identifier(ast) == t_identifier) {
+            if (ast->struct_map[this->expr->type_str(ast)]) {
+                block.push_back(
+                new ExpressionStatement(
+                        new ExpressionAtomic(
+                                std::string(this->expr->type_str(ast)).append("__INCREF__").append(std::string(this->expr->type_str(ast))),
+                                std::vector<Expression*>({ this->expr })
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+    auto cur_scope = ast->scope;
     std::vector<std::string> key;
     std::vector<ScopeValue*> value;
     std::map<std::string, std::string> structs_to_drop;
-    for(std::map<std::string, ScopeValue*>::iterator it = m.begin(); it != m.end(); ++it) {
-        key.push_back(it->first);
-        value.push_back(it->second);
-        if (it->second->type == t_struct) {
-            structs_to_drop[it->first] = it->second->struct_name;
+    std::vector<std::string> struct_idents;
+    while (true) {
+        std::map<std::string, ScopeValue*> m = cur_scope->get_all();
+        for(std::map<std::string, ScopeValue*>::iterator it = m.begin(); it != m.end(); ++it) {
+            key.push_back(it->first);
+            value.push_back(it->second);
+            if (it->second->type == t_struct) {
+                block.push_back(
+                    new ExpressionStatement(
+                        new ExpressionAtomic(
+                            std::string(it->second->struct_name).append("__DECREF__").append(std::string(it->second->struct_name)),
+                            std::vector<Expression*>({ new ExpressionAtomic(std::string(it->first), true) })
+                        )
+                    )
+                );
+            }
+        }
+
+        if (cur_scope->prev_frame) {
+            cur_scope = cur_scope->prev_frame;
+        } else {
+            break;
         }
     }
-    */
-
-    if (this->expr)
-        this->expr = this->expr->fold(ast);
     block.push_back(this);
 }
 

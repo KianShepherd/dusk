@@ -299,9 +299,9 @@ AtomType ExpressionAtomic::get_atomic_type_keep_identifier(AST* ast) {
 
 Expression* ExpressionAtomic::fold(AST* ast) {
     if (this->type == t_dot_exp) {
-        this->operand = this->operand->fold(ast);
         this->base = this->base->fold(ast);
         if (this->dot_type == 0) {
+            this->operand = this->operand->fold(ast);
             if ((this->base)->get_atomic_type_keep_identifier(ast) == t_identifier) {
                 std::string struct_name = ast->scope->get_value_struct(((ExpressionAtomic*)this->base)->str);
                 Struct* strct = ast->struct_map[struct_name];
@@ -334,7 +334,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                     struct_name.append(a->get_atomic_type_str(ast));
                 }
                 ((ExpressionAtomic*)this->operand)->str = struct_name;
-                return this->operand;
+                return this->operand->fold(ast);
             } else if (((ExpressionAtomic*)this->base)->type == t_function_call) {
                 Function* func = ast->func_map[((ExpressionAtomic*)this->base)->str];
                 if (func->type != t_struct) {
@@ -349,7 +349,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                     struct_name.append(a->get_atomic_type_str(ast));
                 }
                 ((ExpressionAtomic*)this->operand)->str = struct_name;
-                return this->operand;
+                return this->operand->fold(ast);
             } else if (((ExpressionAtomic*)this->base)->type == t_get_struct) {
                 Struct* strct = ((ExpressionAtomic*)this->base)->struct_t;
                 if (strct->struct_var_map.find(((ExpressionAtomic*)this->base)->str) == strct->struct_var_map.end()) {
@@ -365,13 +365,14 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                     struct_name.append(a->get_atomic_type_str(ast));
                 }
                 ((ExpressionAtomic*)this->operand)->str = struct_name;
-                return this->operand;
+                return this->operand->fold(ast);
             }
         }
     } else if (this->type == t_function_call) {
         for (int i = 0; i < this->args.size(); i++) {
             auto arg = this->args[i];
             arg = arg->fold(ast);
+            // TODO: ARC incref struct identifier arguments
             if (this->str.compare("print") == 0 || this->str.compare("println") == 0) {
                 if (arg->get_atomic_type_keep_identifier(ast) == t_identifier && arg->get_atomic_type(ast) == t_struct) {
                     std::string f_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
@@ -401,8 +402,24 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                     ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
                     arg = f;
                 }
+                arg = arg->fold(ast);
+            } else {
+                if (
+                    arg->get_atomic_type_keep_identifier(ast) == t_identifier
+                    && ast->scope->get_value(((ExpressionAtomic*)arg)->str) == t_struct
+                    && ast->func_map[this->str]->statements != nullptr
+                    && this->str.find("__del__") == std::string::npos
+                    && this->str.find("__DECREF__") == std::string::npos
+                    && this->str.find("__INCREF__") == std::string::npos
+                    ) {
+                    auto s_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
+                    ast->current_block->push_back(
+                        new ExpressionStatement(
+                            new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(s_name), std::vector<Expression*>({ new ExpressionAtomic(std::string(((ExpressionAtomic*)arg)->str), true) }))
+                        )
+                    );
+                }
             }
-            arg = arg->fold(ast);
             this->args[i] = arg;
             
         }
@@ -950,6 +967,7 @@ void AssignmentExpression::debug(size_t depth) {
 }
 
 Expression* AssignmentExpression::fold(AST* ast) {
+    // TODO: ARC decref old value reference to struct types
     this->value = this->value->fold(ast);
     this->identifier = this->identifier->fold(ast);
     if (this->is_methods)

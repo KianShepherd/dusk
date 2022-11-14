@@ -165,15 +165,36 @@ void Function::debug() {
 }
 
 void Function::fold(AST* ast) {
-    ast->scope->new_scope();
+    ast->push_scope();
     int struct_count = 0;
+    std::vector<Statement*> stats;
+    ast->current_block = &stats;
+    ast->block_returned = false;
     for (size_t i = 0; i < this->arg_count; i++) {
         ast->scope->push_value(((ExpressionAtomic*)this->indentifiers[i])->str, new ScopeValue(this->indentifiers_mutability[i], this->indentifier_type[i], ((this->indentifier_type[i] != t_struct)?std::string(""):this->struct_names[struct_count++])));
+
     }
     if (this->statements) {
-        std::vector<Statement*> stats;
         this->statements->fold(ast, stats);
+        if (!((StatementBlock*)this->statements)->returned && this->name.find("__INCREF__") == std::string::npos && this->name.find("__DECREF__") == std::string::npos && this->name.find("__del__") == std::string::npos) {
+            std::map<std::string, ScopeValue*> m = ast->scope->get_all();
+            for(std::map<std::string, ScopeValue*>::iterator it = m.begin(); it != m.end(); ++it) {
+                if (it->second->type == t_struct) {
+                    ((StatementBlock*)this->statements)->statements.push_back(
+                       new ExpressionStatement(
+                           new ExpressionAtomic(
+                               std::string(it->second->struct_name).append("__DECREF__").append(std::string(it->second->struct_name)),
+                               std::vector<Expression*>({ new ExpressionAtomic(std::string(it->first), true) })
+                           )
+                       )
+                   );
+                }
+        }
+        }
     }
+    ast->pop_scope();
+    ast->current_block = nullptr;
+    ast->block_returned = false;
 }
 
 

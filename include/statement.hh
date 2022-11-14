@@ -47,6 +47,7 @@ public:
     llvm::Value* codegen(AST* ast) override;
 
     std::vector<Statement*> statements;
+    bool returned;
 };
 
 class ReturnStatement : public Statement {

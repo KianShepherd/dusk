@@ -42,6 +42,8 @@ AST::AST() {
     // Create a new builder for the module.
     this->Builder = std::make_unique<llvm::IRBuilder<>>(*(this->TheContext));
     this->stdlib();
+
+    this->current_block = nullptr;
 }
 
 void AST::push_function(Function* function) {
@@ -122,14 +124,8 @@ void AST::static_checking() {
             found_entrypoint = true;
         }
     }
-    /*
-    for (int i = 0; i < (int)this->structs.size(); i++) {
-        for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
-            this->structs[i]->member_functions[j]->fold(this);
-        }
-    }
-    */
     for (int i = 0; i < (int)this->functions.size(); i++) {
+        this->current_function_name = this->functions[i]->name;
         this->functions[i]->fold(this);
     }
     if (!found_entrypoint)

@@ -88,7 +88,7 @@ void Struct::finalize() {
         con->name.append(std::to_string(((int)con->indentifiers.size())));
         con->name.append(con->func_args_to_str());
 
-        // Set refcount to 2 on init (one ref is dropped on func return);
+        // Set refcount to 1 on init
         ((StatementBlock*)con->statements)->statements.insert(
             ((StatementBlock*)con->statements)->statements.begin(),
             new ExpressionStatement(
@@ -100,7 +100,7 @@ void Struct::finalize() {
                         std::string("_rc")
                     ),
                     new ExpressionAtomic((long)1),
-                    2
+                    1
                 )
             )
         );
@@ -140,7 +140,7 @@ void Struct::finalize() {
     if (!has_del) {
         this->member_functions.push_back(
             new Function(
-                std::string(this->name).append("__del__"),
+                std::string(this->name).append("__del__").append(this->name),
                 new StatementBlock(
                     std::vector<Statement*>(
                         {
@@ -162,7 +162,7 @@ void Struct::finalize() {
     if (!has_dec) {
         this->member_functions.push_back(
             new Function(
-                std::string(this->name).append("__DECREF__"),
+                std::string(this->name).append("__DECREF__").append(this->name),
                 new StatementBlock(
                     std::vector<Statement*>(
                         {
@@ -187,8 +187,6 @@ void Struct::finalize() {
                                     1
                                 )
                             ), 
-                            
-                                    
                             new IfStatement(
                                 new BinaryExpression(
                                     new ExpressionAtomic(
@@ -204,7 +202,7 @@ void Struct::finalize() {
                                     std::vector<Statement*>({
                                         new ExpressionStatement(
                                             new ExpressionAtomic(
-                                                std::string(this->name).append("__del__"),
+                                                std::string(this->name).append("__del__").append(std::string(this->name)),
                                                 std::vector<Expression*>({
                                                     new ExpressionAtomic("self", true)
                                                 })
@@ -226,30 +224,30 @@ void Struct::finalize() {
     if (!has_inc) {
         this->member_functions.push_back(
             new Function(
-                std::string(this->name).append("__INCREF__"),
+                std::string(this->name).append("__INCREF__").append(this->name),
                 new StatementBlock(
                     std::vector<Statement*>({
                         new ExpressionStatement(
-                                new AssignmentExpression(
+                            new AssignmentExpression(
+                                new ExpressionAtomic(
+                                    new ExpressionAtomic(std::string("self"), true),
+                                    this,
+                                    this->gen_field_map["_rc"],
+                                    std::string("_rc")
+                                    ),
+                                new BinaryExpression(
                                     new ExpressionAtomic(
                                         new ExpressionAtomic(std::string("self"), true),
                                         this,
                                         this->gen_field_map["_rc"],
                                         std::string("_rc")
                                         ),
-                                    new BinaryExpression(
-                                        new ExpressionAtomic(
-                                            new ExpressionAtomic(std::string("self"), true),
-                                            this,
-                                            this->gen_field_map["_rc"],
-                                            std::string("_rc")
-                                            ),
-                                        new ExpressionAtomic((long)1),
-                                        op_add
-                                        ),
-                                    1
-                                    )
+                                    new ExpressionAtomic((long)1),
+                                    op_add
+                                    ),
+                                1
                                 )
+                            )
                         })
                 ),
                 t_null,
@@ -257,7 +255,6 @@ void Struct::finalize() {
             )
         );
     }
-
     this->struct_type = llvm::StructType::create(*(this->ast->TheContext), this->llvm_types, this->name, true);
 }
 

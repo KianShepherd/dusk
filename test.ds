@@ -3,7 +3,17 @@ struct Foo {
 
     fn Foo(self: Foo) -> Foo {
         println("Init Foo: rc = %d", self._rc);
+        self.a = 0;
         return self;
+    }
+
+    fn inc(self: Foo) {
+        println("Foo inc()");
+        self.a = self.a + 1;
+    }
+
+    fn __str__(self: Foo) -> string {
+        return itos(self.a);
     }
 
     fn __del__(self: Foo) {
@@ -11,16 +21,16 @@ struct Foo {
     }
 
     fn __INCREF__(self: Foo) {
-        println("__INCREF__ Foo: %d", self._rc);
+        println("pre  __INCREF__ Foo: %d", self._rc);
         self._rc = self._rc + 1;
-        println("__INCREF__ Foo: %d", self._rc);
+        println("post __INCREF__ Foo: %d", self._rc);
     }
 
     fn __DECREF__(self: Foo) {
-        println("__DECREF__ Foo: %d", self._rc);
+        println("pre  __DECREF__ Foo: %d", self._rc);
         self._rc = self._rc - 1;
-        println("__DECREF__ Foo: %d", self._rc);
-        if self._rc == 0 {
+        println("post __DECREF__ Foo: %d", self._rc);
+        if self._rc <= 0 {
             println("DELETING");
             self.__del__();
             println("DELETED");
@@ -31,9 +41,29 @@ struct Foo {
 
 fn main(argc: int, argv: string*) -> int {
     let mut a: Foo = Foo();
+    println("inc");
+    a.inc();
+    println("inc");
+    a.inc();
     a.__INCREF__();
-    a.__DECREF__();
-    a.__DECREF__();
     println("done");
+    {
+        let mut a: Foo = Foo();
+        println("Block end");
+    }
+    println("DEC");
+    a.__DECREF__();
+    println(" ");
+    println(" ");
+    println("printing");
+    let mut b: Foo = Foo();
+    println(b);
+    b.inc();
+    println(" ");
+    println(b);
+    println(" ");
+    println(" ");
+    println("return");
+    println(String("Hello") + ", " + String("World"));
     return 0;
 }

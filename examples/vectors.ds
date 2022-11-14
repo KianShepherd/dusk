@@ -15,10 +15,9 @@ fn main() -> int {
     vec.prepend(4);
 
     println(vec);
-    del(vec);
     print("\n");
 
-    let mut vec: Vec<int> = Vec<int>();
+    vec = Vec<int>();
     let mut vec2: Vec<int> = Vec<int>();
     for (let mut i: int = 0; i < 5; i = i + 1) {
         vec.append(5 - i);
@@ -27,19 +26,15 @@ fn main() -> int {
     // You can also use extend to append a vector to another vector
     vec.extend(vec2);
     println(vec);
-    del(vec);
-    del(vec2);
     print("\n");
 
     // The String struct also supports splitting its contents and casting them to a Vec<int> and Vec<float>
     let mut vec: Vec<float> = String("0.5 1.3 9.92 7.65 12.44").split<float>(" ");
     println(vec);
-    del(vec);
 
     let mut str: String = String("abc def ghi jkl mno pqr");
     let mut vec: Vec<String> = str.split<String>(" ");
     println(vec);
-    del(vec);
 
     return 0;
 }

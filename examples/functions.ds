@@ -32,11 +32,16 @@ fn fib_tail(n: int, acc1: BigInt, acc2: BigInt) -> BigInt {
     if n <= 0 {
         return acc1;
     }
-    return fib_tail(n - 1, acc2, acc2 + acc1);
+    acc1 = acc2 + acc1;
+    let mut res: BigInt = fib_tail(n - 1, acc2, acc1);
+    return res;
 }
 
 fn fib(n: int) -> BigInt {
-    return fib_tail(n, BigInt(1), BigInt(1));
+    let mut acc1: BigInt = BigInt(1);
+    let mut acc2: BigInt = BigInt(1);
+    let mut res: BigInt = fib_tail(n, acc1, acc2);
+    return res;
 }
 
 // A main function must be found within the compiled files, and it will be used as the entrypoint.

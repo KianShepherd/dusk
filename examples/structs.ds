@@ -29,8 +29,7 @@ struct Foo {
     }
 
     fn __str__(self: Foo) -> string {
-        let mut str: String = String(self._geta()) + String(", ") + String(self._getb());
-        return print_str(str.str);
+        return print_str((String(self._geta()) + String(", ") + String(self._getb())).str);
     }
 }
 
