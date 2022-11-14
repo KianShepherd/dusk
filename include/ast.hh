@@ -88,12 +88,14 @@ public:
 
     std::string get_value_struct(std::string identifier);
     void push_value(std::string identifier, ScopeValue* value);
+    void push_replaced(std::string identifier, ScopeValue* value);
     void update_value(AST* ast, std::string identifier, ScopeValue* value);
 
     ScopeFrame* prev_frame;
     ScopeFrame* next_frame;
 private:
     std::map<std::string, ScopeValue*> variables;
+    std::map<std::string, ScopeValue*> reassignments;
 };
 
 class CodegenScopeFrame {

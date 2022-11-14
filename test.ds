@@ -7,6 +7,12 @@ struct Foo {
         return self;
     }
 
+    fn Foo(self: Foo, to_copy: Foo) -> Foo {
+        println("Init Foo Copy: rc = %d", self._rc);
+        self.a = to_copy.a;
+        return self;
+    }
+
     fn inc(self: Foo) {
         println("Foo inc()");
         self.a = self.a + 1;
@@ -21,19 +27,15 @@ struct Foo {
     }
 
     fn __INCREF__(self: Foo) {
-        println("pre  __INCREF__ Foo: %d", self._rc);
         self._rc = self._rc + 1;
-        println("post __INCREF__ Foo: %d", self._rc);
+        println("__INCREF__ Foo: %d", self._rc);
     }
 
     fn __DECREF__(self: Foo) {
-        println("pre  __DECREF__ Foo: %d", self._rc);
         self._rc = self._rc - 1;
-        println("post __DECREF__ Foo: %d", self._rc);
+        println("__DECREF__ Foo: %d", self._rc);
         if self._rc <= 0 {
-            println("DELETING");
             self.__del__();
-            println("DELETED");
         }
     }
 }
@@ -45,25 +47,28 @@ fn main(argc: int, argv: string*) -> int {
     a.inc();
     println("inc");
     a.inc();
+    println("INCREF");
     a.__INCREF__();
-    println("done");
+    println("done\n");
     {
+        println("Block start");
         let mut a: Foo = Foo();
-        println("Block end");
+        println("Block end\n");
     }
-    println("DEC");
+    println("DECREF");
     a.__DECREF__();
-    println(" ");
-    println(" ");
-    println("printing");
+    println("\n\nprinting");
     let mut b: Foo = Foo();
-    println(b);
+    println("%s\n", b);
     b.inc();
-    println(" ");
-    println(b);
-    println(" ");
-    println(" ");
-    println("return");
-    println(String("Hello") + ", " + String("World"));
+    println("%s\n\n", b);
+    println("assignments");
+    let mut c: Foo = Foo();
+    println("Reassign");
+    c = Foo();
+    println("Reassign with old value");
+    c = Foo(c);
+
+    println("\n\nreturn");
     return 0;
 }

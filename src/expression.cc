@@ -372,7 +372,6 @@ Expression* ExpressionAtomic::fold(AST* ast) {
         for (int i = 0; i < this->args.size(); i++) {
             auto arg = this->args[i];
             arg = arg->fold(ast);
-            // TODO: ARC incref struct identifier arguments
             if (this->str.compare("print") == 0 || this->str.compare("println") == 0) {
                 if (arg->get_atomic_type_keep_identifier(ast) == t_identifier && arg->get_atomic_type(ast) == t_struct) {
                     std::string f_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
@@ -407,7 +406,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                 if (
                     arg->get_atomic_type_keep_identifier(ast) == t_identifier
                     && ast->scope->get_value(((ExpressionAtomic*)arg)->str) == t_struct
-                    && ast->func_map[this->str]->statements != nullptr
+                    && (ast->struct_map[this->str] || ast->func_map[this->str]->statements != nullptr)
                     && this->str.find("__del__") == std::string::npos
                     && this->str.find("__DECREF__") == std::string::npos
                     && this->str.find("__INCREF__") == std::string::npos
@@ -710,7 +709,7 @@ Expression* BinaryExpression::fold(AST* ast) {
             case op_modulo:        f_name.append("__mod__"); break;
             case op_increment:     f_name.append("__increment__"); break;
         }
-        return new ExpressionAtomic(f_name, std::vector<Expression*>({this->lhs, this->rhs}));
+        return (new ExpressionAtomic(f_name, std::vector<Expression*>({this->lhs, this->rhs})))->fold(ast);
     }
     return (Expression*)this;
 }
@@ -967,9 +966,16 @@ void AssignmentExpression::debug(size_t depth) {
 }
 
 Expression* AssignmentExpression::fold(AST* ast) {
-    // TODO: ARC decref old value reference to struct types
     this->value = this->value->fold(ast);
     this->identifier = this->identifier->fold(ast);
+    if (this->value->get_atomic_type_keep_identifier(ast) == t_identifier && this->value->get_atomic_type(ast) == t_struct) {
+        std::string s_name = ast->scope->get_value_struct(((ExpressionAtomic*)this->identifier)->str);
+        ast->current_block->push_back(new ExpressionStatement(new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(s_name), std::vector<Expression*>({new ExpressionAtomic(std::string(((ExpressionAtomic*)this->identifier)->str), true)}))));
+    }
+    if (this->identifier->get_atomic_type(ast) == t_struct) {
+        std::string s_name = ast->scope->get_value_struct(((ExpressionAtomic*)this->identifier)->str);
+        ast->current_block->push_back(new ExpressionStatement(new ExpressionAtomic(std::string(s_name).append("__DECREF__").append(s_name), std::vector<Expression*>({new ExpressionAtomic(std::string(((ExpressionAtomic*)this->identifier)->str), true)}))));
+    }
     if (this->is_methods)
         return (Expression*)this;
     if (this->is_arr) {

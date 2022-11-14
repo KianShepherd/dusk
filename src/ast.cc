@@ -298,6 +298,10 @@ void ScopeFrame::push_value(std::string identifier, ScopeValue* value) {
     this->variables[identifier] = value;
 }
 
+void ScopeFrame::push_replaced(std::string identifier, ScopeValue* value) {
+    this->reassignments[identifier] = value;
+}
+
 void ScopeFrame::update_value(AST* ast, std::string identifier, ScopeValue* value) {
     ScopeFrame* scope = this;
     while (scope != nullptr) {
