@@ -1,0 +1,73 @@
+Init Foo: rc = 1
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+inc
+__INCREF__ Foo: 2
+Foo inc()
+__DECREF__ Foo: 1
+inc
+__INCREF__ Foo: 2
+Foo inc()
+__DECREF__ Foo: 1
+INCREF
+__INCREF__ Foo: 2
+done
+
+Block start
+Init Foo: rc = 1
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+Block end
+
+__DECREF__ Foo: 0
+Del Foo
+DECREF
+__DECREF__ Foo: 1
+
+
+printing
+Init Foo: rc = 1
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+0
+
+__INCREF__ Foo: 2
+Foo inc()
+__DECREF__ Foo: 1
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+1
+
+
+assignments
+Init Foo: rc = 1
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+Reassign
+__DECREF__ Foo: 0
+Del Foo
+Init Foo: rc = 1
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+Reassign with old value
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+Init Foo Copy: rc = 1
+__INCREF__ Foo: 2
+__DECREF__ Foo: 1
+__DECREF__ Foo: 0
+Del Foo
+assign to new variable
+__INCREF__ Foo: 2
+
+
+return
+__DECREF__ Foo: 0
+Del Foo
+__DECREF__ Foo: 0
+Del Foo
+__DECREF__ Foo: 1
+__DECREF__ Foo: 0
+Del Foo

@@ -1,0 +1,76 @@
+struct Foo {
+    a: int,
+
+    fn Foo(self: Foo) -> Foo {
+        println("Init Foo: rc = %d", self._rc);
+        self.a = 0;
+        return self;
+    }
+
+    fn Foo(self: Foo, to_copy: Foo) -> Foo {
+        println("Init Foo Copy: rc = %d", self._rc);
+        self.a = to_copy.a;
+        return self;
+    }
+
+    fn inc(self: Foo) {
+        println("Foo inc()");
+        self.a = self.a + 1;
+    }
+
+    fn __str__(self: Foo) -> string {
+        return itos(self.a);
+    }
+
+    fn __del__(self: Foo) {
+        println("Del Foo");
+    }
+
+    fn __INCREF__(self: Foo) {
+        self._rc = self._rc + 1;
+        println("__INCREF__ Foo: %d", self._rc);
+    }
+
+    fn __DECREF__(self: Foo) {
+        self._rc = self._rc - 1;
+        println("__DECREF__ Foo: %d", self._rc);
+        if self._rc <= 0 {
+            self.__del__();
+        }
+    }
+}
+
+
+fn main(argc: int, argv: string*) -> int {
+    let mut a: Foo = Foo();
+    println("inc");
+    a.inc();
+    println("inc");
+    a.inc();
+    println("INCREF");
+    a.__INCREF__();
+    println("done\n");
+    {
+        println("Block start");
+        let mut a: Foo = Foo();
+        println("Block end\n");
+    }
+    println("DECREF");
+    a.__DECREF__();
+    println("\n\nprinting");
+    let mut b: Foo = Foo();
+    println("%s\n", b);
+    b.inc();
+    println("%s\n\n", b);
+    println("assignments");
+    let mut c: Foo = Foo();
+    println("Reassign");
+    c = Foo();
+    println("Reassign with old value");
+    c = Foo(c);
+    println("assign to new variable");
+    let mut d: Foo = c;
+
+    println("\n\nreturn");
+    return 0;
+}
