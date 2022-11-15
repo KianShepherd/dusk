@@ -68,6 +68,8 @@ fn main(argc: int, argv: string*) -> int {
     c = Foo();
     println("Reassign with old value");
     c = Foo(c);
+    println("assign to new variable");
+    let mut d: Foo = c;
 
     println("\n\nreturn");
     return 0;

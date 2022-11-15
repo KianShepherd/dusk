@@ -239,6 +239,10 @@ void AssignmentStatement::debug(size_t depth) {
 void AssignmentStatement::fold(AST* ast, std::vector<Statement*>& block) {
     if (this->value) {
         this->value = this->value->fold(ast);
+        if (this->value->get_atomic_type_keep_identifier(ast) == t_identifier && this->value->get_atomic_type(ast) == t_struct) {
+            std::string s_name = ast->scope->get_value_struct(((ExpressionAtomic*)this->value)->str);
+            ast->current_block->push_back(new ExpressionStatement(new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(s_name), std::vector<Expression*>({new ExpressionAtomic(std::string(((ExpressionAtomic*)this->value)->str), true)}))));
+        }
         if (this->type == t_struct) {
             ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->type, this->struct_name));
         } else {
