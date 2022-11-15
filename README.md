@@ -168,6 +168,8 @@ Options:
         - Constructor overloading
         - Operator overloading
         - Method Overloading
+        - Automatic Reference Counting
+        - Destructors
 - Functions
     - `main` as entry point
         - accepts and handles command line arguments
@@ -210,9 +212,6 @@ Options:
 
 ## Planned Functionality
 
-- Structs
-    - Destructors
-    - Automatic Reference Counting
 -  stdlib improvements
     - More abstract datatypes
     - More general functionality
@@ -223,8 +222,6 @@ Options:
     - ...
 - Better compile time failure error messages
     - show line that error occured on
-- Tests
-- Documentation webpage
 
 ## License
 

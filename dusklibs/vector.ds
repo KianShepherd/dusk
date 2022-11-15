@@ -11,6 +11,7 @@ struct String {
         for (let mut i: int = 0; i < count; i++) {
             vec.append(stoi(split_str[i]));
         }
+        del(split_str);
         return vec;
     }
 
@@ -22,6 +23,7 @@ struct String {
         for (let mut i: int = 0; i < count; i++) {
             vec.append(stof(split_str[i]));
         }
+        del(split_str);
         return vec;
     }
 
