@@ -134,3 +134,17 @@ struct Foo {
     }
 }
 ```
+
+You can also implement a destructor function for structs by declaring a function named `__del__`. 
+If this function is not implemented a default version will be created that frees the structs memory.
+
+```
+struct Foo {
+    a: int,
+
+    fn __del__(self: Foo) {
+        // Custom destructor logic for fields if they need it
+        // A call to free the struct objects memory will be added automatically.
+    }
+}
+```
