@@ -22,6 +22,7 @@ public:
 
     BigInt(long n);
     BigInt(mpz_t n);
+    ~BigInt();
 
     char* to_str();
 
@@ -37,6 +38,10 @@ BigInt::BigInt(long n) {
 
 BigInt::BigInt(mpz_t n) {
     mpz_init_set(this->num, n);
+}
+
+BigInt::~BigInt() {
+    mpz_clear(this->num);
 }
 
 char* BigInt::to_str() {
@@ -81,6 +86,7 @@ public:
     BigFloat(double n);
     BigFloat(double n, long precision);
     BigFloat(mpf_t n);
+    ~BigFloat();
 
     char* to_str();
 
@@ -101,6 +107,10 @@ BigFloat::BigFloat(double n, long precision) {
 
 BigFloat::BigFloat(mpf_t n) {
     mpf_init_set(this->num, n);
+}
+
+BigFloat::~BigFloat() {
+    mpf_clear(this->num);
 }
 
 char* BigFloat::to_str() {
@@ -149,6 +159,10 @@ extern "C" {
 
     char* big_to_str(void* b) {
         return ((BigInt*)b)->to_str();
+    }
+
+    void delete_bigint(void* b) {
+        delete (BigInt*)b;
     }
 
     void* add_bigint(void* l, void* r) {
@@ -221,6 +235,10 @@ extern "C" {
 
     void* copy_bigfloat(void* n) {
         return new __InternBig{.num = new BigFloat(((BigFloat*)n)->num), ._rc = 1};
+    }
+
+    void delete_bigfloat(void* b) {
+        delete (BigFloat*)b;
     }
 
     char* bigf_to_str(void* b) {

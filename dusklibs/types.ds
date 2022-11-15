@@ -7,6 +7,7 @@ struct String {
     extern to_string(str: void*) -> string;
     extern count_substr(str: string, substr: string) -> int;
     extern split(str: string, on: string) -> string*;
+    extern delete_string(str: void*);
 
     str: void*,
 
@@ -32,6 +33,10 @@ struct String {
         return self;
     }
 
+    fn __del__(self: String) {
+        delete_string(self.str);
+    }
+
     fn to_str(self: String) -> string {
         self.__INCREF__();
         return print_str(self.str);
@@ -43,7 +48,7 @@ struct String {
     }
 
     fn __add__(self: String, text: string) -> String {
-        append_str_c(self.str, text);
+        self = self + String(text);
         return self;
     }
 
@@ -53,7 +58,7 @@ struct String {
     }
 
     fn __add__(text: string, self: String) -> String {
-        append_str_s(self.str, text);
-        return self;
+        let mut res: String = String(text) + self;
+        return res;
     }
 }

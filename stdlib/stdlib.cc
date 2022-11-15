@@ -164,4 +164,8 @@ extern "C" DLLEXPORT {
     char* to_string(void* str) {
         return (char*)(void*)(((std::string*)str)->c_str());
     }
+
+    void delete_string(void* str) {
+        delete (std::string*)str;
+    }
 }

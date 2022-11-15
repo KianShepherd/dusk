@@ -84,8 +84,11 @@ def run_example(file_name):
     print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"},'
           f' optimized {"PASS" if no_op_pass else "FAIL"}')
     if not (no_op_pass and op_pass):
+        print("\nOptimized\n")
         print(op_res)
+        print("\nUnoptimized\n")
         print(no_op_res)
+        print("\nExprected\n")
         print(expected)
 
 
