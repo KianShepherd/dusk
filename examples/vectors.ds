@@ -1,8 +1,6 @@
 include "vector.ds"
 
 fn main() -> int {
-    // All vectors are heap allocated and therefore need to be freed their type regardless of stored
-    // value type is void*
     let mut vec: Vec<int> = Vec<int>();
 
     // You can append values to a vector
@@ -14,21 +12,56 @@ fn main() -> int {
     vec.prepend(5);
     vec.prepend(4);
 
-    println(vec);
-    print("\n");
-
-    vec = Vec<int>();
     let mut vec2: Vec<int> = Vec<int>();
     for (let mut i: int = 0; i < 5; i = i + 1) {
-        vec.append(5 - i);
         vec2.append(i + 50);
     }
     // You can also use extend to append a vector to another vector
     vec.extend(vec2);
     println(vec);
+    println("%d", 4 == vec.get(0));
+    println("%d", vec.get(1));
     print("\n");
 
+    let mut vec: Vec<float> = Vec<float>();
+
+    // You can append values to a vector
+    vec.append(1.0);
+    vec.append(2.5);
+    vec.append(3.0);
+    // Or prepend them to a vector
+    vec.prepend(6.0);
+    vec.prepend(5.5);
+    vec.prepend(4.0);
+
+    let mut vec2: Vec<float> = Vec<float>();
+    for (let mut i: float = 0.0; i < 5.0; i = i + 1.0) {
+        vec2.append(i + 50.5);
+    }
+    // You can also use extend to append a vector to another vector
+    vec.extend(vec2);
+    println(vec);
+    println("%d", 4.0 == vec.get(0));
+    println("%f", vec.get(1));
+    print("\n");
+
+    let mut vec: Vec<String> = Vec<String>();
+    vec.append(String(" World"));
+    vec.prepend(String("Hello,"));
+    let mut s: String = String("!");
+    vec.append(s);
+    s = String("Foo Bar Baz");
+    for (let mut i: int = 0; i < vec.size(); i++) {
+        print(vec.get(i));
+    }
+    let mut vs: Vec<String> = s.split<String>(" ");
+    vec.extend(vs);
+    println("\n%s", vec);
+
     // The String struct also supports splitting its contents and casting them to a Vec<int> and Vec<float>
+    let mut vec: Vec<int> = String("5 3 9 7 12").split<int>(" ");
+    println(vec);
+
     let mut vec: Vec<float> = String("0.5 1.3 9.92 7.65 12.44").split<float>(" ");
     println(vec);
 

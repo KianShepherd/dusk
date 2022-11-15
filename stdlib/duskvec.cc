@@ -75,6 +75,10 @@ extern "C" {
         return new std::vector<long>();
     }
 
+    void del_ivec(void* v) {
+        delete (std::vector<long>*)v;
+    }
+
     void ipush_back(void* vec, long n) {
         (*(std::vector<long>*)vec).push_back(n);
     }
@@ -88,6 +92,10 @@ extern "C" {
     }
     void* floatvec() {
         return new std::vector<double>();
+    }
+
+    void del_floatvec(void* v) {
+        delete (std::vector<double>*)v;
     }
 
     void fpush_back(void* vec, double n) {
@@ -104,6 +112,10 @@ extern "C" {
 
     void* vpvec() {
         return new std::vector<void*>();
+    }
+
+    void del_vpvec(void* v) {
+        delete (std::vector<void*>*)v;
     }
 
     void vppush_back(void* vec, void* n) {

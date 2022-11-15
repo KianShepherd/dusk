@@ -37,6 +37,7 @@ struct String {
 
 struct Vec<String> {
     extern vpvec() -> void*;
+    extern del_vpvec(v: void*);
     extern vppush_back(vec: void*, val: void*);
     extern vppush_front(vec: void*, val: void*);
     extern getvecvp(vec: void*, idx: int) -> void*;
@@ -49,29 +50,45 @@ struct Vec<String> {
         self.size = 0;
         return self;
     }
+
+    fn __del__(self: Vec<int>) {
+        let mut str: String = String();
+        for (let mut i: int = 0; i < self.size; i++) {
+            str = self.get(i);
+            str.__DECREF__();
+        }
+        del_vpvec(self.vector);
+    }
     
     fn size(self: Vec<String>) -> int {
         return self.size;
     }
 
     fn append(self: Vec<String>, n: String) {
+        n.__INCREF__();
         vppush_back(self.vector, n);
         self.size = self.size + 1;
     }
 
     fn prepend(self: Vec<String>, n: String) {
+        n.__INCREF__();
         vppush_front(self.vector, n);
         self.size = self.size + 1;
     }
 
     fn get(self: Vec<String>, idx: int) -> String {
-        return getvecvp(self.vector, idx);
+        let mut res: String = getvecvp(self.vector, idx);
+        return res;
     }
 
     fn extend(self: Vec<String>, vec: Vec<String>) {
         let size: int = vec.size();
+        vec.__INCREF__();
         for (let mut i: int = 0; i < size; i++) {
-            vppush_back(self.vector, vec.get(i));
+            let mut str: String = vec.get(i);
+            str.__INCREF__();
+            vppush_back(self.vector, str);
+            self.size = self.size + 1;
         }
     }
 
@@ -90,6 +107,7 @@ struct Vec<String> {
 
 struct Vec<int> {
     extern intvec() -> void*;
+    extern del_ivec(v: void*);
     extern ipush_back(vec: void*, val: int);
     extern ipush_front(vec: void*, val: int);
     extern getveci(vec: void*, idx: int) -> int;
@@ -102,6 +120,10 @@ struct Vec<int> {
         self.vector = intvec();
         self.size = 0;
         return self;
+    }
+
+    fn __del__(self: Vec<int>) {
+        del_ivec(self.vector);
     }
     
     fn size(self: Vec<int>) -> int {
@@ -135,6 +157,7 @@ struct Vec<int> {
 
 struct Vec<float> {
     extern floatvec() -> void*;
+    extern del_floatvec(v: void*);
     extern fpush_back(vec: void*, val: float);
     extern fpush_front(vec: void*, val: float);
     extern getvecf(vec: void*, idx: int) -> float;
@@ -147,6 +170,10 @@ struct Vec<float> {
         self.vector = floatvec();
         self.size = 0;
         return self;
+    }
+
+    fn __del__(self: Vec<float>) {
+        del_floatvec(self.vector);
     }
     
     fn size(self: Vec<float>) -> int {
