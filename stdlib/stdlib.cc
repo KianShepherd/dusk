@@ -147,7 +147,7 @@ extern "C" DLLEXPORT {
         auto len = seglist.size();
         char** out = (char**)malloc(len * sizeof(char*));
         for (int i = 0; i < len; i++) {
-            out[i] = copycs(seglist[i].c_str(), seglist[i].size());
+            out[i] = copycs(seglist[i].c_str(), seglist[i].size() + 1);
         }
         return out;
     }
