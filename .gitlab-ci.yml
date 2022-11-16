@@ -9,15 +9,14 @@ include:
 - template: Security/SAST.gitlab-ci.yml
 
 
-
 pages:
-  image: busybox
+  image: python:3.8-buster
   stage: deploy
   script:
-  - echo 'Nothing to do...'
+  - pip install mkdocs>=1.1.2
+  - mkdocs build --strict --verbose
   artifacts:
     paths:
     - public
-    expire_in: 1 day
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
