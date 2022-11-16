@@ -197,6 +197,12 @@ void Function::fold(AST* ast) {
     ast->block_returned = false;
 }
 
+void Function::clean(AST* ast) {
+    if (this->statements) {
+        this->statements->clean(ast);
+    }
+}
+
 
 llvm::Function* Function::codegen_proto(AST* ast) {
     llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);

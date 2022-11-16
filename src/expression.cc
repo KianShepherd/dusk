@@ -297,6 +297,21 @@ AtomType ExpressionAtomic::get_atomic_type_keep_identifier(AST* ast) {
     return this->type;
 }
 
+void ExpressionAtomic::clean(AST* ast) {
+    if (this->type == t_function_call) {
+        for (auto& e : this->args) {
+            e->clean(ast);
+        }
+        if (this->str.compare("println") != 0 && this->str.compare("print") != 0) {
+            if (ast->func_map[this->str]) {
+                ast->to_check.push_back(ast->func_map[this->str]);
+            }
+        }
+    } else if (this->type == t_get_struct) {
+        this->base->clean(ast);
+    }
+}
+
 Expression* ExpressionAtomic::fold(AST* ast) {
     if (this->type == t_dot_exp) {
         this->base = this->base->fold(ast);
@@ -492,7 +507,7 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
                     atom_type = llvm::Type::getInt8PtrTy(*(ast->TheContext));
                 }
                 auto index_val = this->index->codegen(ast, t_number);
-        auto index_vec = std::vector<llvm::Value*>();
+                auto index_vec = std::vector<llvm::Value*>();
                 index_vec.push_back(index_val);
 
                 auto Vd = ast->Builder->CreateLoad(std::get<1>(ast->NamedValues->get_value(this->str)), V, this->str.c_str());
@@ -647,6 +662,11 @@ void BinaryExpression::debug(size_t depth) {
     this->lhs->debug(depth + 1);
     this->rhs->debug(depth + 1);
     
+}
+
+void BinaryExpression::clean(AST* ast) {
+    this->lhs->clean(ast);
+    this->rhs->clean(ast);
 }
 
 Expression* BinaryExpression::fold(AST* ast) {
@@ -864,6 +884,10 @@ void UnaryExpression::debug(size_t depth) {
     
 }
 
+void UnaryExpression::clean(AST* ast) {
+    this->operand->clean(ast);
+}
+
 Expression* UnaryExpression::fold(AST* ast) {
     this->operand = this->operand->fold(ast);
     if (this->op.compare("++") == 0) {
@@ -965,6 +989,10 @@ void AssignmentExpression::debug(size_t depth) {
     this->value->debug(depth + 1);
 }
 
+void AssignmentExpression::clean(AST* ast) {
+    this->value->clean(ast);
+}
+
 Expression* AssignmentExpression::fold(AST* ast) {
     this->value = this->value->fold(ast);
     this->identifier = this->identifier->fold(ast);
@@ -1061,6 +1089,10 @@ BreakExpression::BreakExpression() {
 
 void BreakExpression::debug(size_t depth) {
     std::cout << std::string(depth * 4, ' ') << "BREAK" << std::endl;
+}
+
+void BreakExpression::clean(AST* ast) {
+
 }
 
 Expression* BreakExpression::fold(AST* ast) {

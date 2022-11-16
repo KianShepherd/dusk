@@ -113,6 +113,42 @@ void AST::finalize_structs() {
     }
 }
 
+void AST::clean_ast() {
+    std::vector<Function*> parsing = std::vector<Function*>({this->func_map["main"], this->func_map["copys"], this->func_map["copyi"], this->func_map["copysa"], this->func_map["copyd"]});
+    while (true) {
+        if (parsing.size() == 0)
+            break;
+        for (auto& func : parsing) {
+            std::cout << "Parsing: " << func->name << std::endl;
+            this->was_called.push_back(func);
+            func->clean(this);
+        }
+        parsing.clear();
+        for (auto& func : this->to_check) {
+            bool found = false;
+            for (auto& called : this->was_called) {
+                if (func->name.compare(called->name) == 0) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                for (auto& called : parsing) {
+                    if (func->name.compare(called->name) == 0) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                parsing.push_back(func);   
+            }
+        }
+        this->to_check.clear();
+    }
+    this->functions = this->was_called;
+}
 void AST::static_checking() {
     bool found_entrypoint = false;
     for (int i = 0; i < (int)this->functions.size(); i++) {

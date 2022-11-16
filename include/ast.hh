@@ -131,6 +131,7 @@ public:
     void debug();
     void finalize_structs();
     void static_checking();
+    void clean_ast();
     llvm::Value* LogErrorV(const char *Str);
 
     void codegen(char debug, bool optimizations, std::string outfile);
@@ -152,6 +153,8 @@ public:
     std::map<std::string, Function*> func_map;
     std::vector<std::string> includes;
     std::vector<std::string> require;
+    std::vector<Function*> was_called;
+    std::vector<Function*> to_check;
 private:
     std::vector<Function*> functions;
     std::vector<Struct*> structs;

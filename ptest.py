@@ -72,24 +72,27 @@ def run_example(file_name):
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
-    no_op_res = run_output(file_name)
-    op_res = run_output(file_name, opt=1)
-    expected = run_output(file_name, expected=True)
+    try:
+        no_op_res = run_output(file_name)
+        op_res = run_output(file_name, opt=1)
+        expected = run_output(file_name, expected=True)
 
-    no_op_pass = no_op_res == expected
-    op_pass = op_res == expected
-    preamble = f'{file_name}.ds: '
-    while len(preamble) < 20:
-        preamble = preamble + " "
-    print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"},'
-          f' optimized {"PASS" if no_op_pass else "FAIL"}')
-    if not (no_op_pass and op_pass):
-        print("\nOptimized\n")
-        print(op_res)
-        print("\nUnoptimized\n")
-        print(no_op_res)
-        print("\nExprected\n")
-        print(expected)
+        no_op_pass = no_op_res == expected
+        op_pass = op_res == expected
+        preamble = f'{file_name}.ds: '
+        while len(preamble) < 20:
+            preamble = preamble + " "
+        print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"},'
+              f' optimized {"PASS" if no_op_pass else "FAIL"}')
+        if not (no_op_pass and op_pass):
+            print("\nOptimized\n")
+            print(op_res)
+            print("\nUnoptimized\n")
+            print(no_op_res)
+            print("\nExprected\n")
+            print(expected)
+    except BaseException:
+        print(f'Failed to compile {file_name}')
 
 
 for f in test_cases:

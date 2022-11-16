@@ -233,6 +233,12 @@ int main(int argc, char** argv) {
         ast.debug();
     }
     ast.static_checking();
+
+    if (compiler_args.debug_ast) {
+        ast.debug();
+    }
+
+    ast.clean_ast();
     
     if (compiler_args.debug_ast) {
         ast.debug();

@@ -26,6 +26,7 @@ public:
     Function(std::string name, Statement* statements, AtomType type, std::vector<std::vector<std::string>> args, std::string struct_name);
     void debug();
     void fold(AST* ast);
+    void clean(AST* ast);
     void push_front(Expression* name, AtomType type, bool mut, std::string struct_name);
     std::tuple<std::string, AtomType, std::vector<AtomType>> get_meta();
 

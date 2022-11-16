@@ -9,6 +9,10 @@ void ExpressionStatement::debug(size_t depth) {
     this->expr->debug(depth);
 }
 
+void ExpressionStatement::clean(AST* ast) {
+    this->expr->clean(ast);
+}
+
 void ExpressionStatement::fold(AST* ast, std::vector<Statement*>& block) {
     this->expr = this->expr->fold(ast);
     // TODO: ARC call DECREF on struct if expr returns a struct
@@ -31,6 +35,12 @@ void StatementBlock::debug(size_t depth) {
         this->statements[i]->debug(depth + 1);
     }
     std::cout << std::string(depth * 4, ' ') << "}" << std::endl;
+}
+
+void StatementBlock::clean(AST* ast) {
+    for (size_t i = 0; i < this->statements.size(); i++) {
+        this->statements[i]->clean(ast);
+    }
 }
 
 void StatementBlock::fold(AST* ast, std::vector<Statement*>& block) {
@@ -90,6 +100,11 @@ void ReturnStatement::debug(size_t depth) {
     } else {
         std::cout << " void" << std::endl;
     }
+}
+
+void ReturnStatement::clean(AST* ast) {
+    if (this->expr)
+        this->expr->clean(ast);
 }
 
 void ReturnStatement::fold(AST* ast, std::vector<Statement*>& block) {
@@ -236,6 +251,11 @@ void AssignmentStatement::debug(size_t depth) {
     }
 }
 
+void AssignmentStatement::clean(AST* ast) {
+    if (this->value)
+        this->value->clean(ast);
+}
+
 void AssignmentStatement::fold(AST* ast, std::vector<Statement*>& block) {
     if (this->value) {
         this->value = this->value->fold(ast);
@@ -340,6 +360,16 @@ void IfStatement::debug(size_t depth) {
     }
 }
 
+void IfStatement::clean(AST* ast) {
+    this->condition->clean(ast);
+    if (this->block1) {
+        this->block1->clean(ast);
+    }
+    if (this->block2) {
+        this->block2->clean(ast);
+    }
+}
+
 void IfStatement::fold(AST* ast, std::vector<Statement*>& block) {
     this->condition = this->condition->fold(ast);
     std::vector<Statement*> null_block;
@@ -429,6 +459,11 @@ void WhileStatement::debug(size_t depth) {
     this->condition->debug(depth + 1);
     std::cout << std::string(depth * 4, ' ') << "Do" << std::endl;
     this->block->debug(depth + 1);
+}
+
+void WhileStatement::clean(AST* ast) {
+    this->condition->clean(ast);
+    this->block->clean(ast);
 }
 
 void WhileStatement::fold(AST* ast, std::vector<Statement*>& _block) {
