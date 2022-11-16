@@ -232,16 +232,17 @@ int main(int argc, char** argv) {
     if (compiler_args.debug_ast) {
         ast.debug();
     }
-    ast.static_checking();
+    ast.static_checking(compiler_args.only_compile);
 
     if (compiler_args.debug_ast) {
         ast.debug();
     }
+    if (!compiler_args.only_compile) {
+        ast.clean_ast();
 
-    ast.clean_ast();
-    
-    if (compiler_args.debug_ast) {
-        ast.debug();
+        if (compiler_args.debug_ast) {
+            ast.debug();
+        }
     }
     if (ast.check_error(std::string("Logic Error: ")))
         return 2;

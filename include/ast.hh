@@ -130,7 +130,7 @@ public:
     bool check_error(std::string stage);
     void debug();
     void finalize_structs();
-    void static_checking();
+    void static_checking(bool only_compile);
     void clean_ast();
     llvm::Value* LogErrorV(const char *Str);
 

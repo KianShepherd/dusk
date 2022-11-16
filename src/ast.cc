@@ -149,7 +149,7 @@ void AST::clean_ast() {
     }
     this->functions = this->was_called;
 }
-void AST::static_checking() {
+void AST::static_checking(bool only_compile) {
     bool found_entrypoint = false;
     for (int i = 0; i < (int)this->functions.size(); i++) {
         auto meta = this->functions[i]->get_meta();
@@ -164,7 +164,7 @@ void AST::static_checking() {
         this->current_function_name = this->functions[i]->name;
         this->functions[i]->fold(this);
     }
-    if (!found_entrypoint)
+    if (!found_entrypoint && !only_compile)
         this->push_err("No entrypoint found, you must declare a main function.");
 }
 
