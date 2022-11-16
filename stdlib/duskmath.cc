@@ -8,7 +8,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
-#include <cmath>
+#include <math.h>
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
 #else

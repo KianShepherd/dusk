@@ -39,7 +39,7 @@ def run_output(file_name, *, opt=None, expected=False):
     """Run test case."""
     if expected:
         with open(f'./examples/example_outputs/{file_name}.txt') as f:
-            return f.read()
+            return [x.strip() for x in f.read().splitlines()]
 
     command = ['./CMake/dusk']
     if opt is not None:
@@ -82,30 +82,37 @@ def run_example(file_name):
         no_op_diff = []
         no_op_pass = True
         for i in range(max(len(no_op_res), len(expected))):
-            if i > len(expected):
-                no_op_diff.append(f'""   : "{no_op_res[i]}"')
+            if i > len(expected) - 1:
+                no_op_diff.append(f'line  {i}   : ""   : "{no_op_res[i]}"')
+                no_op_diff.append(f'line  {i}   : ""   : "{no_op_res[i].encode("utf-8")}"')
                 no_op_pass = False
-            elif i > len(no_op_res):
-                no_op_diff.append(f'"{expected[i]}"   :   ""')
+            elif i > len(no_op_res) - 1:
+                no_op_diff.append(f'line  {i}   : "{expected[i]}"   :   ""')
+                no_op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   ""')
                 no_op_pass = False
             else:
                 if no_op_res[i] != expected[i]:
                     no_op_pass = False
-                    no_op_diff.append(f'"{expected[i]}"   :   "{no_op_res[i]}"')
+
+                    no_op_diff.append(f'line  {i}   : "{expected[i]}"   :   "{no_op_res[i]}"')
+                    no_op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   "{no_op_res[i].encode("utf-8")}"')
 
         op_diff = []
         op_pass = True
         for i in range(max(len(op_res), len(expected))):
-            if i > len(expected):
-                op_diff.append(f'""   : "{op_res[i]}"')
+            if i > len(expected) - 1:
+                op_diff.append(f'line  {i}   : ""   : "{op_res[i]}"')
+                op_diff.append(f'line  {i}   : ""   : "{op_res[i].encode("utf-8")}"')
                 op_pass = False
-            elif i > len(op_res):
-                op_diff.append(f'"{expected[i]}"   :   ""')
+            elif i > len(op_res) - 1:
+                op_diff.append(f'line  {i}   : "{expected[i]}"   :   ""')
+                op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   ""')
                 op_pass = False
             else:
                 if op_res[i] != expected[i]:
                     op_pass = False
-                    op_diff.append(f'"{expected[i]}"   :   "{op_res[i]}"')
+                    op_diff.append(f'line  {i}   : "{expected[i]}"   :   "{op_res[i]}"')
+                    op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   "{op_res[i].encode("utf-8")}"')
 
         preamble = f'{file_name}.ds: '
         while len(preamble) < 20:
@@ -118,6 +125,9 @@ def run_example(file_name):
         if not op_pass:
             print("\nOptimized Diff\n")
             print('\n'.join(op_diff))
+        if not op_pass or not no_op_pass:
+            print('\nExpected\n')
+            print('\n'.join(expected))
     except FileNotFoundError:
         print(f'Failed to compile {file_name}')
 

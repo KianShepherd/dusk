@@ -25,7 +25,7 @@ extern "C" DLLEXPORT {
     char* input() {
         std::string strtmp;
         std::getline(std::cin, strtmp);
-        char* tmp = copycs(strtmp.c_str(), (int)strtmp.size());
+        char* tmp = copycs(strtmp.c_str(), (int)strtmp.size() + 1);
         return tmp;
     }
     
