@@ -7,9 +7,11 @@ find_package(BISON)
 add_compile_options(-Wall)
 add_compile_options(-O3)
 
-FLEX_TARGET(Scanner ${CMAKE_SOURCE_DIR}/src/tokens.l  ${CMAKE_SOURCE_DIR}/src/scanner.cc)
-BISON_TARGET(Parser ${CMAKE_SOURCE_DIR}/src/grammar.y ${CMAKE_SOURCE_DIR}/src/parser.cc)
-ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
+add_custom_command(
+  OUTPUT src/scanner.cc src/parser.cc include/parser.hh
+  COMMAND ../gen_parser.py
+  VERBATIM
+)
 
 find_package(LLVM REQUIRED CONFIG)
 
@@ -36,6 +38,8 @@ set(SOURCES
     src/function.cc
     src/helpers.cc
     src/struct.cc
+    src/parser.cc
+    src/scanner.cc
 )
 
 link_directories(/usr/local/lib)
@@ -54,6 +58,7 @@ set(HEADER_FILES
     include/statement.hh
     include/helpers.hh
     include/struct.hh
+    include/parser.hh
 )
 
 add_library(stddusk stdlib/stdlib.cc)

@@ -119,7 +119,6 @@ void AST::clean_ast() {
         if (parsing.size() == 0)
             break;
         for (auto& func : parsing) {
-            std::cout << "Parsing: " << func->name << std::endl;
             this->was_called.push_back(func);
             func->clean(this);
         }
