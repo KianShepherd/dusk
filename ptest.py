@@ -50,19 +50,21 @@ def run_output(file_name, *, opt=None, expected=False):
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
+    res = ''
     if file_name == 'io':
-        return subprocess.run(
+        res = subprocess.run(
             ['./out'],
             stdout=subprocess.PIPE,
             input='Hello input()',
             text=True
         ).stdout
     else:
-        return subprocess.run(
+        res = subprocess.run(
             ['./out'],
             stdout=subprocess.PIPE,
             text=True
         ).stdout
+    return [x.strip() for x in res.splitlines()]
 
 
 def run_example(file_name):
@@ -76,23 +78,47 @@ def run_example(file_name):
         no_op_res = run_output(file_name)
         op_res = run_output(file_name, opt=1)
         expected = run_output(file_name, expected=True)
+        
+        no_op_diff = []
+        no_op_pass = True
+        for i in range(max(len(no_op_res), len(expected))):
+            if i > len(expected):
+                no_op_diff.append(f'""   : "{no_op_res[i]}"')
+                no_op_pass = False
+            elif i > len(no_op_res):
+                no_op_diff.append(f'"{expected[i]}"   :   ""')
+                no_op_pass = False
+            else:
+                if no_op_res[i] != expected[i]:
+                    no_op_pass = False
+                    no_op_diff.append(f'"{expected[i]}"   :   "{no_op_res[i]}"')
 
-        no_op_pass = no_op_res == expected
-        op_pass = op_res == expected
+        op_diff = []
+        op_pass = True
+        for i in range(max(len(op_res), len(expected))):
+            if i > len(expected):
+                op_diff.append(f'""   : "{op_res[i]}"')
+                op_pass = False
+            elif i > len(op_res):
+                op_diff.append(f'"{expected[i]}"   :   ""')
+                op_pass = False
+            else:
+                if op_res[i] != expected[i]:
+                    op_pass = False
+                    op_diff.append(f'"{expected[i]}"   :   "{op_res[i]}"')
+
         preamble = f'{file_name}.ds: '
         while len(preamble) < 20:
             preamble = preamble + " "
         print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"},'
               f' optimized {"PASS" if op_pass else "FAIL"}')
-        if not (no_op_pass and op_pass):
-            print("\nOptimized\n")
-            print(op_res)
-            print("\nUnoptimized\n")
-            print(no_op_res)
-            print("\nExpected\n")
-            print(expected)
-            print('')
-    except BaseException:
+        if not no_op_pass:
+            print("\nUnoptimized Diff\n")
+            print('\n'.join(no_op_diff))
+        if not op_pass:
+            print("\nOptimized Diff\n")
+            print('\n'.join(op_diff))
+    except FileNotFoundError:
         print(f'Failed to compile {file_name}')
 
 
