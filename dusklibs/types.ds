@@ -34,7 +34,21 @@ struct String {
     }
 
     fn __del__(self: String) {
+        //println("del String");
         delete_string(self.str);
+    }
+    
+    fn __INCREF__(self: String) {
+        self._rc = self._rc + 1;
+        //println("inc String: %d", self._rc);
+    }
+
+    fn __DECREF__(self: String) {
+        self._rc = self._rc - 1;
+        //println("dec String: %d", self._rc);
+        if self._rc == 0 {
+            self.__del__();
+        }
     }
 
     fn to_str(self: String) -> string {

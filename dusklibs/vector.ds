@@ -52,9 +52,9 @@ struct Vec<String> {
     }
 
     fn __del__(self: Vec<int>) {
-        let mut str: String = String();
+        //println("del Vec<String>");
         for (let mut i: int = 0; i < self.size; i++) {
-            str = self.get(i);
+            let mut str: String = self.get(i);
             str.__DECREF__();
         }
         del_vpvec(self.vector);
@@ -62,6 +62,19 @@ struct Vec<String> {
     
     fn size(self: Vec<String>) -> int {
         return self.size;
+    }
+
+    fn __INCREF__(self: Vec<String>) {
+        self._rc = self._rc + 1;
+        //println("inc Vec<String>: %d", self._rc);
+    }
+
+    fn __DECREF__(self: Vec<String>) {
+        self._rc = self._rc - 1;
+        //println("dec Vec<String>: %d", self._rc);
+        if self._rc == 0 {
+            self.__del__();
+        }
     }
 
     fn append(self: Vec<String>, n: String) {
@@ -77,8 +90,8 @@ struct Vec<String> {
     }
 
     fn get(self: Vec<String>, idx: int) -> String {
-        let mut res: String = getvecvp(self.vector, idx);
-        return res;
+        self.__INCREF__();
+        return getvecvp(self.vector, idx);
     }
 
     fn extend(self: Vec<String>, vec: Vec<String>) {
@@ -123,7 +136,20 @@ struct Vec<int> {
     }
 
     fn __del__(self: Vec<int>) {
+        //println("del Vec<int>");
         del_ivec(self.vector);
+    }
+
+    fn __INCREF__(self: Vec<int>) {
+        self._rc = self._rc + 1;
+        //println("inc Vec<int>: %d", self._rc);
+    }
+    fn __DECREF__(self: Vec<int>) {
+        self._rc = self._rc - 1;
+        //println("dec Vec<int>: %d", self._rc);
+        if self._rc == 0 {
+            self.__del__();
+        }
     }
     
     fn size(self: Vec<int>) -> int {
@@ -173,7 +199,20 @@ struct Vec<float> {
     }
 
     fn __del__(self: Vec<float>) {
+        //println("del Vec<float>");
         del_floatvec(self.vector);
+    }
+
+    fn __INCREF__(self: Vec<float>) {
+        self._rc = self._rc + 1;
+        //println("inc Vec<float>: %d", self._rc);
+    }
+    fn __DECREF__(self: Vec<float>) {
+        self._rc = self._rc - 1;
+        //println("dec Vec<float>: %d", self._rc);
+        if self._rc == 0 {
+            self.__del__();
+        }
     }
     
     fn size(self: Vec<float>) -> int {

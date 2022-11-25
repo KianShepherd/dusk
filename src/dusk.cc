@@ -74,11 +74,13 @@ int main(int argc, char** argv) {
         bool only_compile;
         bool optimizations;
         bool debug_ast;
+        bool debug_full_ast;
         bool debug_ir;
         bool debug_compile_command;
     } compiler_args;
     compiler_args.optimizations = false;
     compiler_args.debug_ast = false;
+    compiler_args.debug_full_ast = false;
     compiler_args.debug_ir = false;
     compiler_args.debug_compile_command = false;
     compiler_args.only_compile = false;
@@ -116,6 +118,18 @@ int main(int argc, char** argv) {
         }
         if (cur_arg.compare("-da") == 0) {
             compiler_args.debug_ast = true;
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-df") == 0) {
+            compiler_args.debug_full_ast = true;
+            compiler_args.debug_ir = true;
+            compiler_args.debug_compile_command = true;
+            args++;
+            continue;
+        }
+        if (cur_arg.compare("-daf") == 0) {
+            compiler_args.debug_full_ast = true;
             args++;
             continue;
         }
@@ -229,20 +243,20 @@ int main(int argc, char** argv) {
 
     ast.finalize_structs();
 
-    if (compiler_args.debug_ast) {
+    if (compiler_args.debug_full_ast) {
         ast.debug();
     }
     ast.static_checking(compiler_args.only_compile);
 
-    if (compiler_args.debug_ast) {
+    if (compiler_args.debug_full_ast) {
         ast.debug();
     }
     if (!compiler_args.only_compile) {
         ast.clean_ast();
+    }
 
-        if (compiler_args.debug_ast) {
-            ast.debug();
-        }
+    if (compiler_args.debug_ast) {
+        ast.debug();
     }
     if (ast.check_error(std::string("Logic Error: ")))
         return 2;

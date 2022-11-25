@@ -122,6 +122,17 @@ void ReturnStatement::fold(AST* ast, std::vector<Statement*>& block) {
                     )
                 );
             }
+        } else if (this->expr->get_atomic_type_keep_identifier(ast) == t_get_struct && ((ExpressionAtomic*)this->expr)->struct_t->struct_var_type_map[((ExpressionAtomic*)this->expr)->str] == t_struct) {
+                ExpressionAtomic* exp = (ExpressionAtomic*)this->expr;
+                std::string struct_name = exp->struct_t->struct_var_map[exp->str];
+                block.push_back(
+                    new ExpressionStatement(
+                        new ExpressionAtomic(
+                                std::string(struct_name).append("__INCREF__").append(std::string(struct_name)),
+                                std::vector<Expression*>({ this->expr })
+                        )
+                    )
+                );
         }
     }
 
@@ -263,6 +274,14 @@ void AssignmentStatement::fold(AST* ast, std::vector<Statement*>& block) {
             std::string s_name = ast->scope->get_value_struct(((ExpressionAtomic*)this->value)->str);
             ast->current_block->push_back(new ExpressionStatement(new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(s_name), std::vector<Expression*>({new ExpressionAtomic(std::string(((ExpressionAtomic*)this->value)->str), true)}))));
         }
+        if (this->value->get_type() == t_get) {
+            ast->current_block->push_back(new ExpressionStatement(
+                new ExpressionAtomic(
+                    std::string(this->struct_name).append("__INCREF__").append(this->struct_name),
+                    std::vector<Expression*>({this->value})
+                )
+            ));
+        }
         if (this->type == t_struct) {
             ast->scope->push_value(((ExpressionAtomic*)this->identifier)->str, new ScopeValue(this->mut, this->type, this->struct_name));
         } else {
@@ -288,8 +307,9 @@ llvm::Value* AssignmentStatement::codegen(AST* ast) {
         Init = this->value;
         if (this->type == t_float_arr || this->type == t_number_arr || this->type == t_bool_arr || this->type == t_string_arr || this->type == t_string)
             this->length = ((ExpressionAtomic*)this->value)->length;
-        if (this->type == t_struct)
+        if (this->type == t_struct) {
             this->length = 1;
+        }
     } else {
         if (this->type == t_float_arr) {
             std::vector<double> vals;

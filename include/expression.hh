@@ -45,7 +45,8 @@ enum ExpType {
     t_unary,
     t_break,
     t_assignment,
-    t_undef
+    t_undef,
+    t_get
 };
 
 enum Operators {
@@ -79,6 +80,8 @@ public:
     virtual std::string type_str(AST* ast) { return std::string(""); };
 
     virtual std::string get_atomic_type_str(AST* ast) { return std::string(""); };
+
+    bool folded = false;
 };
 
 class ExpressionAtomic : public Expression {
@@ -101,7 +104,7 @@ public:
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
     void clean(AST* ast) override;
-    ExpType get_type() override { return t_atomic; };
+    ExpType get_type() override { return ((this->type == t_get_struct)?t_get:t_atomic); };
     AtomType get_atomic_type(AST* ast) override;
     AtomType get_atomic_type_keep_identifier(AST* ast) override;
     uintptr_t get_value();
