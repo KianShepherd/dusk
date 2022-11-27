@@ -24,12 +24,14 @@ class AST;
 class Struct {
 public:
     Struct(std::string name, AST* ast);
+    Struct(std::string name, AST* ast, bool is_template);
     void push_var(std::string name, AtomType);
     void push_var(std::string name, AtomType, std::string struct_name);
     void push_function(Function* func);
     void push_constructor(Function* func);
     void push_function_pre(Function* func);
     void finalize();
+    Struct* monomorph(std::string new_name, std::string new_type);
 
     void debug(size_t depth);
 
@@ -50,6 +52,7 @@ private:
     AST* ast;
 
     int mem_size;
+    bool is_template;
 
     std::vector<std::string> func_idents;
     std::vector<llvm::Type*> llvm_types;

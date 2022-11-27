@@ -80,6 +80,35 @@ void AST::push_struct(Struct* s) {
     }
 }
 
+std::vector<std::string> split_template(std::string name) {
+    std::vector<std::string> strs = std::vector<std::string>();
+    strs.push_back(name.substr(0, name.find('<')));
+    strs.push_back(name.substr(name.find('<') + 1, name.length() - name.find('<') - 2));
+    return strs;
+}
+
+void AST::push_template(Struct* s) {
+    auto template_names = split_template(s->name);
+    if (!this->template_map[template_names[0]]) {
+        this->templates.push_back(s);
+        this->template_map[template_names[0]] = s;
+    } else {
+        for (int i = 0; i < (int)s->type_idents.size(); i++) {
+            if (s->struct_var_map.count(s->type_idents[i])) {
+                this->template_map[template_names[0]]->push_var(s->type_idents[i], s->types[i], s->struct_var_map[s->type_idents[i]]);
+            } else {
+                this->template_map[template_names[0]]->push_var(s->type_idents[i], s->types[i]);
+            }
+        }
+        for (int i = 0; i < (int)s->member_functions.size(); i++) {
+            this->template_map[template_names[0]]->push_function_pre(s->member_functions[i]);
+        }
+        for (int i = 0; i < (int)s->constructors.size(); i++) {
+            this->template_map[template_names[0]]->push_constructor(s->constructors[i]);
+        }
+    }
+}
+
 void AST::push_err(std::string msg) {
     this->error = true;
     this->err << msg;
@@ -99,6 +128,9 @@ void AST::debug() {
     }
     for (int i = 0; i < (int)this->structs.size(); i++) {
         this->structs[i]->debug(0);
+    }
+    for (int i = 0; i < (int)this->templates.size(); i++) {
+        this->templates[i]->debug(0);
     }
     std::cout << "----- DEBUG AST -----" << std::endl;
 }
@@ -148,6 +180,51 @@ void AST::clean_ast() {
     }
     this->functions = this->was_called;
 }
+
+Struct* AST::get_struct(std::string name) {
+    std::cout << "looked_for " << name << std::endl;
+    if (this->func_map[name]) {
+        std::cout << "is func" << std::endl;
+        return nullptr;
+    }
+    std::cout << "not_func   " << name << std::endl;
+    Struct* s = this->struct_map[name];
+    if (s)
+        return s;
+    auto template_names = split_template(name);
+    //std::cout << "get_struct: " << name << std::endl;
+    //std::cout << "template_names: " << template_names[0] << " : " << template_names[1] << std::endl;
+    if (this->template_map[std::string(template_names[0])] && name.find("__del__") == std::string::npos && name.find("__INCREF__") == std::string::npos && name.find("__DECREF__") == std::string::npos) {
+        std::cout << "got " << template_names[0] << std::endl;
+        auto t = this->template_map[std::string(template_names[0])];
+        auto m = t->monomorph(std::string(name), std::string(template_names[1]));
+        std::cout << "MORPHED: " << m->name << std::endl;
+        m->finalize();
+        this->push_struct(m);
+        for (int i = 0; i < (int)m->member_functions.size(); i++) {
+            this->func_definitions.push_back(m->member_functions[i]->get_meta());
+        }
+        auto old_name = this->current_function_name;
+        auto old_block = this->current_block;
+        for (int i = 0; i < (int)m->member_functions.size(); i++) {
+            this->current_function_name = m->member_functions[i]->name;
+            m->member_functions[i]->fold(this);
+            this->func_map[m->member_functions[i]->name] = m->member_functions[i];
+        }
+        this->current_block = old_block;
+        this->current_function_name = old_name;
+        std::cout << "========================================================" << std::endl;
+        m->debug(0);
+        for (int i = 0; i < (int)m->member_functions.size(); i++) {
+            m->member_functions[i]->debug();
+        }
+        std::cout << "========================================================" << std::endl;
+        return m;
+    }
+    
+    return nullptr;
+}
+
 void AST::static_checking(bool only_compile) {
     bool found_entrypoint = false;
     for (int i = 0; i < (int)this->functions.size(); i++) {
@@ -249,21 +326,18 @@ void AST::codegen(char debug, bool optimizations, std::string outfile) {
     auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
     this->TheModule->setDataLayout(TargetMachine->createDataLayout());
     this->TheModule->setTargetTriple(TargetTriple);
+    std::cout << "func_defs" << std::endl;
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->func_definitions.push_back(this->functions[i]->get_meta());
         // Forward declare all the function definitions
         this->functions[i]->codegen_proto(this);
     }
-    for (int i = 0; i < (int)this->structs.size(); i++) {
-        for (int j = 0; j < (int)this->structs[i]->member_functions.size(); j++) {
-            this->func_definitions.push_back(this->structs[i]->member_functions[j]->get_meta());
-            // Forward declare all the function definitions
-            this->structs[i]->member_functions[j]->codegen_proto(this);
-        }
-    }
+    std::cout << "codegen" << std::endl;
     // Codegen all of the actual functions
     for (int i = 0; i < (int)this->functions.size(); i++) {
+        std::cout << "Func name: " << this->functions[i]->name << std::endl;
         this->functions[i]->codegen(this);
+        std::cout << "Done" << std::endl;
     }
     if (debug) {
         std::cout << "===== DEBUG IR ======" << std::endl;

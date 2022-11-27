@@ -197,6 +197,56 @@ void Function::fold(AST* ast) {
     ast->block_returned = false;
 }
 
+
+Function* Function::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
+    std::cout << "Morph func = " << old_name << " : " << new_name << " , " << old_type << " : " << new_type << std::endl;
+    std::string name = std::string(this->name);
+    if (name.find(old_name) != std::string::npos) {
+        name.replace(name.find(old_name), old_name.length(), new_name);
+    }
+    int strct_count = 0;
+    auto args = std::vector<std::vector<std::string>>({});
+    for (int i = 0; i < this->arg_count; i++) {
+        if (this->indentifier_type[i] != t_struct) {
+            std::string type;
+            switch (this->indentifier_type[i]) {
+                case t_number: type =  "int"; break;
+                case t_long: type =  "long"; break;
+                case t_char: type =  "char"; break;
+                case t_float: type =  "float"; break;
+                case t_bool: type =  "bool"; break;
+                case t_string: type =  "string"; break;
+                case t_number_arr: type =  "int*"; break;
+                case t_float_arr: type =  "float*"; break;
+                case t_bool_arr: type =  "bool*"; break;
+                case t_string_arr: type =  "string*"; break;
+                default: type = std::string("unknown");
+            }
+            args.push_back(std::vector<std::string>({
+                        ((ExpressionAtomic*)this->indentifiers[i])->str,
+                        type,
+                        ((this->indentifiers_mutability[i])?std::string("t"):std::string("f"))
+                        }));
+        } else {
+            std::string s_name = std::string(this->struct_names[strct_count++]);
+            if (s_name.compare(old_name) == 0) {
+                s_name = new_name;
+            } else if (s_name.compare(old_type) == 0) {
+                s_name = new_type;
+            }
+            args.push_back(std::vector<std::string>({
+                        std::string(((ExpressionAtomic*)this->indentifiers[i])->str),
+                        std::string("struct"),
+                        ((this->indentifiers_mutability[i])?std::string("t"):std::string("f")),
+                        s_name
+                        }));
+        }
+    }
+    if (this->type != t_struct)
+        return new Function(name, this->statements->monomorph(new_name, new_type, old_name, old_type), this->type, args);
+    return new Function(name, this->statements->monomorph(new_name, new_type, old_name, old_type), this->type, args, new_type);
+}
+
 void Function::clean(AST* ast) {
     if (this->statements) {
         this->statements->clean(ast);
@@ -210,6 +260,7 @@ llvm::Function* Function::codegen_proto(AST* ast) {
     if (!TheFunction) {
         // Make the function type:  double(double,double) etc.
         std::vector<llvm::Type*> func_args = std::vector<llvm::Type*>();
+        
         for (size_t i = 0; i < this->arg_count; i++) {
             switch (this->indentifier_type[i]) {
                 case t_number: func_args.push_back(llvm::Type::getInt64Ty(*(ast->TheContext))); break;
@@ -259,8 +310,10 @@ llvm::Function* Function::codegen_proto(AST* ast) {
 llvm::Function* Function::codegen(AST* ast) {
     llvm::Function *TheFunction = ast->TheModule->getFunction(this->name);
     
-    if (!TheFunction)
+    if (!TheFunction) {
+        std::cout << "Function Codegen could not find: " << this->name << std::endl;
         return nullptr;
+    }
     if (!this->statements)
         return TheFunction;
 

@@ -255,7 +255,7 @@ int main(int argc, char** argv) {
         ast.clean_ast();
     }
 
-    if (compiler_args.debug_ast) {
+    if (compiler_args.debug_ast || compiler_args.debug_full_ast) {
         ast.debug();
     }
     if (ast.check_error(std::string("Logic Error: ")))

@@ -54,6 +54,40 @@ Struct::Struct(std::string name, AST* ast) {
     this->ast = ast;
 }
 
+Struct::Struct(std::string name, AST* ast, bool is_template) {
+    this->name = name;
+    this->ast = ast;
+    this->is_template = true;
+}
+
+Struct* Struct::monomorph(std::string new_name, std::string new_type) {
+    std::cout << "MONOMORPH " << new_name << " : " << new_type << std::endl;
+    auto morphed = new Struct(new_name, this->ast);
+
+    for (auto& v : this->type_idents) {
+        if (this->struct_var_type_map[v] == t_struct) {
+            if (this->struct_var_map[v].compare(this->name) == 0) {
+                morphed->push_var(v, t_struct, new_name);
+            } else if (this->struct_var_map[v].compare(std::string(this->name).substr(this->name.find('<') + 1, this->name.length() - this->name.find('<') - 2)) == 0) {
+                morphed->push_var(v, t_struct, new_type);
+            } else {
+                morphed->push_var(v, t_struct, this->struct_var_map[v]);
+            }
+
+        } else {
+            morphed->push_var(v, this->struct_var_type_map[v]);
+        }
+
+    }
+    for (auto& f : this->member_functions) {
+        morphed->push_function(f->monomorph(new_name, new_type, this->name, std::string(this->name).substr(this->name.find('<') + 1, this->name.length() - this->name.find('<') - 2)));
+    }
+    for (auto& f : this->constructors) {
+        morphed->push_constructor(f->monomorph(new_name, new_type, this->name, std::string(this->name).substr(this->name.find('<') + 1, this->name.length() - this->name.find('<') - 2)));
+    }
+    return morphed;
+}
+
 void Struct::finalize() {
     this->push_var(std::string("_rc"), t_number);
     auto base_const_name = std::string("~").append(this->name).append("~");
@@ -364,11 +398,14 @@ void Struct::push_function(Function* func) {
             this->constructors.push_back(func);
             return;
         }
-        std::string func_name = std::string(this->name).append(func->name);
-        if (func->name.compare("__str__") != 0)
-            func_name.append(func->func_args_to_str());
+        std::string func_name = func->name;
+        if (!this->is_template) {
+            func_name = std::string(this->name).append(func->name);
+            if (func->name.compare("__str__") != 0)
+                func_name.append(func->func_args_to_str());
+            func->name = func_name;
+        }
         this->func_idents.push_back(func_name);
-        func->name = func_name;
         this->gen_field_map[func_name] = -1;
         int field_idx = this->member_functions.size();
         this->field_map[func_name] = std::tuple<int, int>(1, field_idx);
@@ -376,16 +413,20 @@ void Struct::push_function(Function* func) {
     } else {
         if (func->arg_count == 1) {
             if (func->name.compare("__del__") == 0 || func->name.compare("__INCREF__") != 0 || func->name.compare("__DECREF__") != 0) {
-                std::string func_name = std::string(this->name).append(func->name).append(this->name);
-                func->name = func_name;
+                if (!this->is_template) {
+                    std::string func_name = std::string(this->name).append(func->name).append(this->name);
+                    func->name = func_name;
+                }
                 this->member_functions.push_back(func);
                 return;
             }
             this->ast->push_err(std::string("Builtin operators only allow 1 argument self.\n"));
         } else if (func->arg_count == 2) {
-            std::string func_name = func->func_args_to_str();
-            func_name.append(func->name);
-            func->name = func_name;
+            if (!this->is_template) {
+                std::string func_name = func->func_args_to_str();
+                func_name.append(func->name);
+                func->name = func_name;
+            }
             this->member_functions.push_back(func);
         } else {
             this->ast->push_err(std::string("Binary operators only allow 2 arguments.\n"));

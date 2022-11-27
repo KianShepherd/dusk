@@ -1,81 +1,32 @@
-struct LinkedList {
-    val: int,
-    next: LinkedList,
-    has_next: int,
+include "bignum.ds"
 
-    fn LinkedList(self: LinkedList) -> LinkedList {
-        println("Init: 0");
-        self.val = 0;
-        self.has_next = 0;
+template Result<R> {
+    data: R,
+    err: String,
+
+    fn Result<R>(self: Result<R>) -> Result<R> {
         return self;
     }
 
-    fn LinkedList(self: LinkedList, value: int) -> LinkedList {
-        println("Init: %d", value);
-        self.next = LinkedList();
-        self.val = value;
-        self.has_next = 0;
+    fn Result<R>(self: Result<R>, val: R) -> Result<R> {
+        val.__INCREF__();
+        self.data = val;
         return self;
     }
 
-    fn add_next(self: LinkedList) -> LinkedList {
-        self.has_next = 1;
-        return self.next;
-    }
-
-    fn add_next(self: LinkedList, value: int) -> LinkedList {
-        println("\n");
-        self.next = LinkedList(value);
-        self.has_next = 1;
-        return self.next;
-    }
-
-    fn get_next(self: LinkedList) -> LinkedList {
-        let mut next: LinkedList = self.next;
-        return next;
-    }
-
-    fn __INCREF__(self: LinkedList) {
-        self._rc = self._rc + 1;
-        println("inc %d: %d", self.val, self._rc);
-    }
-
-    fn __DECREF__(self: LinkedList) {
-        self._rc = self._rc - 1;
-        println("dec %d: %d", self.val, self._rc);
-        if self._rc == 0 {
-            self.__del__();
-        }
-    }
-
-    fn __del__(self: LinkedList) {
-        println("del %d", self.val);
-        if self.has_next == 1 {
-            self.next.__DECREF__();
-        }
+    fn get_res(self: Result<R>) -> R {
+        return self.data;
     }
 }
 
 
 fn main(argc: int, argv: string*) -> int {
-    let mut a: LinkedList = LinkedList(1);
-    let mut b: LinkedList = LinkedList(0);
-    println("Adding");
-    a.add_next(2).add_next(3).add_next(4).__DECREF__();
-    println("Added\n\n");
-    let mut next: int = a.has_next;
-    while (next != 0) {
-        println("get val");
-        println("val: %d", a.val);
-        //b = a;
-        println("b=a");
-        a = a.get_next();
-        println("get_next()");
-        println("val: %d", a.val);
-        println("got val");
-        next = a.has_next;
-        println("got next\n");
-    }
+    let mut a: Result<String> = Result<String>(String("foo"));
+    let mut str: String = a.get_res();
+    println(str);
+    //let mut b: Result<BigInt> = Result<BigInt>(BigInt(5));
+    //let mut num: BigInt = b.get_res();
+    //println(num);
     println("Done");
     return 0;
 }

@@ -41,7 +41,7 @@ void yyerror(AST&, const char*);
 %token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
 %token DIVIDE TIMES PLUS MINUS MODULO NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW DOT INCLUDE REQUIRE
-%token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT
+%token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT TEMPLATE
 
 %type<expr>  exp;
 %type<stat>  statement statementblock mutassign;
@@ -102,6 +102,24 @@ structdef: STRUCT IDENTIFIER LBRACE structfields RBRACE
             }
         }
         ast.push_struct(s);
+    }
+    | TEMPLATE IDENTIFIER LBRACE structfields RBRACE
+    {
+        auto s = new Struct(std::string(*($2)), &ast, true);
+        std::vector<std::pair<int, void*>> vals = *($4);
+        for (auto& p : vals) {
+            if (p.first == 0) {
+                std::tuple<std::string, AtomType, std::string> field = *((std::tuple<std::string, AtomType, std::string>*)p.second);
+                if (std::get<1>(field) == t_struct) {
+                    s->push_var(std::get<0>(field), std::get<1>(field), std::get<2>(field));
+                } else {
+                    s->push_var(std::get<0>(field), std::get<1>(field));
+                }
+            } else {
+                s->push_function((Function*)p.second);
+            }
+        }
+        ast.push_template(s);
     }
     ;
 

@@ -122,6 +122,7 @@ public:
     void push_include(std::string file);
     void push_requires(std::string file);
     void push_struct(Struct* s);
+    void push_template(Struct* s);
     void push_err(std::string msg);
 
     void push_scope();
@@ -140,6 +141,7 @@ public:
     std::vector<Statement*>* current_block;
     std::string current_function_name;
     bool block_returned;
+    Struct* get_struct(std::string name);
 
 
     ScopeFrame* scope;
@@ -149,15 +151,17 @@ public:
     std::unique_ptr<llvm::IRBuilder<>> Builder;
 
     std::vector<std::tuple<std::string, AtomType, std::vector<AtomType>>> func_definitions;
-    std::map<std::string, Struct*> struct_map;
+    std::map<std::string, Struct*> template_map;
     std::map<std::string, Function*> func_map;
     std::vector<std::string> includes;
     std::vector<std::string> require;
     std::vector<Function*> was_called;
     std::vector<Function*> to_check;
 private:
+    std::map<std::string, Struct*> struct_map;
     std::vector<Function*> functions;
     std::vector<Struct*> structs;
+    std::vector<Struct*> templates;
     bool error;
     std::stringstream err;
 };
