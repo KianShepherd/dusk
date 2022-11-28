@@ -474,7 +474,10 @@ Expression* ExpressionAtomic::monomorph(std::string new_name, std::string new_ty
             for (auto& a : this->args) {
                 new_args.push_back(a->monomorph(new_name, new_type, old_name, old_type));
             }
-            return new ExpressionAtomic(std::string(this->str), new_args);
+            auto func_name = std::string(this->str);
+            if (func_name.find(std::string("<").append(old_type).append(std::string(">"))) != std::string::npos)
+                func_name.replace(func_name.find(std::string("<").append(old_type).append(std::string(">"))), old_type.length() + 2, std::string("<").append(new_type).append(">"));
+            return new ExpressionAtomic(func_name, new_args);
         }
         case t_get_struct: {
             Struct* strct = this->struct_t;
