@@ -192,6 +192,7 @@ Struct* AST::get_struct(std::string name) {
     //std::cout << "get_struct: " << name << std::endl;
     //std::cout << "template_names: " << template_names[0] << " : " << template_names[1] << std::endl;
     if (this->template_map[std::string(template_names[0])] && name.find("__del__") == std::string::npos && name.find("__INCREF__") == std::string::npos && name.find("__DECREF__") == std::string::npos) {
+        std::cout << "template: " << name << std::endl << "Template Type: " << template_names[1] << std::endl;
         this->get_struct(template_names[1]);
         auto t = this->template_map[std::string(template_names[0])];
         auto m = t->monomorph(std::string(name), std::string(template_names[1]));
@@ -205,6 +206,7 @@ Struct* AST::get_struct(std::string name) {
         auto old_scope = this->scope;
         this->scope = new ScopeFrame();
         for (int i = 0; i < (int)m->member_functions.size(); i++) {
+            std::cout << "func_name: " << m->member_functions[i]->name << std::endl;
             if (!this->func_map[m->member_functions[i]->name]) {
                 this->current_function_name = m->member_functions[i]->name;
                 m->member_functions[i]->fold(this);
@@ -214,6 +216,7 @@ Struct* AST::get_struct(std::string name) {
         this->current_block = old_block;
         this->current_function_name = old_name;
         this->scope = old_scope;
+        m->debug(0);
         return m;
     }
     

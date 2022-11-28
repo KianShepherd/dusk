@@ -2,8 +2,8 @@ include "vector.ds"
 include "bignum.ds"
 
 fn main(argc: int, argv: string*) -> int {
-    let mut v1: Vec<BigInt> = Vec<BigInt>();
     let mut vec: Vec<Vec<BigInt>> = Vec<Vec<BigInt>>();
+    let mut v1: Vec<BigInt> = Vec<BigInt>();
     v1.append(BigInt(1));
     v1.append(BigInt(2));
     v1.append(BigInt(3));
@@ -13,9 +13,9 @@ fn main(argc: int, argv: string*) -> int {
     v2.append(BigInt(6));
     println(v1);
     println(v2);
-    //vec.append(v1);
-    //vec.append(v2);
-    //println(vec);
+    vec.append(v1);
+    vec.append(v2);
+    println(vec);
     println("Done");
     return 0;
 }

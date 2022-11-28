@@ -93,6 +93,11 @@ struct BigFloat {
         return big_to_float(self.num);
     }
 
+    fn to_str(self: BigFloat) -> string {
+        self.__INCREF__();
+        return bigf_to_str(self.num);
+    }
+
     fn __str__(self: BigFloat) -> string {
         self.__INCREF__();
         return bigf_to_str(self.num);
@@ -290,6 +295,11 @@ struct BigInt {
     fn to_int(self: BigInt) -> int {
         self.__INCREF__();
         return big_to_long(self.num);
+    }
+
+    fn to_str(self: BigInt) -> string {
+        self.__INCREF__();
+        return big_to_str(self.num);
     }
 
     fn __str__(self: BigInt) -> string {

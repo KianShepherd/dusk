@@ -110,10 +110,22 @@ template Vec<T> {
         }
     }
 
+    fn to_str(self: Vec<T>) -> string {
+        let mut ret: String = String("[ ");
+        for (let mut i: int = 0; i < self.size; i++) {
+            ret = ret + self.get(i).to_str();
+            if (i < self.size - 1) {
+                ret = ret + ", ";
+            }
+        }
+        ret = ret + " ]";
+        return ret.to_str();
+    }
+
     fn __str__(self: Vec<T>) -> string {
         let mut ret: String = String("[ ");
         for (let mut i: int = 0; i < self.size; i++) {
-            ret = ret + String(self.get(i));
+            ret = ret + self.get(i).to_str();
             if (i < self.size - 1) {
                 ret = ret + ", ";
             }
@@ -195,6 +207,10 @@ struct Vec<int> {
         }
     }
 
+    fn to_str(self: Vec<int>) -> string {
+        return ivec_str(self.vector);
+    }
+
     fn __str__(self: Vec<int>) -> string {
         return ivec_str(self.vector);
     }
@@ -258,6 +274,10 @@ struct Vec<float> {
         }
     }
     
+    fn to_str(self: Vec<float>) -> string {
+        return fvec_str(self.vector);
+    }
+
     fn __str__(self: Vec<float>) -> string {
         return fvec_str(self.vector);
     }
