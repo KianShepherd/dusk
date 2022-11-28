@@ -20,7 +20,7 @@ void ExpressionStatement::fold(AST* ast, std::vector<Statement*>& block) {
 }
 
 Statement* ExpressionStatement::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    return new ExpressionStatement(this->expr->monomorph(new_name, new_type, old_name, old_type));
 }
 
 llvm::Value* ExpressionStatement::codegen(AST* ast) {
@@ -81,7 +81,11 @@ void StatementBlock::fold(AST* ast, std::vector<Statement*>& block) {
 }
 
 Statement* StatementBlock::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    auto stats = std::vector<Statement*>();
+    for (auto& s : this->statements) {
+        stats.push_back(s->monomorph(new_name, new_type, old_name, old_type));
+    }
+    return new StatementBlock(stats);
 }
 
 llvm::Value* StatementBlock::codegen(AST* ast) {
@@ -176,7 +180,7 @@ void ReturnStatement::fold(AST* ast, std::vector<Statement*>& block) {
 }
 
 Statement* ReturnStatement::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    return new ReturnStatement(this->expr->monomorph(new_name, new_type, old_name, old_type));
 }
 
 llvm::Value* ReturnStatement::codegen(AST* ast) {
@@ -280,8 +284,6 @@ void AssignmentStatement::clean(AST* ast) {
 }
 
 void AssignmentStatement::fold(AST* ast, std::vector<Statement*>& block) {
-
-    this->debug(0);
     if (this->type == t_struct) {
         ast->get_struct(this->struct_name);
     }
@@ -315,7 +317,16 @@ void AssignmentStatement::fold(AST* ast, std::vector<Statement*>& block) {
 }
 
 Statement* AssignmentStatement::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    if (this->type == t_struct) {
+        auto s_name = std::string(this->struct_name);
+        if (s_name.compare(old_name) == 0) 
+            s_name = std::string(new_name);
+        else if (s_name.compare(old_type) == 0) {
+            s_name = std::string(new_type);
+        }
+        return new AssignmentStatement(this->identifier->monomorph(new_name, new_type, old_name, old_type), this->value->monomorph(new_name, new_type, old_name, old_type), this->mut, this->type, s_name);
+    }
+    return new AssignmentStatement(this->identifier->monomorph(new_name, new_type, old_name, old_type), this->value->monomorph(new_name, new_type, old_name, old_type), this->mut, this->type, this->length);
 }
 
 llvm::Value* AssignmentStatement::codegen(AST* ast) {
@@ -424,7 +435,7 @@ void IfStatement::fold(AST* ast, std::vector<Statement*>& block) {
 }
 
 Statement* IfStatement::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    return new IfStatement(this->condition->monomorph(new_name, new_type, old_name, old_type), this->block1->monomorph(new_name, new_type, old_name, old_type), (this->block2)?this->block2->monomorph(new_name, new_type, old_name, old_type):nullptr);
 }
 
 llvm::Value* IfStatement::codegen(AST* ast) {
@@ -519,7 +530,7 @@ void WhileStatement::fold(AST* ast, std::vector<Statement*>& _block) {
 }
 
 Statement* WhileStatement::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    return new WhileStatement(this->condition->monomorph(new_name, new_type, old_name, old_type), this->block->monomorph(new_name, new_type, old_name, old_type));
 }
 
 llvm::Value* WhileStatement::codegen(AST* ast) {

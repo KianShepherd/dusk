@@ -109,7 +109,6 @@ ExpressionAtomic::ExpressionAtomic(Expression* base, Struct* s, int index, std::
     this->number = index;
     this->type = t_get_struct;
     this->str = field_name;
-
 }
 
 void ExpressionAtomic::debug(size_t depth) {
@@ -387,8 +386,6 @@ Expression* ExpressionAtomic::fold(AST* ast) {
             }
         }
     } else if (this->type == t_function_call) {
-        std::cout << "fold func call: " << this->str << std::endl;
-        this->debug(0);
         for (int i = 0; i < this->args.size(); i++) {
             auto arg = this->args[i];
             if (this->str.compare("print") == 0 || this->str.compare("println") == 0) {
@@ -431,12 +428,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                     && this->str.find("__DECREF__") == std::string::npos
                     && this->str.find("__INCREF__") == std::string::npos
                     ) {
-                    std::cout << "fold ident incref" << std::endl;
                     auto s_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
-                    std::cout << "fold s_name: " << s_name << std::endl;
-                    std::cout << "fold full s_name: " << std::string(s_name).append("__INCREF__").append(std::string(s_name)) << std::endl;
-                    std::cout << "fold arg: " << std::endl;
-                    arg->debug(0);
                     if (!ast->current_block)
                         std::cout << "No block found in func call fold" << std::endl;
                     ast->current_block->push_back(
@@ -444,11 +436,8 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                             new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(std::string(s_name)), std::vector<Expression*>({ new ExpressionAtomic(std::string(((ExpressionAtomic*)arg)->str), true) }))
                         )
                     );
-                    std::cout << "folded ident incref" << std::endl;
                 } else {
-                    std::cout << "fold genric" << std::endl;
                     arg = arg->fold(ast);
-                    std::cout << "folded genric" << std::endl;
                 }
             }
             this->args[i] = arg;
@@ -466,7 +455,38 @@ Expression* ExpressionAtomic::fold(AST* ast) {
 }
 
 Expression* ExpressionAtomic::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    switch (this->type) {
+        case t_number: return new ExpressionAtomic((long)this->number);
+        case t_long: return new ExpressionAtomic((long long)this->number);
+        case t_float: return new ExpressionAtomic((double)this->floating);
+        case t_char: return new ExpressionAtomic((char)this->character);
+        case t_string: return new ExpressionAtomic(std::string("\"").append(std::string(this->str)).append(std::string("\"")), false);
+        case t_null: return new ExpressionAtomic();;
+        case t_bool: return new ExpressionAtomic((bool)this->boolean);
+        case t_number_arr:return new ExpressionAtomic(this->type, this->length, std::vector<long long>(this->int_vals));
+        case t_float_arr: return new ExpressionAtomic(this->type, this->length, std::vector<double>(this->float_vals));
+        case t_string_arr: return new ExpressionAtomic(this->type, this->length, std::vector<long long>(this->int_vals));
+        case t_bool_arr: return new ExpressionAtomic(this->length, std::vector<std::string>(this->string_vals));
+        case t_identifier: return new ExpressionAtomic(std::string(this->str), true);
+        case t_dot_exp: return new ExpressionAtomic(this->base->monomorph(new_name, new_type, old_name, old_type), this->operand->monomorph(new_name, new_type, old_name, old_type));
+        case t_function_call: {
+            auto new_args = std::vector<Expression*>();
+            for (auto& a : this->args) {
+                new_args.push_back(a->monomorph(new_name, new_type, old_name, old_type));
+            }
+            return new ExpressionAtomic(std::string(this->str), new_args);
+        }
+        case t_get_struct: {
+            Struct* strct = this->struct_t;
+            if (strct->name.compare(old_name) == 0) {
+                strct = this->struct_t->ast->get_struct(new_name);
+            } else if (strct->name.compare(old_type) == 0) {
+                strct = this->struct_t->ast->get_struct(new_type);
+            }
+            return new ExpressionAtomic(this->base->monomorph(new_name, new_type, old_name, old_type), strct, this->number, std::string(this->str));
+        }
+        default: std::cout << "Unknown atomic type" << std::endl; return nullptr;
+    }
 }
 
 
@@ -756,7 +776,7 @@ Expression* BinaryExpression::fold(AST* ast) {
 }
 
 Expression* BinaryExpression::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    return new BinaryExpression(this->lhs->monomorph(new_name, new_type, old_name, old_type), this->rhs->monomorph(new_name, new_type, old_name, old_type), this->type);
 }
 
 std::string BinaryExpression::get_atomic_type_str(AST* ast) {
@@ -930,7 +950,7 @@ Expression* UnaryExpression::fold(AST* ast) {
 }
 
 Expression* UnaryExpression::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    return new UnaryExpression(this->operand->monomorph(new_name, new_type, old_name, old_type), std::string(this->op));
 }
 
 std::string UnaryExpression::get_atomic_type_str(AST* ast) {
@@ -999,7 +1019,7 @@ AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* v
     this->identifier = identifier;
     this->value = value;
     this->index = 0;
-    this->is_arr = true;
+    this->is_arr = false;
     this->is_methods = 1;
 }
 
@@ -1044,7 +1064,13 @@ Expression* AssignmentExpression::fold(AST* ast) {
 }
 
 Expression* AssignmentExpression::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    return this;
+    if (this->is_methods) {
+        return new AssignmentExpression(this->identifier->monomorph(new_name, new_type, old_name, old_type), this->value->monomorph(new_name, new_type, old_name, old_type), 1);
+    } else if (this->is_arr) {
+        return new AssignmentExpression(this->identifier->monomorph(new_name, new_type, old_name, old_type), this->value->monomorph(new_name, new_type, old_name, old_type), this->index->monomorph(new_name, new_type, old_name, old_type));
+    } else {
+        return new AssignmentExpression(this->identifier->monomorph(new_name, new_type, old_name, old_type), this->value->monomorph(new_name, new_type, old_name, old_type));
+    }
 }
 
 std::string AssignmentExpression::get_atomic_type_str(AST* ast) {

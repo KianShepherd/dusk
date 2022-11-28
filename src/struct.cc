@@ -61,9 +61,7 @@ Struct::Struct(std::string name, AST* ast, bool is_template) {
 }
 
 Struct* Struct::monomorph(std::string new_name, std::string new_type) {
-    std::cout << "MONOMORPH " << new_name << " : " << new_type << std::endl;
     auto morphed = new Struct(new_name, this->ast);
-
     for (auto& v : this->type_idents) {
         if (this->struct_var_type_map[v] == t_struct) {
             if (this->struct_var_map[v].compare(this->name) == 0) {

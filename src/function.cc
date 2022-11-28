@@ -199,7 +199,6 @@ void Function::fold(AST* ast) {
 
 
 Function* Function::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
-    std::cout << "Morph func = " << old_name << " : " << new_name << " , " << old_type << " : " << new_type << std::endl;
     std::string name = std::string(this->name);
     if (name.find(old_name) != std::string::npos) {
         name.replace(name.find(old_name), old_name.length(), new_name);

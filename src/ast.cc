@@ -182,12 +182,9 @@ void AST::clean_ast() {
 }
 
 Struct* AST::get_struct(std::string name) {
-    std::cout << "looked_for " << name << std::endl;
     if (this->func_map[name]) {
-        std::cout << "is func" << std::endl;
         return nullptr;
     }
-    std::cout << "not_func   " << name << std::endl;
     Struct* s = this->struct_map[name];
     if (s)
         return s;
@@ -195,10 +192,9 @@ Struct* AST::get_struct(std::string name) {
     //std::cout << "get_struct: " << name << std::endl;
     //std::cout << "template_names: " << template_names[0] << " : " << template_names[1] << std::endl;
     if (this->template_map[std::string(template_names[0])] && name.find("__del__") == std::string::npos && name.find("__INCREF__") == std::string::npos && name.find("__DECREF__") == std::string::npos) {
-        std::cout << "got " << template_names[0] << std::endl;
+        this->get_struct(template_names[1]);
         auto t = this->template_map[std::string(template_names[0])];
         auto m = t->monomorph(std::string(name), std::string(template_names[1]));
-        std::cout << "MORPHED: " << m->name << std::endl;
         m->finalize();
         this->push_struct(m);
         for (int i = 0; i < (int)m->member_functions.size(); i++) {
@@ -206,19 +202,18 @@ Struct* AST::get_struct(std::string name) {
         }
         auto old_name = this->current_function_name;
         auto old_block = this->current_block;
+        auto old_scope = this->scope;
+        this->scope = new ScopeFrame();
         for (int i = 0; i < (int)m->member_functions.size(); i++) {
-            this->current_function_name = m->member_functions[i]->name;
-            m->member_functions[i]->fold(this);
-            this->func_map[m->member_functions[i]->name] = m->member_functions[i];
+            if (!this->func_map[m->member_functions[i]->name]) {
+                this->current_function_name = m->member_functions[i]->name;
+                m->member_functions[i]->fold(this);
+                this->func_map[m->member_functions[i]->name] = m->member_functions[i];
+            }
         }
         this->current_block = old_block;
         this->current_function_name = old_name;
-        std::cout << "========================================================" << std::endl;
-        m->debug(0);
-        for (int i = 0; i < (int)m->member_functions.size(); i++) {
-            m->member_functions[i]->debug();
-        }
-        std::cout << "========================================================" << std::endl;
+        this->scope = old_scope;
         return m;
     }
     
@@ -326,18 +321,14 @@ void AST::codegen(char debug, bool optimizations, std::string outfile) {
     auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
     this->TheModule->setDataLayout(TargetMachine->createDataLayout());
     this->TheModule->setTargetTriple(TargetTriple);
-    std::cout << "func_defs" << std::endl;
     for (int i = 0; i < (int)this->functions.size(); i++) {
         this->func_definitions.push_back(this->functions[i]->get_meta());
         // Forward declare all the function definitions
         this->functions[i]->codegen_proto(this);
     }
-    std::cout << "codegen" << std::endl;
     // Codegen all of the actual functions
     for (int i = 0; i < (int)this->functions.size(); i++) {
-        std::cout << "Func name: " << this->functions[i]->name << std::endl;
         this->functions[i]->codegen(this);
-        std::cout << "Done" << std::endl;
     }
     if (debug) {
         std::cout << "===== DEBUG IR ======" << std::endl;

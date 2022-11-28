@@ -1,0 +1,32 @@
+include "bignum.ds"
+
+template Result<R> {
+    data: R,
+    err: String,
+
+    fn Result<R>(self: Result<R>) -> Result<R> {
+        return self;
+    }
+
+    fn Result<R>(self: Result<R>, val: R) -> Result<R> {
+        val.__INCREF__();
+        self.data = val;
+        return self;
+    }
+
+    fn get_res(self: Result<R>) -> R {
+        return self.data;
+    }
+}
+
+
+fn main(argc: int, argv: string*) -> int {
+    let mut a: Result<String> = Result<String>(String("foo"));
+    let mut str: String = a.get_res();
+    println(str);
+    let mut b: Result<BigInt> = Result<BigInt>(BigInt(5));
+    let mut num: BigInt = b.get_res();
+    println(num);
+    println("Done");
+    return 0;
+}

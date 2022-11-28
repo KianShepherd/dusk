@@ -1,32 +1,21 @@
+include "vector.ds"
 include "bignum.ds"
 
-template Result<R> {
-    data: R,
-    err: String,
-
-    fn Result<R>(self: Result<R>) -> Result<R> {
-        return self;
-    }
-
-    fn Result<R>(self: Result<R>, val: R) -> Result<R> {
-        val.__INCREF__();
-        self.data = val;
-        return self;
-    }
-
-    fn get_res(self: Result<R>) -> R {
-        return self.data;
-    }
-}
-
-
 fn main(argc: int, argv: string*) -> int {
-    let mut a: Result<String> = Result<String>(String("foo"));
-    let mut str: String = a.get_res();
-    println(str);
-    //let mut b: Result<BigInt> = Result<BigInt>(BigInt(5));
-    //let mut num: BigInt = b.get_res();
-    //println(num);
+    let mut v1: Vec<BigInt> = Vec<BigInt>();
+    let mut vec: Vec<Vec<BigInt>> = Vec<Vec<BigInt>>();
+    v1.append(BigInt(1));
+    v1.append(BigInt(2));
+    v1.append(BigInt(3));
+    let mut v2: Vec<BigInt> = Vec<BigInt>();
+    v2.append(BigInt(4));
+    v2.append(BigInt(5));
+    v2.append(BigInt(6));
+    println(v1);
+    println(v2);
+    //vec.append(v1);
+    //vec.append(v2);
+    //println(vec);
     println("Done");
     return 0;
 }
