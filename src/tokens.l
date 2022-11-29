@@ -12,6 +12,8 @@
 %option noinput nounput noyywrap nodefault
 %option yylineno
 %option outfile="src/scanner.cc"
+
+%x comment
 %%
 [0-9]+                  { yylval.str = new std::string(yytext, yyleng); return NUMBER;  }
 [0-9]+c                 { yylval.str = new std::string(yytext, yyleng); return CNUMBER;  }
@@ -78,5 +80,10 @@ require                 { return REQUIRE;  }
 
 [[:space:]]             ; /* Ignore whitespace */
 "//".*                  { /* DO NOTHING */ }
+<INITIAL>"/*"           BEGIN(comment);
+<comment>"*/"           BEGIN(INITIAL);
+<comment>[^*\n]+        // eat comment in chunks
+<comment>"*"            // eat the lone star
+<comment>\n             yylineno++;
 .                       { std::stringstream ss; ss << "bad input character '" << yytext << "' at line " << yylineno << std::endl; yylval.str = new std::string(ss.str()); return LEXERROR; }
 %%

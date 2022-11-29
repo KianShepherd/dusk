@@ -226,3 +226,19 @@ end of the block.
     } // Scope C Destroyed
 } // Scope A Destroyed
 ```
+
+## Other
+
+Comments can be created using `//`.
+
+```
+// This is a comment
+```
+
+Multiline Comments can be created using `/* ... */`.
+
+```
+/* This is a comment
+That spans multiple lines
+*/
+```
