@@ -109,7 +109,6 @@ ExpressionAtomic::ExpressionAtomic(Expression* base, Struct* s, int index, std::
     this->number = index;
     this->type = t_get_struct;
     this->str = field_name;
-
 }
 
 void ExpressionAtomic::debug(size_t depth) {
@@ -196,7 +195,7 @@ std::string ExpressionAtomic::get_atomic_type_str(AST* ast) {
     AtomType value = ast->scope->get_value(this->str);
     if (this->type == t_identifier) {
         if (value == t_null)
-            ast->push_err("Attempted to lookup unknown identifier.");
+            ast->push_err("Attempted to lookup unknown identifier");
         if (this->index) {
             if (value == t_string_arr) {
                 value = t_string;
@@ -210,7 +209,7 @@ std::string ExpressionAtomic::get_atomic_type_str(AST* ast) {
             return ast->scope->get_value_struct(this->str);
         return type_string(ast, value);
     } else if (this->type == t_function_call) {
-        if (ast->struct_map[this->str] != nullptr)
+        if (ast->get_struct(this->str) != nullptr)
             return this->str;
         auto func = ast->func_map[this->str];
         if (func->type == t_struct)
@@ -245,7 +244,7 @@ std::string ExpressionAtomic::type_str(AST* ast) {
             return type;
         }
         case t_function_call: {
-            if (ast->struct_map[this->str] != nullptr)
+            if (ast->get_struct(this->str) != nullptr)
                 return this->str;
             auto func = ast->func_map[this->str];
             if (func->type == t_struct)
@@ -322,7 +321,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
             this->operand = this->operand->fold(ast);
             if ((this->base)->get_atomic_type_keep_identifier(ast) == t_identifier) {
                 std::string struct_name = ast->scope->get_value_struct(((ExpressionAtomic*)this->base)->str);
-                Struct* strct = ast->struct_map[struct_name];
+                Struct* strct = ast->get_struct(struct_name);
                 return (new ExpressionAtomic(this->base, strct, strct->gen_field_map[((ExpressionAtomic*)this->operand)->str], ((ExpressionAtomic*)this->operand)->str))->fold(ast);
             } else if (((ExpressionAtomic*)this->base)->type == t_function_call) {
                 Function* func = ast->func_map[((ExpressionAtomic*)this->base)->str];
@@ -330,14 +329,14 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                     ast->push_err(std::string("Attempted to call . method off non struct object."));
                     return (Expression*)this;
                 }
-                Struct* strct = ast->struct_map[func->struct_name];
+                Struct* strct = ast->get_struct(func->struct_name);
                 return (new ExpressionAtomic(this->base, strct, strct->gen_field_map[((ExpressionAtomic*)this->operand)->str], ((ExpressionAtomic*)this->operand)->str))->fold(ast);
             } else if (((ExpressionAtomic*)this->base)->type == t_get_struct) {
                 Struct* strct = ((ExpressionAtomic*)this->base)->struct_t;
                 if (strct->struct_var_map.find(((ExpressionAtomic*)this->base)->str) == strct->struct_var_map.end()) {
                     ast->push_err(std::string("Attempted to call . method off non struct object."));
                 }
-                strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->base)->str]];
+                strct = ast->get_struct(strct->struct_var_map[((ExpressionAtomic*)this->base)->str]);
                 std::string struct_name = strct->name;
                 return (new ExpressionAtomic(this->base, strct, strct->gen_field_map[((ExpressionAtomic*)this->operand)->str], ((ExpressionAtomic*)this->operand)->str))->fold(ast);
             }
@@ -373,7 +372,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                 if (strct->struct_var_map.find(((ExpressionAtomic*)this->base)->str) == strct->struct_var_map.end()) {
                     ast->push_err(std::string("Attempted to call . method off non struct object."));
                 }
-                strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->base)->str]];
+                strct = ast->get_struct(strct->struct_var_map[((ExpressionAtomic*)this->base)->str]);
                 std::string struct_name = strct->name;
                 struct_name.append(((ExpressionAtomic*)this->operand)->str);
             
@@ -387,20 +386,10 @@ Expression* ExpressionAtomic::fold(AST* ast) {
             }
         }
     } else if (this->type == t_function_call) {
-        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-        std::cout << "Folding: " << this->str << std::endl;
-        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
         for (int i = 0; i < this->args.size(); i++) {
             auto arg = this->args[i];
-            std::cout << "-------------------------" << std::endl;
-            arg->debug(0);
-            std::cout << "-------------------------" << std::endl;
-            if (!arg->folded) {
-                arg = arg->fold(ast);
-            }
-            arg->debug(0);
-            std::cout << "-------------------------" << std::endl;
             if (this->str.compare("print") == 0 || this->str.compare("println") == 0) {
+                arg = arg->fold(ast);
                 if (arg->get_atomic_type_keep_identifier(ast) == t_identifier && arg->get_atomic_type(ast) == t_struct) {
                     std::string f_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
                     f_name.append("__str__");
@@ -423,7 +412,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                         this->args[i] = arg;
                         continue;
                     }
-                    strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->base)->str]];
+                    strct = ast->get_struct(strct->struct_var_map[((ExpressionAtomic*)this->base)->str]);
                     std::string f_name = strct->name;
                     f_name.append("__str__");
                     ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
@@ -434,28 +423,27 @@ Expression* ExpressionAtomic::fold(AST* ast) {
                 if (
                     arg->get_atomic_type_keep_identifier(ast) == t_identifier
                     && ast->scope->get_value(((ExpressionAtomic*)arg)->str) == t_struct
-                    && (ast->struct_map[this->str] || ast->func_map[this->str]->statements != nullptr)
+                    && (ast->get_struct(this->str) || (ast->func_map[this->str] && ast->func_map[this->str]->statements != nullptr))
                     && this->str.find("__del__") == std::string::npos
                     && this->str.find("__DECREF__") == std::string::npos
                     && this->str.find("__INCREF__") == std::string::npos
                     ) {
-                    std::cout << "Adding INCREF in: " << ast->current_function_name << std::endl;
                     auto s_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
+                    if (!ast->current_block)
+                        std::cout << "No block found in func call fold" << std::endl;
                     ast->current_block->push_back(
                         new ExpressionStatement(
-                            new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(s_name), std::vector<Expression*>({ arg }))
+                            new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(std::string(s_name)), std::vector<Expression*>({ new ExpressionAtomic(std::string(((ExpressionAtomic*)arg)->str), true) }))
                         )
                     );
-                    for (auto& s : *ast->current_block) {
-                        s->debug(0);
-                        std::cout << "=========================" << std::endl;
-                    }
+                } else {
+                    arg = arg->fold(ast);
                 }
             }
             this->args[i] = arg;
             
         }
-        if (ast->struct_map[this->str] != nullptr) {
+        if (ast->get_struct(this->str) != nullptr) {
             std::string s = std::string("");
             for (auto& arg: this->args) {
                 s.append(arg->type_str(ast));
@@ -464,6 +452,44 @@ Expression* ExpressionAtomic::fold(AST* ast) {
         }
     }
     return (Expression*)this;
+}
+
+Expression* ExpressionAtomic::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
+    switch (this->type) {
+        case t_number: return new ExpressionAtomic((long)this->number);
+        case t_long: return new ExpressionAtomic((long long)this->number);
+        case t_float: return new ExpressionAtomic((double)this->floating);
+        case t_char: return new ExpressionAtomic((char)this->character);
+        case t_string: return new ExpressionAtomic(std::string("\"").append(std::string(this->str)).append(std::string("\"")), false);
+        case t_null: return new ExpressionAtomic();;
+        case t_bool: return new ExpressionAtomic((bool)this->boolean);
+        case t_number_arr:return new ExpressionAtomic(this->type, this->length, std::vector<long long>(this->int_vals));
+        case t_float_arr: return new ExpressionAtomic(this->type, this->length, std::vector<double>(this->float_vals));
+        case t_string_arr: return new ExpressionAtomic(this->type, this->length, std::vector<long long>(this->int_vals));
+        case t_bool_arr: return new ExpressionAtomic(this->length, std::vector<std::string>(this->string_vals));
+        case t_identifier: return new ExpressionAtomic(std::string(this->str), true);
+        case t_dot_exp: return new ExpressionAtomic(this->base->monomorph(new_name, new_type, old_name, old_type), this->operand->monomorph(new_name, new_type, old_name, old_type));
+        case t_function_call: {
+            auto new_args = std::vector<Expression*>();
+            for (auto& a : this->args) {
+                new_args.push_back(a->monomorph(new_name, new_type, old_name, old_type));
+            }
+            auto func_name = std::string(this->str);
+            if (func_name.find(std::string("<").append(old_type).append(std::string(">"))) != std::string::npos)
+                func_name.replace(func_name.find(std::string("<").append(old_type).append(std::string(">"))), old_type.length() + 2, std::string("<").append(new_type).append(">"));
+            return new ExpressionAtomic(func_name, new_args);
+        }
+        case t_get_struct: {
+            Struct* strct = this->struct_t;
+            if (strct->name.compare(old_name) == 0) {
+                strct = this->struct_t->ast->get_struct(new_name);
+            } else if (strct->name.compare(old_type) == 0) {
+                strct = this->struct_t->ast->get_struct(new_type);
+            }
+            return new ExpressionAtomic(this->base->monomorph(new_name, new_type, old_name, old_type), strct, this->number, std::string(this->str));
+        }
+        default: std::cout << "Unknown atomic type" << std::endl; return nullptr;
+    }
 }
 
 
@@ -706,7 +732,7 @@ Expression* BinaryExpression::fold(AST* ast) {
             if (strct->struct_var_map.find(((ExpressionAtomic*)this->lhs)->str) == strct->struct_var_map.end()) {
                 return (Expression*)this;
             }
-            strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->lhs)->str]];
+            strct = ast->get_struct(strct->struct_var_map[((ExpressionAtomic*)this->lhs)->str]);
             f_name.append(strct->name);
         } else {
             f_name.append(type_string(ast, this->lhs->get_atomic_type(ast)));
@@ -725,7 +751,7 @@ Expression* BinaryExpression::fold(AST* ast) {
             if (strct->struct_var_map.find(((ExpressionAtomic*)this->rhs)->str) == strct->struct_var_map.end()) {
                 return (Expression*)this;
             }
-            strct = ast->struct_map[strct->struct_var_map[((ExpressionAtomic*)this->rhs)->str]];
+            strct = ast->get_struct(strct->struct_var_map[((ExpressionAtomic*)this->rhs)->str]);
             f_name.append(strct->name);
         } else {
             f_name.append(type_string(ast, this->rhs->get_atomic_type(ast)));
@@ -750,6 +776,10 @@ Expression* BinaryExpression::fold(AST* ast) {
         return (new ExpressionAtomic(f_name, std::vector<Expression*>({this->lhs, this->rhs})))->fold(ast);
     }
     return (Expression*)this;
+}
+
+Expression* BinaryExpression::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
+    return new BinaryExpression(this->lhs->monomorph(new_name, new_type, old_name, old_type), this->rhs->monomorph(new_name, new_type, old_name, old_type), this->type);
 }
 
 std::string BinaryExpression::get_atomic_type_str(AST* ast) {
@@ -922,6 +952,10 @@ Expression* UnaryExpression::fold(AST* ast) {
     return (Expression*)this;
 }
 
+Expression* UnaryExpression::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
+    return new UnaryExpression(this->operand->monomorph(new_name, new_type, old_name, old_type), std::string(this->op));
+}
+
 std::string UnaryExpression::get_atomic_type_str(AST* ast) {
     return this->operand->get_atomic_type_str(ast);
 }
@@ -988,7 +1022,7 @@ AssignmentExpression::AssignmentExpression(Expression* identifier, Expression* v
     this->identifier = identifier;
     this->value = value;
     this->index = 0;
-    this->is_arr = true;
+    this->is_arr = false;
     this->is_methods = 1;
 }
 
@@ -1030,6 +1064,16 @@ Expression* AssignmentExpression::fold(AST* ast) {
         ast->scope->update_value(ast, ((ExpressionAtomic*)this->identifier)->str, new ScopeValue(true, ((ExpressionAtomic*)this->value)->get_atomic_type(ast), std::string("")));
     }
     return (Expression*)this;
+}
+
+Expression* AssignmentExpression::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
+    if (this->is_methods) {
+        return new AssignmentExpression(this->identifier->monomorph(new_name, new_type, old_name, old_type), this->value->monomorph(new_name, new_type, old_name, old_type), 1);
+    } else if (this->is_arr) {
+        return new AssignmentExpression(this->identifier->monomorph(new_name, new_type, old_name, old_type), this->value->monomorph(new_name, new_type, old_name, old_type), this->index->monomorph(new_name, new_type, old_name, old_type));
+    } else {
+        return new AssignmentExpression(this->identifier->monomorph(new_name, new_type, old_name, old_type), this->value->monomorph(new_name, new_type, old_name, old_type));
+    }
 }
 
 std::string AssignmentExpression::get_atomic_type_str(AST* ast) {
@@ -1115,6 +1159,10 @@ void BreakExpression::clean(AST* ast) {
 
 Expression* BreakExpression::fold(AST* ast) {
     return (Expression*)this;
+}
+
+Expression* BreakExpression::monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) {
+    return this;
 }
 
 llvm::Value* BreakExpression::codegen(AST* ast, AtomType type) {

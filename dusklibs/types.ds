@@ -27,6 +27,11 @@ struct String {
         return self;
     }
 
+    fn String(self: String, val: String) -> String {
+        self.str = new_str_preset(val.to_str());
+        return self;
+    }
+
     fn String(self: String, num: float) -> String {
         self.str = new_str();
         self = self + ftos(num);

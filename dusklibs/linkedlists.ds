@@ -1,0 +1,81 @@
+template LinkedList<T> {
+    val: T,
+    next: LinkedList<T>,
+    has_next: int,
+
+    fn LinkedList<T>(self: LinkedList<T>, value: T) -> LinkedList<T> {
+        value.__INCREF__();
+        self.val = value;
+        self.has_next = 0;
+        return self;
+    }
+
+    fn add_next(self: LinkedList<T>, value: T) -> LinkedList<T> {
+        self.next = LinkedList<T>(value);
+        self.has_next = 1;
+        let mut next: LinkedList<T> = self.next;
+        return next;
+    }
+
+    fn get_next(self: LinkedList<T>) -> LinkedList<T> {
+        let mut next: LinkedList<T> = self.next;
+        return next;
+    }
+
+    fn __str__(self: LinkedList<T>) -> string {
+        let mut v: T = self.val;
+        return v.to_str();
+    }
+
+    fn __del__(self: LinkedList<T>) {
+        self.val.__DECREF__();
+        if self.has_next == 1 {
+            self.next.__DECREF__();
+        }
+    }
+}
+
+struct LinkedList<int> {
+    val: int,
+    next: LinkedList<int>,
+    has_next: int,
+
+    fn LinkedList<int>(self: LinkedList<int>) -> LinkedList<int> {
+        self.val = 0;
+        self.has_next = 0;
+        return self;
+    }
+
+    fn LinkedList<int>(self: LinkedList<int>, value: int) -> LinkedList<int> {
+        self.val = value;
+        self.has_next = 0;
+        return self;
+    }
+
+    fn add_next(self: LinkedList<int>) -> LinkedList<int> {
+        self.next = LinkedList<int>();
+        self.has_next = 1;
+        return self.next;
+    }
+
+    fn add_next(self: LinkedList<int>, value: int) -> LinkedList<int> {
+        self.next = LinkedList<int>(value);
+        self.has_next = 1;
+        return self.next;
+    }
+
+    fn get_next(self: LinkedList<int>) -> LinkedList<int> {
+        let mut next: LinkedList<int> = self.next;
+        return next;
+    }
+
+    fn __str__(self: LinkedList<int>) -> string {
+        return String(self.val).to_str();
+    }
+
+    fn __del__(self: LinkedList<int>) {
+        if self.has_next == 1 {
+            self.next.__DECREF__();
+        }
+    }
+}

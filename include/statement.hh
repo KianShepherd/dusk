@@ -23,6 +23,7 @@ class Statement {
 public:
     virtual void debug(size_t depth) {};
     virtual void fold(AST* ast, std::vector<Statement*>& block) {};
+    virtual Statement* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type);
     virtual void clean(AST* ast) {};
     virtual llvm::Value* codegen(AST* ast) = 0;
 };
@@ -34,6 +35,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast, std::vector<Statement*>& block) override;
+    Statement* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     llvm::Value* codegen(AST* ast) override;
 private:
@@ -46,6 +48,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast, std::vector<Statement*>& block) override;
+    Statement* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     llvm::Value* codegen(AST* ast) override;
 
@@ -59,6 +62,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast, std::vector<Statement*>& block) override;
+    Statement* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     llvm::Value* codegen(AST* ast) override;
 private:
@@ -72,6 +76,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast, std::vector<Statement*>& block) override;
+    Statement* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     llvm::Value* codegen(AST* ast) override;
 private:
@@ -89,6 +94,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast, std::vector<Statement*>& block) override;
+    Statement* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     llvm::Value* codegen(AST* ast) override;
 private:
@@ -103,6 +109,7 @@ public:
 
     void debug(size_t depth) override;
     void fold(AST* ast, std::vector<Statement*>& block) override;
+    Statement* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     llvm::Value* codegen(AST* ast) override;
 private:

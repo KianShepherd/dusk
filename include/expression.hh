@@ -71,6 +71,7 @@ class Expression {
 public:
     virtual void debug(size_t depth) {};
     virtual Expression* fold(AST* ast) { return nullptr; };
+    virtual Expression* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type);
     virtual void clean(AST* ast) {};
     virtual ExpType get_type() { return t_undef; };
     virtual AtomType get_atomic_type(AST* ast) { return t_null; };
@@ -103,6 +104,7 @@ public:
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
+    Expression* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     ExpType get_type() override { return ((this->type == t_get_struct)?t_get:t_atomic); };
     AtomType get_atomic_type(AST* ast) override;
@@ -137,6 +139,7 @@ public:
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
+    Expression* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     ExpType get_type() override { return t_binary; };
     AtomType get_atomic_type(AST* ast) override;
@@ -157,6 +160,7 @@ public:
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
+    Expression* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     ExpType get_type() override { return t_unary; };
     AtomType get_atomic_type(AST* ast) override;
@@ -178,6 +182,7 @@ public:
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
+    Expression* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     ExpType get_type() override { return t_assignment; };
     AtomType get_atomic_type(AST* ast) override;
@@ -200,6 +205,7 @@ public:
 
     void debug(size_t depth) override;
     Expression* fold(AST* ast) override;
+    Expression* monomorph(std::string new_name, std::string new_type, std::string old_name, std::string old_type) override;
     void clean(AST* ast) override;
     ExpType get_type() override { return t_break; };
     AtomType get_atomic_type(AST* ast) override;

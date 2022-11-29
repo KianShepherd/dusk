@@ -68,6 +68,7 @@ mut                     { return MUTABLE;  }
 return                  { return RETURN;   }
 break                   { return BREAK;    }
 struct                  { return STRUCT;   }
+template                { return TEMPLATE; }
 include                 { return INCLUDE;  }
 require                 { return REQUIRE;  }
 

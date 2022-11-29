@@ -1,46 +1,46 @@
-struct LinkedList {
+struct LinkedList<int> {
     val: int,
-    next: LinkedList,
+    next: LinkedList<int>,
     has_next: int,
 
-    fn LinkedList(self: LinkedList) -> LinkedList {
+    fn LinkedList<int>(self: LinkedList<int>) -> LinkedList<int> {
         println("Init: 0");
         self.val = 0;
         self.has_next = 0;
         return self;
     }
 
-    fn LinkedList(self: LinkedList, value: int) -> LinkedList {
+    fn LinkedList<int>(self: LinkedList<int>, value: int) -> LinkedList<int> {
         println("Init: %d", value);
-        self.next = LinkedList();
         self.val = value;
         self.has_next = 0;
         return self;
     }
 
-    fn add_next(self: LinkedList) -> LinkedList {
+    fn add_next(self: LinkedList<int>) -> LinkedList<int> {
+        self.next = LinkedList<int>();
         self.has_next = 1;
         return self.next;
     }
 
-    fn add_next(self: LinkedList, value: int) -> LinkedList {
+    fn add_next(self: LinkedList<int>, value: int) -> LinkedList<int> {
         println("\n");
-        self.next = LinkedList(value);
+        self.next = LinkedList<int>(value);
         self.has_next = 1;
         return self.next;
     }
 
-    fn get_next(self: LinkedList) -> LinkedList {
-        let mut next: LinkedList = self.next;
+    fn get_next(self: LinkedList<int>) -> LinkedList<int> {
+        let mut next: LinkedList<int> = self.next;
         return next;
     }
 
-    fn __INCREF__(self: LinkedList) {
+    fn __INCREF__(self: LinkedList<int>) {
         self._rc = self._rc + 1;
         println("inc %d: %d", self.val, self._rc);
     }
 
-    fn __DECREF__(self: LinkedList) {
+    fn __DECREF__(self: LinkedList<int>) {
         self._rc = self._rc - 1;
         println("dec %d: %d", self.val, self._rc);
         if self._rc == 0 {
@@ -48,7 +48,7 @@ struct LinkedList {
         }
     }
 
-    fn __del__(self: LinkedList) {
+    fn __del__(self: LinkedList<int>) {
         println("del %d", self.val);
         if self.has_next == 1 {
             self.next.__DECREF__();
@@ -56,10 +56,9 @@ struct LinkedList {
     }
 }
 
-
 fn main(argc: int, argv: string*) -> int {
-    let mut a: LinkedList = LinkedList(1);
-    let mut b: LinkedList = LinkedList(0);
+    let mut a: LinkedList<int> = LinkedList<int>(1);
+    let mut b: LinkedList<int> = LinkedList<int>(0);
     println("Adding");
     a.add_next(2).add_next(3).add_next(4).__DECREF__();
     println("Added\n\n");

@@ -52,7 +52,7 @@ fn main() -> int {
     vec.append(s);
     s = String("Foo Bar Baz");
     for (let mut i: int = 0; i < vec.size(); i++) {
-        print(vec.get(i));
+        print(vec.get(i).to_str());
     }
     let mut vs: Vec<String> = s.split<String>(" ");
     vec.extend(vs);

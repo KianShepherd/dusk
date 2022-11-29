@@ -2,6 +2,18 @@ require "bignum"
 require "gmp"
 require "gmpxx"
 
+struct String {
+    fn String(self: String, num: BigInt) -> String {
+        self.str = new_str_preset(big_to_str(num.num));
+        return self;
+    }
+
+    fn String(self: String, num: BigFloat) -> String {
+        self.str = new_str_preset(bigf_to_str(num.num));
+        return self;
+    }
+}
+
 struct BigFloat {
     extern new_bigfloat(n: float) -> void*;
     extern new_bigfloat_prec(n: float, precision: int) -> void*;
@@ -79,6 +91,11 @@ struct BigFloat {
     fn to_float(self: BigFloat) -> float {
         self.__INCREF__();
         return big_to_float(self.num);
+    }
+
+    fn to_str(self: BigFloat) -> string {
+        self.__INCREF__();
+        return bigf_to_str(self.num);
     }
 
     fn __str__(self: BigFloat) -> string {
@@ -278,6 +295,11 @@ struct BigInt {
     fn to_int(self: BigInt) -> int {
         self.__INCREF__();
         return big_to_long(self.num);
+    }
+
+    fn to_str(self: BigInt) -> string {
+        self.__INCREF__();
+        return big_to_str(self.num);
     }
 
     fn __str__(self: BigInt) -> string {

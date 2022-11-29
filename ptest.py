@@ -115,7 +115,7 @@ def run_example(file_name):
                     op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   "{op_res[i].encode("utf-8")}"')
 
         preamble = f'{file_name}.ds: '
-        while len(preamble) < 20:
+        while len(preamble) < 25:
             preamble = preamble + " "
         print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"},'
               f' optimized {"PASS" if op_pass else "FAIL"}')

@@ -17,8 +17,10 @@ void print_help() {
     std::cout << "Usage: dusk [options] file..." << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << "-h                Display this information." << std::endl;
-    std::cout << "-d                Print out debug information about the AST and LLVM IR." << std::endl;
-    std::cout << "-da               Print out debug information about the AST." << std::endl;
+    std::cout << "-d                Print out debug information about the final AST and LLVM IR." << std::endl;
+    std::cout << "-df               Print out debug information about the AST at each stage and LLVM IR." << std::endl;
+    std::cout << "-da               Print out debug information about the final AST." << std::endl;
+    std::cout << "-daf              Print out debug information about the AST at each stage." << std::endl;
     std::cout << "-di               Print out debug information about the LLVM IR." << std::endl;
     std::cout << "-dc               Print out debug information about the compile commands." << std::endl;
     std::cout << "-O                Optimize the generated object / executable." << std::endl;
@@ -255,7 +257,7 @@ int main(int argc, char** argv) {
         ast.clean_ast();
     }
 
-    if (compiler_args.debug_ast) {
+    if (compiler_args.debug_ast || compiler_args.debug_full_ast) {
         ast.debug();
     }
     if (ast.check_error(std::string("Logic Error: ")))
