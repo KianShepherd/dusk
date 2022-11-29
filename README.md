@@ -124,8 +124,10 @@ $ dusk -h
 Usage: dusk [options] file...
 Options:
 -h                Display this information.
--d                Print out debug information about the AST and LLVM IR.
--da               Print out debug information about the AST.
+-d                Print out debug information about the final AST and LLVM IR.
+-df               Print out debug information about the AST at each stage and LLVM IR.
+-da               Print out debug information about the final AST.
+-daf              Print out debug information about the AST at each stage.
 -di               Print out debug information about the LLVM IR.
 -dc               Print out debug information about the compile commands.
 -O                Optimize the generated object / executable.
@@ -152,6 +154,13 @@ Options:
         - `bignum.ds` also provides these for handling of float and integer numbers of unbounded size
             - BigInt
             - BigFloat
+        - `vector.ds` also provides these for handling of various vector types.
+            - Vec<int>
+            - Vec<float>
+            - Vec<T> template type for other Structs
+        - `linkedlists.ds` also provides these for handling of various linked list types
+            - LinkedList<int>
+            - LinkedList<T> template type for other Structs
     - Array Types
         - boolean array
         - strings
@@ -170,6 +179,11 @@ Options:
         - Method Overloading
         - Automatic Reference Counting
         - Destructors
+        - `template` keyword
+            - Template Structs can be created that are generic over Struct types.
+            - Supports Templated member fields
+            - Supports Templated methods
+                - Can also override specific templated typed functions
 - Functions
     - `main` as entry point
         - accepts and handles command line arguments
@@ -212,10 +226,20 @@ Options:
 
 ## Planned Functionality
 
--  stdlib improvements
+- Improve Templates
+    - Add supprt for multiple templated types
+ - Improve Automatic Reference Counting
+    - There are currently a few edge cases around calls to `__INCREF__` and `__DECREF__` that aren't currently implemented.
+        - As I continue to add test caases and catch these more will be fixed.
+- `stdlib` improvements
     - More abstract datatypes
+        - LinkedList
+            - General Improvements on functionality
+        - Map
+        - Set
     - More general functionality
         - IO
+            - `writefile`
         - Math functions
         - String manipulation
         - ...

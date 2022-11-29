@@ -148,3 +148,72 @@ struct Foo {
     }
 }
 ```
+
+## Templates
+
+Structs can also be created using the `template` keyword. The name for these template types must be
+formatted like `struct_name<T>` where `T` can be any identifier to be templated over. Templates will
+monomorphize all the fields and function arguments and return types into the correct types for the
+templated type. These templated types are only created as needed.
+
+For example here is a section of the `Vec<T>` template found in the standard library.
+
+```
+extern vpvec() -> void*;
+extern del_vpvec(v: void*);
+extern vppush_back(vec: void*, val: void*);
+extern vppush_front(vec: void*, val: void*);
+extern getvecvp(vec: void*, idx: int) -> void*;
+
+template Vec<T> {
+    vector: void*,
+    size: int,
+    exampleT: T, // example of a templated member variable
+    exampleVT: Vec<T>, // example of a templated member variable
+
+    fn Vec<T>(self: Vec<T>) -> Vec<T> {
+        self.vector = vpvec();
+        self.size = 0;
+        return self;
+    }
+
+    fn append(self: Vec<T>, n: T) {
+        n.__INCREF__(); // n isn't automatically __INCREF__'d on call into extern C func
+        vppush_back(self.vector, n);
+        self.size = self.size + 1;
+    }
+
+    fn prepend(self: Vec<T>, n: T) {
+        n.__INCREF__(); // n isn't automatically __INCREF__'d on call into extern C func
+        vppush_front(self.vector, n);
+        self.size = self.size + 1;
+    }
+
+    fn get(self: Vec<T>, idx: int) -> T {
+        self.__INCREF__(); // self isn't automatically __INCREF__'d on call into extern C func
+        return getvecvp(self.vector, idx);
+    }
+}
+```
+
+Templated functions can be overriden for specific types if required. (Currently the names must be
+manually magled to include struct type at the start, and most methods must also have types appended
+to the end).
+
+```
+template Vec<T> {
+    ...
+}
+
+fn Vec<String>__str__(self: Vec<String>) -> string {
+    let mut ret: String = String("[ ");
+    for (let mut i: int = 0; i < self.size; i++) {
+        ret = ret + "'" + String(self.get(i)) + "'";
+        if (i < self.size - 1) {
+            ret = ret + ", ";
+        }
+    }
+    ret = ret + " ]";
+    return ret.to_str();
+}
+```
