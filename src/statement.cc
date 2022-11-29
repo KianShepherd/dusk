@@ -15,7 +15,8 @@ void ExpressionStatement::clean(AST* ast) {
 
 void ExpressionStatement::fold(AST* ast, std::vector<Statement*>& block) {
     this->expr = this->expr->fold(ast);
-    // TODO: ARC call DECREF on struct if expr returns a struct
+    if (this->expr->get_type() != t_assignment&& this->expr->get_atomic_type(ast) == t_struct)
+        this->expr = new ExpressionAtomic(std::string(this->expr->get_atomic_type_str(ast)).append("__DECREF__").append(std::string(this->expr->get_atomic_type_str(ast))), std::vector<Expression*>({ this->expr }));
     block.push_back(this);
 }
 

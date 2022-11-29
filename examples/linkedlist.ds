@@ -60,7 +60,7 @@ fn main(argc: int, argv: string*) -> int {
     let mut a: LinkedList<int> = LinkedList<int>(1);
     let mut b: LinkedList<int> = LinkedList<int>(0);
     println("Adding");
-    a.add_next(2).add_next(3).add_next(4).__DECREF__();
+    a.add_next(2).add_next(3).add_next(4);
     println("Added\n\n");
     let mut next: int = a.has_next;
     while (next != 0) {
