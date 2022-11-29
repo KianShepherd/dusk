@@ -243,7 +243,13 @@ Function* Function::monomorph(std::string new_name, std::string new_type, std::s
     }
     if (this->type != t_struct)
         return new Function(name, this->statements->monomorph(new_name, new_type, old_name, old_type), this->type, args);
-    return new Function(name, this->statements->monomorph(new_name, new_type, old_name, old_type), this->type, args, new_type);
+    auto new_s_name = std::string(this->struct_name);
+    if (new_s_name.find(old_name) != std::string::npos) {
+        new_s_name = std::string(new_name);
+    } else if (new_s_name.find(old_type) != std::string::npos) {
+        new_s_name = std::string(new_type);
+    }
+    return new Function(name, this->statements->monomorph(new_name, new_type, old_name, old_type), this->type, args, new_s_name);
 }
 
 void Function::clean(AST* ast) {

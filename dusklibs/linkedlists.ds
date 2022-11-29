@@ -3,33 +3,18 @@ template LinkedList<T> {
     next: LinkedList<T>,
     has_next: int,
 
-    fn LinkedList<T>(self: LinkedList<T>) -> LinkedList<T> {
-        self.next = BigInt(0);
-        self.has_next = 0;
-        return self;
-    }
-
     fn LinkedList<T>(self: LinkedList<T>, value: T) -> LinkedList<T> {
-        self.next = BigInt(0);
         value.__INCREF__();
         self.val = value;
         self.has_next = 0;
         return self;
     }
 
-    fn add_next(self: LinkedList<T>) -> LinkedList<T> {
-        self.next = LinkedList<T>();
-        self.__INCREF__();
-        self.has_next = 1;
-        return self.next;
-    }
-
     fn add_next(self: LinkedList<T>, value: T) -> LinkedList<T> {
-        value.__INCREF__();
         self.next = LinkedList<T>(value);
-        self.__INCREF__();
         self.has_next = 1;
-        return self.next;
+        let mut next: LinkedList<T> = self.next;
+        return next;
     }
 
     fn get_next(self: LinkedList<T>) -> LinkedList<T> {
@@ -38,9 +23,7 @@ template LinkedList<T> {
     }
 
     fn __str__(self: LinkedList<T>) -> string {
-        self.__INCREF__();
         let mut v: T = self.val;
-        v.__INCREF__();
         return v.to_str();
     }
 
