@@ -159,6 +159,7 @@ struct Vec<int> {
     extern getveci(vec: void*, idx: int) -> int;
     extern ivec_str(vec: void*) -> string;
     extern sortveci(vec: void*);
+    extern reverseveci(vec: void*);
 
     vector: void*,
     size: int,
@@ -208,6 +209,10 @@ struct Vec<int> {
         sortveci(self.vector);
     }
 
+    fn reverse(self: Vec<int>) {
+        reverseveci(self.vector);
+    }
+
     fn extend(self: Vec<int>, vec: Vec<int>) {
         for (let mut i: int = 0; i < vec.size; i++) {
             ipush_back(self.vector, vec.get(i));
@@ -231,6 +236,7 @@ struct Vec<float> {
     extern getvecf(vec: void*, idx: int) -> float;
     extern fvec_str(vec: void*) -> string;
     extern sortvecf(vec: void*);
+    extern reversevecf(vec: void*);
 
     vector: void*,
     size: int,
@@ -278,6 +284,10 @@ struct Vec<float> {
 
     fn sort(self: Vec<float>) {
         sortvecf(self.vector);
+    }
+
+    fn reverse(self: Vec<float>) {
+        reversevecf(self.vector);
     }
 
     fn extend(self: Vec<float>, vec: Vec<float>) {

@@ -94,6 +94,10 @@ extern "C" {
     void sortveci(void* vec) {
         std::sort(((std::vector<long>*)vec)->begin(), ((std::vector<long>*)vec)->end());
     }
+    
+    void reverseveci(void* vec) {
+        std::reverse(((std::vector<long>*)vec)->begin(), ((std::vector<long>*)vec)->end());
+    }
 
     void* floatvec() {
         return new std::vector<double>();
@@ -117,6 +121,10 @@ extern "C" {
 
     void sortvecf(void* vec) {
         std::sort(((std::vector<double>*)vec)->begin(), ((std::vector<double>*)vec)->end());
+    }
+
+    void reversevecf(void* vec) {
+        std::reverse(((std::vector<double>*)vec)->begin(), ((std::vector<double>*)vec)->end());
     }
 
     void* vpvec() {

@@ -16,8 +16,9 @@ fn main() -> int {
         }
     }
     cals.sort();
+    cals.reverse();
 
-    println("Part 1: %d", cals.get(cals.size() - 1));
-    println("Part 2: %d", cals.get(cals.size() - 1) + cals.get(cals.size() - 2) + cals.get(cals.size() - 3));
+    println("Part 1: %d", cals.get(0));
+    println("Part 2: %d", cals.get(0) + cals.get(1) + cals.get(2));
     return 0;
 }

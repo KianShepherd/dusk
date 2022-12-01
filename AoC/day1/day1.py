@@ -18,4 +18,3 @@ elves = sorted(elves)[::-1]
 
 print(f'Part 1: {elves[0]}')
 print(f'Part 2: {sum(elves[:3])}')
-    
