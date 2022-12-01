@@ -244,6 +244,7 @@ Options:
         - String manipulation
         - ...
     - ...
+- `__iter__` method function for structs for looping `for (v: vec) { ... }`
 - Better compile time failure error messages
     - show line that error occured on
 
