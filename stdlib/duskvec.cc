@@ -90,6 +90,11 @@ extern "C" {
     long getveci(void* vec, long idx) {
         return ((*(std::vector<long>*)vec)[idx]);
     }
+    
+    void sortveci(void* vec) {
+        std::sort(((std::vector<long>*)vec)->begin(), ((std::vector<long>*)vec)->end());
+    }
+
     void* floatvec() {
         return new std::vector<double>();
     }
@@ -108,6 +113,10 @@ extern "C" {
 
     double getvecf(void* vec, long idx) {
         return (*(std::vector<double>*)vec)[idx];
+    }
+
+    void sortvecf(void* vec) {
+        std::sort(((std::vector<double>*)vec)->begin(), ((std::vector<double>*)vec)->end());
     }
 
     void* vpvec() {

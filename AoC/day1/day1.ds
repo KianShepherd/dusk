@@ -1,0 +1,23 @@
+include "vector.ds"
+
+fn main() -> int {
+    let f: string = readfile("./AoC/day1/input.txt");
+    let mut file_content: String = String(f);
+    let mut elves: Vec<String> = file_content.split<String>("\n");
+    let mut cals: Vec<int> = Vec<int>();
+    let mut cal_tot: int = 0;
+    for (let mut i: int = 0; i < elves.size(); i++) {
+        let num: int = stoi(elves.get(i).to_str());
+        if num == 0 {
+            cals.append(cal_tot);
+            cal_tot = 0;
+        } else {
+            cal_tot = cal_tot + num;
+        }
+    }
+    cals.sort();
+
+    println("Part 1: %d", cals.get(cals.size() - 1));
+    println("Part 2: %d", cals.get(cals.size() - 1) + cals.get(cals.size() - 2) + cals.get(cals.size() - 3));
+    return 0;
+}
