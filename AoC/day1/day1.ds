@@ -1,9 +1,7 @@
 include "vector.ds"
 
 fn main() -> int {
-    let f: string = readfile("./AoC/day1/input.txt");
-    let mut file_content: String = String(f);
-    let mut elves: Vec<String> = file_content.split<String>("\n");
+    let mut elves: Vec<String> = String(readfile("./AoC/day1/input.txt")).split<String>("\n");
     let mut cals: Vec<int> = Vec<int>();
     let mut cal_tot: int = 0;
     for (let mut i: int = 0; i < elves.size(); i++) {
