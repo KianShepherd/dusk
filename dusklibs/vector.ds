@@ -66,6 +66,7 @@ template Vec<T> {
     }
     
     fn size(self: Vec<T>) -> int {
+        self.__INCREF__();
         return self.size;
     }
 

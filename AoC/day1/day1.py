@@ -1,3 +1,4 @@
+"""AoC day1."""
 cals = []
 with open('./AoC/day1/input.txt', 'r') as f:
     [cals.append(int(x) if x != '' else -1) for x in f.read().split('\n')]

@@ -8,6 +8,7 @@ struct String {
     extern count_substr(str: string, substr: string) -> int;
     extern split(str: string, on: string) -> string*;
     extern delete_string(str: void*);
+    extern cmpstr(s1: void*, s2: void*) -> int;
 
     str: void*,
 
@@ -78,6 +79,21 @@ struct String {
 
     fn __add__(text: string, self: String) -> String {
         let mut res: String = String(text) + self;
+        return res;
+    }
+
+    fn __eq__(self: String, rhs: String) -> bool {
+        let res: bool = 0 == cmpstr(self.str, rhs.str);
+        return res;
+    }
+
+    fn __eq__(self: String, rhs: string) -> bool {
+        let res: bool = 0 == cmpstr(self.str, String(rhs).str);
+        return res;
+    }
+
+    fn __eq__(rhs: String, self: String) -> bool {
+        let res: bool = 0 == cmpstr(self.str, String(rhs).str);
         return res;
     }
 }

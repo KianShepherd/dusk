@@ -165,6 +165,10 @@ extern "C" DLLEXPORT {
         return (char*)(void*)(((std::string*)str)->c_str());
     }
 
+    long cmpstr(void* s1, void* s2) {
+        return (long)((std::string*)s1)->compare(*((std::string*)s2));
+    }
+
     void delete_string(void* str) {
         delete (std::string*)str;
     }

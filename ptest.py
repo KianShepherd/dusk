@@ -78,41 +78,51 @@ def run_example(file_name):
         no_op_res = run_output(file_name)
         op_res = run_output(file_name, opt=1)
         expected = run_output(file_name, expected=True)
-        
+
         no_op_diff = []
         no_op_pass = True
         for i in range(max(len(no_op_res), len(expected))):
             if i > len(expected) - 1:
                 no_op_diff.append(f'line  {i}   : ""   : "{no_op_res[i]}"')
-                no_op_diff.append(f'line  {i}   : ""   : "{no_op_res[i].encode("utf-8")}"')
+                no_op_diff.append(f'line  {i}   : ""   : '
+                                  f'"{no_op_res[i].encode("utf-8")}"')
                 no_op_pass = False
             elif i > len(no_op_res) - 1:
                 no_op_diff.append(f'line  {i}   : "{expected[i]}"   :   ""')
-                no_op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   ""')
+                no_op_diff.append(f'line  {i}   : '
+                                  f'"{expected[i].encode("utf-8")}"   :   ""')
                 no_op_pass = False
             else:
                 if no_op_res[i] != expected[i]:
                     no_op_pass = False
 
-                    no_op_diff.append(f'line  {i}   : "{expected[i]}"   :   "{no_op_res[i]}"')
-                    no_op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   "{no_op_res[i].encode("utf-8")}"')
+                    no_op_diff.append(f'line  {i}   : "{expected[i]}"   :   '
+                                      f'"{no_op_res[i]}"')
+                    no_op_diff.append(f'line  {i}   : '
+                                      f'"{expected[i].encode("utf-8")}"   :   '
+                                      f'"{no_op_res[i].encode("utf-8")}"')
 
         op_diff = []
         op_pass = True
         for i in range(max(len(op_res), len(expected))):
             if i > len(expected) - 1:
                 op_diff.append(f'line  {i}   : ""   : "{op_res[i]}"')
-                op_diff.append(f'line  {i}   : ""   : "{op_res[i].encode("utf-8")}"')
+                op_diff.append(f'line  {i}   : ""   : '
+                               f'"{op_res[i].encode("utf-8")}"')
                 op_pass = False
             elif i > len(op_res) - 1:
                 op_diff.append(f'line  {i}   : "{expected[i]}"   :   ""')
-                op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   ""')
+                op_diff.append(f'line  {i}   : '
+                               f'"{expected[i].encode("utf-8")}"   :   ""')
                 op_pass = False
             else:
                 if op_res[i] != expected[i]:
                     op_pass = False
-                    op_diff.append(f'line  {i}   : "{expected[i]}"   :   "{op_res[i]}"')
-                    op_diff.append(f'line  {i}   : "{expected[i].encode("utf-8")}"   :   "{op_res[i].encode("utf-8")}"')
+                    op_diff.append(f'line  {i}   : "{expected[i]}"   :   '
+                                   f'"{op_res[i]}"')
+                    op_diff.append(f'line  {i}   : '
+                                   f'"{expected[i].encode("utf-8")}"   :   '
+                                   f'"{op_res[i].encode("utf-8")}"')
 
         preamble = f'{file_name}.ds: '
         while len(preamble) < 25:

@@ -1,5 +1,113 @@
-fn main() -> int {
-    let mut file: String = String(readfile("./AoC/day1/input.txt"));
+include "vector.ds"
 
+
+fn get_winner_score(oponenet: String, me: String) -> int {
+    let mut res: int = 0;
+    if oponenet == String("A") {
+        if me == String("X") {
+            return 3;
+        }
+        if me == String("Y") {
+            return 6;
+        }
+        return 0;
+    }
+    if oponenet == String("B") {
+        if me == String("X") {
+            return 0;
+        }
+        if me == String("Y") {
+            return 3;
+        }
+        return 6;
+    }
+    if oponenet == String("C") {
+        if me == String("X") {
+            return 6;
+        }
+        if me == String("Y") {
+            return 0;
+        }
+        return 3;
+    }
+    return res;
+}
+
+
+fn get_choice_score(me: String) -> int {
+    if me == String("X") {
+        return 1;
+    }
+    if me == String("Y") {
+        return 2;
+    }
+    return 3;
+}
+
+
+fn get_score(oponenet: String, me: String) -> int {
+    oponenet.__INCREF__();
+    me.__INCREF__();
+    let s1: int = get_choice_score(me);
+    let s2: int = get_winner_score(oponenet, me);
+    return s1 + s2;
+}
+
+fn get_my_choice(oponenet: String, me: String) -> String {
+    if oponenet == String("A") {
+        if me == String("X") {
+            return String("Z");
+        }
+        if me == String("Y") {
+            return String("X");
+        }
+        return String("Y");
+    }
+    if oponenet == String("B") {
+        if me == String("X") {
+            return String("X");
+        }
+        if me == String("Y") {
+            return String("Y");
+        }
+        return String("Z");
+    }
+    if oponenet == String("C") {
+        if me == String("X") {
+            return String("Y");
+        }
+        if me == String("Y") {
+            return String("Z");
+        }
+        return String("X");
+    }
+    return String("");
+}
+
+
+fn score_part1(games: Vec<String>) -> int {
+    let mut score: int = 0;
+    for (let mut i: int = 0; i < games.size; i++) {
+        let mut game: Vec<String> = String(games.get(i)).split<String>(" ");
+        score = score + get_score(game.get(0), game.get(1));
+    }
+    return score;
+}
+
+fn score_part2(games: Vec<String>) -> int {
+    let mut score: int = 0;
+    for (let mut i: int = 0; i < games.size; i++) {
+        let mut game: Vec<String> = String(games.get(i)).split<String>(" ");
+        score = score + get_score(game.get(0), get_my_choice(game.get(0), game.get(1)));
+    }
+    return score;
+}
+
+
+fn main() -> int {
+    let mut games: Vec<String> = String(readfile("./AoC/day2/input.txt")).split<String>("\n");
+    games.__INCREF__();
+    println("Part 1: %d", score_part1(games));
+    println("Part 2: %d", score_part2(games));
     return 0;
 }
