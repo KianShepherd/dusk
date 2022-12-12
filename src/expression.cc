@@ -549,6 +549,8 @@ llvm::Value* ExpressionAtomic::codegen(AST* ast, AtomType type) {
                     atom_type = llvm::Type::getInt1Ty(*(ast->TheContext));
                 } else if (vec_type == t_string_arr) {
                     atom_type = llvm::Type::getInt8PtrTy(*(ast->TheContext));
+                } else if (vec_type == t_string) {
+                    atom_type = llvm::Type::getInt8Ty(*(ast->TheContext));
                 }
                 auto index_val = this->index->codegen(ast, t_number);
                 auto index_vec = std::vector<llvm::Value*>();

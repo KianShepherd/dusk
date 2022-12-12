@@ -217,6 +217,7 @@ struct Vec<int> {
     fn extend(self: Vec<int>, vec: Vec<int>) {
         for (let mut i: int = 0; i < vec.size; i++) {
             ipush_back(self.vector, vec.get(i));
+            self.size = self.size + 1;
         }
     }
 

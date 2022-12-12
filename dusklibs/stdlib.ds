@@ -17,6 +17,8 @@ fn delete(arr: void*) {
     delet(arr);
 }
 
+extern ctoi(c: char) -> int;
+
 extern ftoi(a: float) -> int;
 extern ftos(a: float) -> string;
 

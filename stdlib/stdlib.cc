@@ -81,6 +81,10 @@ extern "C" DLLEXPORT {
     long stoi(char* a) {
         return std::atol(a);
     }
+
+    long ctoi(char c) {
+        return (long)c;
+    }
     // To floats
     double itof(long a) {
         return static_cast<double>(a);
@@ -171,5 +175,17 @@ extern "C" DLLEXPORT {
 
     void delete_string(void* str) {
         delete (std::string*)str;
+    }
+
+    long str_len(void* str) {
+        return (long)((std::string*)str)->size();
+    }
+
+    void* sub_str(void* str, long from, long to) {
+        return new std::string(((std::string*)str)->substr(from, to - from));
+    }
+
+    void* sub_str_e(void* str, long from) {
+        return new std::string(((std::string*)str)->substr(from));
     }
 }

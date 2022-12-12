@@ -1,4 +1,113 @@
+include "vector.ds"
+
+fn compare(contents: String) -> int {
+    let len: int = contents.size() / 2;
+    let mut pocket1: String  = contents.substr(0, len);
+    let mut pocket2: String  = contents.substr(len);
+    for (let mut i: int = 0; i < pocket1.size(); i++) {
+        for (let mut j: int = 0; j < pocket2.size(); j++) {
+            if ctoi(pocket1.at(i)) == ctoi(pocket2.at(j)) {
+                let c: int = ctoi(pocket1.at(i));
+                if c >= 97 {
+                    // Uppercase
+                    return c - 96;
+                } else {
+                    // Lowecase
+                    return c - 38;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+fn part1(contents: Vec<String>) -> int {
+    let mut sum: int = 0;
+    for (let mut i: int = 0; i < contents.size; i++) {
+        sum = sum + compare(contents.get(i));
+    }
+    return sum;
+}
+fn part2(contents: Vec<String>) -> int {
+    let mut sum: int = 0;
+    for (let mut i: int = 0; i < contents.size / 3; i++) {
+        let mut nums: Vec<int> = Vec<int>();
+        for (let mut j: int = 0; j < 3; j++) {
+            let mut tmp: Vec<int> = Vec<int>();
+            let mut tmpstr: String = String(contents.get((i * 3) + j));
+
+            for (let mut k: int = 0; k < tmpstr.size(); k++) {
+                let mut n: int = ctoi(tmpstr.at(k));
+                if n >= 97 {
+                    n = n - 96;
+                } else {
+                    n = n - 38;
+                }
+
+                let mut found: int = 0;
+                for (let mut l: int = 0; l < tmp.size; l++) {
+                    if tmp.get(l) == n {
+                        found = found + 1;
+                    }
+                }
+                if found == 0 {
+                    tmp.append(n);
+                }
+            }
+            nums.extend(tmp);
+        }
+        nums.sort();
+        let mut consecutive: int = 1;
+        let mut last: int = nums.get(0);
+        for (let mut j: int = 1; j < nums.size; j++) {
+            if nums.get(j) == last {
+                consecutive = consecutive + 1;
+                if consecutive == 3 {
+                    sum = sum + last;
+                    consecutive = 1;
+                }
+            } else {
+                consecutive = 1;
+                last = nums.get(j);
+            }
+        }
+    }
+    return sum;
+}
+/*
+def part2(contents):
+    """Part 2."""
+    badges = []
+    for _ in range(int(len(contents) / 3)):
+        item_map = {}
+        for _ in range(3):
+            pack_set = set(contents.pop(0))
+            for c in pack_set:
+                if c in item_map:
+                    item_map[c] += 1
+                else:
+                    item_map[c] = 1
+        for k, v in item_map.items():
+            if v >= 3:
+                badges.append(k)
+    total = 0
+    for c in badges:
+        if c.islower():
+            total += ord(c) - 96
+        else:
+            total += ord(c) - 38
+    print(f'Part 2: {total}')
+*/
 fn main() -> int {
     let mut input: Vec<String> = String(readfile("./AoC/day3/input.txt")).split<String>("\n");
+    //println("%d", compare(input.get(0)));
+    /*
+    for (let mut i: int = 0; i < input.size(); i++) {
+        let mut s: String = input.get(i);
+        println(s);
+    }
+    */
+    println("Part 1: %d", part1(input));
+    println("Part 2: %d", part2(input));
     return 0;
 }

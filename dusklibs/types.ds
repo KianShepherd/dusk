@@ -9,6 +9,9 @@ struct String {
     extern split(str: string, on: string) -> string*;
     extern delete_string(str: void*);
     extern cmpstr(s1: void*, s2: void*) -> int;
+    extern str_len(str: void*) -> int;
+    extern sub_str(str: void*, from: int, to: int) -> void*;
+    extern sub_str_e(str: void*, from: int) -> void*;
 
     str: void*,
 
@@ -55,6 +58,32 @@ struct String {
         if self._rc == 0 {
             self.__del__();
         }
+    }
+
+    fn substr(self: String, start: int, end: int) -> String {
+        self.__INCREF__();
+        let mut res: String = String();
+        res.str = sub_str(self.str, start, end);
+        return res;
+    }
+
+    fn substr(self: String, start: int) -> String {
+        self.__INCREF__();
+        let mut res: String = String();
+        res.str = sub_str_e(self.str, start);
+        return res;
+    }
+
+    fn size(self: String) -> int {
+        self.__INCREF__();
+        return str_len(self.str);
+    }
+
+    fn at(self: String, loc: int) -> char {
+        self.__INCREF__();
+        let s: string = self.to_str();
+        let c: char = s[loc];
+        return c;
     }
 
     fn to_str(self: String) -> string {
