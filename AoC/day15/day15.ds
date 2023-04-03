@@ -1,4 +1,0 @@
-fn main() -> int {
-    let mut input: Vec<String> = String(readfile("./AoC/day3/input.txt")).split<String>("\n");
-    return 0;
-}
