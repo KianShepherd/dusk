@@ -188,6 +188,7 @@ Struct* AST::get_struct(std::string name) {
     Struct* s = this->struct_map[name];
     if (s)
         return s;
+    std::cout << "Did not find struct: " << name <<  ". Attempting to monomorph." << std::endl;
     auto template_names = split_template(name);
     //std::cout << "get_struct: " << name << std::endl;
     //std::cout << "template_names: " << template_names[0] << " : " << template_names[1] << std::endl;
