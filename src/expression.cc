@@ -80,20 +80,20 @@ ExpressionAtomic::ExpressionAtomic(std::string str, std::vector<Expression*> arg
 
 ExpressionAtomic::ExpressionAtomic(AtomType type, int length, std::vector<long long> values) {
     this->type = type;
-    this->length = length;
+    this->length = values.size();
     this->int_vals = values;
 }
 
 ExpressionAtomic::ExpressionAtomic(AtomType type, int length, std::vector<double> values) {
     this->type = type;
-    this->length = length;
+    this->length = values.size();
     this->float_vals = values;
 }
 
 ExpressionAtomic::ExpressionAtomic(int length, std::vector<std::string> values) {
     this->type = t_string_arr;
-    this->length = length;
     this->string_vals = values;
+    this->length = values.size();
 }
 
 ExpressionAtomic::ExpressionAtomic(Expression* base, Expression* operand) {

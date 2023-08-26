@@ -138,8 +138,8 @@ def run_example(file_name):
         if not op_pass or not no_op_pass:
             print('\nExpected\n')
             print('\n'.join(expected))
-    except FileNotFoundError:
-        print(f'Failed to compile {file_name}')
+    except FileNotFoundError as e:
+        print(f'Failed to compile {file_name}\n{e}')
 
 
 for f in test_cases:
