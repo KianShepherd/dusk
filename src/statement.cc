@@ -471,7 +471,7 @@ llvm::Value* IfStatement::codegen(AST* ast) {
     llvm::Value* b2 = nullptr;
     if (this->block2) {
         // Emit else block.
-        TheFunction->getBasicBlockList().push_back(ElseBB);
+        TheFunction->insert(TheFunction->end(), ElseBB);
         ast->Builder->SetInsertPoint(ElseBB);
 
         b2 = this->block2->codegen(ast);
@@ -489,7 +489,7 @@ llvm::Value* IfStatement::codegen(AST* ast) {
         incoming++;
     if (b1 || b2 || !this->block2) {
         // Emit merge block.
-        TheFunction->getBasicBlockList().push_back(MergeBB);
+        TheFunction->insert(TheFunction->end(), MergeBB);
         ast->Builder->SetInsertPoint(MergeBB);
 
         llvm::PHINode *PN = ast->Builder->CreatePHI(llvm::Type::getInt1Ty(*(ast->TheContext)), incoming, "iftmp");

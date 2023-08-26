@@ -5,7 +5,6 @@ project(dusk VERSION 0.1)
 find_package(FLEX)
 find_package(BISON)
 add_compile_options(-Wall)
-add_compile_options(-O3)
 
 add_custom_command(
   OUTPUT src/scanner.cc src/parser.cc include/parser.hh
@@ -13,21 +12,16 @@ add_custom_command(
   VERBATIM
 )
 
-find_package(LLVM REQUIRED CONFIG)
-
-message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
-
-message(STATUS "LLVM INCLUDE ${LLVM_INCLUDE_DIRS}")
-include_directories(${LLVM_INCLUDE_DIRS})
-separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
-add_definitions(${LLVM_DEFINITIONS_LIST})
-message(STATUS "LLVM DEFINITIONS ${LLVM_PACKAGE_VERSION}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fno-rtti")
+execute_process(COMMAND ./llvm-project/build/bin/llvm-config --cxxflags OUTPUT_VARIABLE llvm_build)
+string(STRIP ${llvm_build} llvm_build)
+string(REPLACE "\n" " " llvm_build ${llvm_build})
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fno-rtti -march=native -fexceptions -pipe \
+    -DLLVM_DISABLE_ABI_BREAKING_CHECKS_ENFORCING ${llvm_build}")
 
 set(SOURCES
     src/dusk.cc
@@ -44,6 +38,9 @@ set(SOURCES
 
 link_directories(/usr/local/lib)
 include_directories(/usr/local/include/gmp)
+include_directories("${CMAKE_SOURCE_DIR}/llvm-project/build/include")
+include_directories("${CMAKE_SOURCE_DIR}/llvm-project/llvm/include")
+link_directories("${CMAKE_SOURCE_DIR}/llvm-project/build/lib")
 if(APPLE)
     include_directories(/usr/local/include/llvm)
     include_directories(/opt/homebrew/include)
@@ -67,11 +64,12 @@ add_library(duskio stdlib/duskio.cc)
 add_library(duskmath stdlib/duskmath.cc)
 add_library(bignum stdlib/bignum.cc)
 
-add_executable(dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
 
-llvm_map_components_to_libnames(all)
+add_executable(dusk ${SOURCES} ${HEADER_FILES} ${BISON_Parser_OUTPUTS}
+    ${FLEX_Scanner_OUTPUTS})
 
-execute_process(COMMAND llvm-config --system-libs --libs all
+
+execute_process(COMMAND ./llvm-project/build/bin/llvm-config --system-libs --libs all
                 OUTPUT_VARIABLE llvm_libraries)
 string(STRIP ${llvm_libraries} llvm_libraries)
 string(REPLACE "\n" " " llvm_libraries ${llvm_libraries})

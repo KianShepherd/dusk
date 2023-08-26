@@ -26,16 +26,12 @@ The examples for building this project also include `ninja`, but that is an opti
 
 ## Installation
 
-Build LLVM 
+Clone the repository, and run `deps.sh` to automatially install LLVM locally to this project.
 
 ```
-git clone https://github.com/llvm/llvm-project.git
-cd llvm-project
-mkdir build
-cd build
-cmake -G Ninja -DLLVM_ENABLE_ASSERTIONS=On -DCMAKE_BUILD_TYPE=Release ../llvm
-ninja
-ninja install
+git clone --recurse-submodules https://gitlab.com/kian_shepherd/Dusk.git
+cd Dusk
+./deps.sh
 ```
 
 To use the `bignum.ds` library you also need the [GNU Multiple Precision Arithmetic Library](https://gmplib.org/)
@@ -92,11 +88,15 @@ To generate a `compile_commands.json` file for use with `ccls` run
 
 ## Building
 
-To build the project run.
+To build the project run or simply run `build.sh`.
 
 ```
 cmake -G Ninja -S . -B CMake
 ninja -C CMake
+
+or
+
+./build.sh
 ```
 
 To install the binary run.
