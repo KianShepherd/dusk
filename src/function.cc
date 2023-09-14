@@ -94,7 +94,7 @@ Function::Function(std::string name, Statement* statements, AtomType type, std::
 std::string Function::func_args_to_str() {
     auto str = std::string("");
     int struct_count = 0;
-    for (int i = 0; i < this->indentifier_type.size(); i++) {
+    for (long unsigned int i = 0; i < this->indentifier_type.size(); i++) {
         switch (this->indentifier_type[i]) {
             case t_number: str.append("int"); break;
             case t_long: str.append("long"); break;
@@ -205,7 +205,7 @@ Function* Function::monomorph(std::string new_name, std::string new_type, std::s
     }
     int strct_count = 0;
     auto args = std::vector<std::vector<std::string>>({});
-    for (int i = 0; i < this->arg_count; i++) {
+    for (long unsigned int i = 0; i < this->arg_count; i++) {
         if (this->indentifier_type[i] != t_struct) {
             std::string type;
             switch (this->indentifier_type[i]) {

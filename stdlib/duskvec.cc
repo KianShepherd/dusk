@@ -45,7 +45,7 @@ extern "C" {
         std::ostringstream str;
         str << "[ ";
         auto v = *((std::vector<long>*) vec);
-        for (int i = 0; i < v.size(); i++) {
+        for (std::vector<long>::size_type i = 0; i < v.size(); i++) {
             str << v[i];
             if (i != v.size() - 1) {
                 str << ", ";
@@ -60,7 +60,7 @@ extern "C" {
         std::ostringstream str;
         str << "[ ";
         auto v = *((std::vector<double>*) vec);
-        for (int i = 0; i < v.size(); i++) {
+        for (std::vector<double>::size_type i = 0; i < v.size(); i++) {
             str << v[i];
             if (i != v.size() - 1) {
                 str << ", ";

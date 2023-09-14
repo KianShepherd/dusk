@@ -42,11 +42,11 @@ inline bool file_exists(std::string path) {
 std::vector<std::string> resolve_paths(AST* ast, std::vector<std::string> load_paths, std::vector<std::string> sources) {
     std::vector<std::string> resolved_paths = std::vector<std::string>();
 
-    for (int i = 0; i < sources.size(); i++) {
+    for (long unsigned int i = 0; i < sources.size(); i++) {
         if (file_exists(sources[i])) {
             resolved_paths.push_back(sources[i]);
         } else {
-            for (int j = 0; j < load_paths.size(); j++) {
+            for (long unsigned int j = 0; j < load_paths.size(); j++) {
                 std::string tmp_path = load_paths[j];
                 tmp_path.append(sources[i]);
                 if (file_exists(tmp_path)) {

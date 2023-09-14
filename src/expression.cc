@@ -386,7 +386,7 @@ Expression* ExpressionAtomic::fold(AST* ast) {
             }
         }
     } else if (this->type == t_function_call) {
-        for (int i = 0; i < this->args.size(); i++) {
+        for (long unsigned int i = 0; i < this->args.size(); i++) {
             auto arg = this->args[i];
             if (this->str.compare("print") == 0 || this->str.compare("println") == 0) {
                 arg = arg->fold(ast);

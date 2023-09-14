@@ -5,6 +5,7 @@ project(dusk VERSION 0.1)
 find_package(FLEX)
 find_package(BISON)
 add_compile_options(-Wall)
+add_compile_options(-Wno-comment)
 
 add_custom_command(
   OUTPUT src/scanner.cc src/parser.cc include/parser.hh

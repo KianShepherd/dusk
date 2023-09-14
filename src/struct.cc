@@ -293,7 +293,7 @@ void Struct::finalize() {
 void Struct::debug(size_t depth) {
     std::cout << std::endl << "Struct "<< this->name << " {" << std::endl;;
 
-    for (int i = 0; i < this->type_idents.size(); i++) {
+    for (long unsigned int i = 0; i < this->type_idents.size(); i++) {
         std::cout << std::string(4, ' ') << this->type_idents[i] << " : " << atom_to_debug(this->types[i]);
         if (this->struct_var_map.find(this->type_idents[i]) != this->struct_var_map.end()) {
             std::cout << " " << this->struct_var_map[this->type_idents[i]];
