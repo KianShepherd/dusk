@@ -15,3 +15,4 @@ compile_commands.json
 .DS_Store
 
 public/*
+**/llvm-project/*
