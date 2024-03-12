@@ -11,6 +11,7 @@ libdusk.a
 .ccls
 compile_commands.json
 .cache/*
+.ccls-cache/*
 
 .DS_Store
 

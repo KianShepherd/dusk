@@ -9,24 +9,15 @@ std::string type_string(AST* ast, AtomType type) {
         case t_float: return std::string("float");
         case t_char: return std::string("char");
         case t_string: return std::string("string");
-        case t_identifier: {
-            // TODO
-            return std::string("string todo");
-        }
+        case t_identifier: return std::string("identifier");
         case t_bool: return std::string("bool");
-        case t_function_call: {
-            // TODO
-            return std::string("call todo");
-        }
+        case t_function_call: return std::string("call");
         case t_bool_arr: return std::string("bool*");
         case t_number_arr: return std::string("int*");
         case t_float_arr: return std::string("float*");
         case t_string_arr: return std::string("string*");
-        case t_get_struct: {
-            // TODO
-            return std::string("struct todo");
-        }
-        default: return std::string("oh no");
+        case t_get_struct: return std::string("struct");
+        default: return std::string("Unknown type for call to type_string");
     }
 }
 
