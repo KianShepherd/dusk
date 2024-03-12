@@ -377,69 +377,90 @@ Expression* ExpressionAtomic::fold(AST* ast) {
             }
         }
     } else if (this->type == t_function_call) {
-        for (long unsigned int i = 0; i < this->args.size(); i++) {
-            auto arg = this->args[i];
-            if (this->str.compare("print") == 0 || this->str.compare("println") == 0) {
-                arg = arg->fold(ast);
-                if (arg->get_atomic_type_keep_identifier(ast) == t_identifier && arg->get_atomic_type(ast) == t_struct) {
-                    std::string f_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
-                    f_name.append("__str__");
-                    ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
-                    arg = f;
-                } else if (((ExpressionAtomic*)arg)->type == t_function_call) {
-                    Function* func = ast->func_map[((ExpressionAtomic*)arg)->str];
-                    if (func->type != t_struct) {
-                        this->args[i] = arg;
-                        continue;
-                    }
-                    std::string f_name = func->struct_name;
-
-                    f_name.append("__str__");
-                    ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
-                    arg = f;
-                } else if (((ExpressionAtomic*)arg)->type == t_get_struct) {
-                    Struct* strct = ((ExpressionAtomic*)arg)->struct_t;
-                    if (strct->struct_var_map.find(((ExpressionAtomic*)((ExpressionAtomic*)arg)->base)->str) == strct->struct_var_map.end()) {
-                        this->args[i] = arg;
-                        continue;
-                    }
-                    strct = ast->get_struct(strct->struct_var_map[((ExpressionAtomic*)this->base)->str]);
-                    std::string f_name = strct->name;
-                    f_name.append("__str__");
-                    ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
-                    arg = f;
-                }
-                arg = arg->fold(ast);
+        if (this->str.compare("sizeof") == 0) {
+            if (this->args.size() != 1) {
+                std::cout << "call to sizeof does not contain exactly one argument.\n";
+                return nullptr;
+            }
+            auto type_ident = ((ExpressionAtomic*)this->args[0])->str;
+            if (type_ident.compare("int") == 0) {
+                return new ExpressionAtomic((long) 8);
+            } else if (type_ident.compare("long") == 0) {
+                return new ExpressionAtomic((long) 16);
+            } else if (type_ident.compare("float") == 0) {
+                return new ExpressionAtomic((long) 8);
+            } else if (type_ident.compare("char") == 0) {
+                return new ExpressionAtomic((long) 1);
+            } else if (type_ident.compare("bool") == 0) {
+                return new ExpressionAtomic((long) 1);
             } else {
-                if (
-                    arg->get_atomic_type_keep_identifier(ast) == t_identifier
-                    && ast->scope->get_value(((ExpressionAtomic*)arg)->str) == t_struct
-                    && (ast->get_struct(this->str) || (ast->func_map[this->str] && ast->func_map[this->str]->statements != nullptr))
-                    && this->str.find("__del__") == std::string::npos
-                    && this->str.find("__DECREF__") == std::string::npos
-                    && this->str.find("__INCREF__") == std::string::npos
-                    ) {
-                    auto s_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
-                    if (!ast->current_block)
-                        std::cout << "No block found in func call fold" << std::endl;
-                    ast->current_block->push_back(
-                        new ExpressionStatement(
-                            new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(std::string(s_name)), std::vector<Expression*>({ new ExpressionAtomic(std::string(((ExpressionAtomic*)arg)->str), true) }))
-                        )
-                    );
-                } else {
+                return new ExpressionAtomic((long) llvm::DataLayout((llvm::Module*)((void*)(&(*(ast->TheModule))))).getPointerSize());
+            }
+        } else {
+            for (long unsigned int i = 0; i < this->args.size(); i++) {
+                auto arg = this->args[i];
+                if (this->str.compare("print") == 0 || this->str.compare("println") == 0) {
                     arg = arg->fold(ast);
+                    if (arg->get_atomic_type_keep_identifier(ast) == t_identifier && arg->get_atomic_type(ast) == t_struct) {
+                        std::string f_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
+                        f_name.append("__str__");
+                        ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
+                        arg = f;
+                    } else if (((ExpressionAtomic*)arg)->type == t_function_call) {
+                        Function* func = ast->func_map[((ExpressionAtomic*)arg)->str];
+                        if (func->type != t_struct) {
+                            this->args[i] = arg;
+                            continue;
+                        }
+                        std::string f_name = func->struct_name;
+
+                        f_name.append("__str__");
+                        ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
+                        arg = f;
+                    } else if (((ExpressionAtomic*)arg)->type == t_get_struct) {
+                        Struct* strct = ((ExpressionAtomic*)arg)->struct_t;
+                        if (strct->struct_var_map.find(((ExpressionAtomic*)((ExpressionAtomic*)arg)->base)->str) == strct->struct_var_map.end()) {
+                            this->args[i] = arg;
+                            continue;
+                        }
+                        strct = ast->get_struct(strct->struct_var_map[((ExpressionAtomic*)this->base)->str]);
+                        std::string f_name = strct->name;
+                        f_name.append("__str__");
+                        ExpressionAtomic* f = new ExpressionAtomic(f_name, std::vector<Expression*>({arg}));
+                        arg = f;
+                    }
+                    arg = arg->fold(ast);
+                } else {
+                    if (
+                        arg->get_atomic_type_keep_identifier(ast) == t_identifier
+                        && ast->scope->get_value(((ExpressionAtomic*)arg)->str) == t_struct
+                        && (ast->get_struct(this->str) || (ast->func_map[this->str] && ast->func_map[this->str]->statements != nullptr))
+                        && this->str.find("__del__") == std::string::npos
+                        && this->str.find("__DECREF__") == std::string::npos
+                        && this->str.find("__INCREF__") == std::string::npos
+                        ) {
+                        auto s_name = ast->scope->get_value_struct(((ExpressionAtomic*)arg)->str);
+                        if (!ast->current_block)
+                            std::cout << "No block found in func call fold" << std::endl;
+                        ast->current_block->push_back(
+                            new ExpressionStatement(
+                                new ExpressionAtomic(std::string(s_name).append("__INCREF__").append(std::string(s_name)), std::vector<Expression*>({ new ExpressionAtomic(std::string(((ExpressionAtomic*)arg)->str), true) }))
+                            )
+                        );
+                    } else {
+                        arg = arg->fold(ast);
+                    }
                 }
+                this->args[i] = arg;
+                
             }
-            this->args[i] = arg;
-            
-        }
-        if (ast->get_struct(this->str) != nullptr) {
-            std::string s = std::string("");
-            for (auto& arg: this->args) {
-                s.append(arg->type_str(ast));
+            if (ast->get_struct(this->str) != nullptr) {
+                std::string s = std::string("");
+                for (auto& arg: this->args) {
+                    s.append(arg->type_str(ast));
+                }
+                this->str = this->str.append(std::to_string(this->args.size())).append(s);
             }
-            this->str = this->str.append(std::to_string(this->args.size())).append(s);
         }
     }
     return (Expression*)this;

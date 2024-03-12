@@ -1,4 +1,4 @@
 fn main(argc: int, argv: string*) -> int {
-    println("Done");
+    sizeof(char);
     return 0;
 }

@@ -38,12 +38,12 @@ void yyerror(AST&, const char*);
     std::vector<std::pair<int, void*>>* fields;
 }
 
-%token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR
+%token<str> NUMBER CNUMBER LNUMBER STRING DOUBLE IDENTIFIER TRUE FALSE NULLTOK LEXERROR INT LONG VOID FLOAT BOOL STR CHAR
 %token DIVIDE TIMES PLUS MINUS MODULO NOT EQUAL EQUALEQUAL BANGEQUAL LESSEQUAL MOREEQUAL LESSTHAN MORETHAN OR AND
 %token SEMICOLON LBRACE RBRACE LPAREN RPAREN LSQUARE RSQUARE COLON COMMA ARROW DOT INCLUDE REQUIRE
-%token INT LONG VOID FLOAT BOOL STR CHAR FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT TEMPLATE
+%token FUNCTION EXTERN IF ELSE FOR WHILE RETURN LET MUTABLE BREAK STRUCT TEMPLATE SIZEOF
 
-%type<expr>  exp;
+%type<expr>  exp type;
 %type<stat>  statement statementblock mutassign;
 %type<stats> statements;
 %type<strs>  typedarg;
@@ -800,6 +800,86 @@ exprlist: %empty
     }
     ;
 
+type: INT
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
+    }
+    | IDENTIFIER
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
+    }
+    | LONG
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
+    }
+    | VOID
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
+    }
+    | FLOAT
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
+    }
+    | BOOL
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
+    }
+    | CHAR
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
+    }
+    | STR
+    {
+        $$ = new ExpressionAtomic(std::string(*($1)), true);
+        free($1);
+    }
+    | INT TIMES
+    {
+        $$ = new ExpressionAtomic(std::string("foo*"), true);
+        free($1);
+    }
+    | LONG TIMES
+    {
+        $$ = new ExpressionAtomic(std::string("foo*"), true);
+        free($1);
+    }
+    | VOID TIMES
+    {
+        $$ = new ExpressionAtomic(std::string("foo*"), true);
+        free($1);
+    }
+    | FLOAT TIMES
+    {
+        $$ = new ExpressionAtomic(std::string("foo*"), true);
+        free($1);
+    }
+    | BOOL TIMES
+    {
+        $$ = new ExpressionAtomic(std::string("foo*"), true);
+        free($1);
+    }
+    | CHAR TIMES
+    {
+        $$ = new ExpressionAtomic(std::string("foo*"), true);
+        free($1);
+    }
+    | STR TIMES
+    {
+        $$ = new ExpressionAtomic(std::string("foo*"), true);
+        free($1);
+    }
+    | IDENTIFIER TIMES
+    {
+        $$ = new ExpressionAtomic(std::string("foo*"), true);
+        free($1);
+    }
 
 exp: NUMBER
     {
@@ -846,6 +926,12 @@ exp: NUMBER
     {
         $$ = new ExpressionAtomic(std::string(*($1)), std::vector<Expression*>());
         free($1);
+    }
+    | SIZEOF LPAREN type RPAREN
+    {
+        auto x = std::vector<Expression*>();
+        x.push_back($3);
+        $$ = new ExpressionAtomic(std::string("sizeof"), x);
     }
     | IDENTIFIER LPAREN exprlist RPAREN
     {

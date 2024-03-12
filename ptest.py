@@ -69,6 +69,10 @@ def run_output(file_name, *, opt=None, expected=False):
 
 def run_example(file_name):
     """Run test cases for file."""
+    preamble = f'{file_name}.ds: '
+    while len(preamble) < 25:
+        preamble = preamble + " "
+    print(preamble, end='')
     subprocess.run(
         ['./CMake/dusk', f'./examples/{file_name}.ds'],
         stdout=subprocess.DEVNULL,
@@ -124,10 +128,7 @@ def run_example(file_name):
                                    f'"{expected[i].encode("utf-8")}"   :   '
                                    f'"{op_res[i].encode("utf-8")}"')
 
-        preamble = f'{file_name}.ds: '
-        while len(preamble) < 25:
-            preamble = preamble + " "
-        print(f'{preamble}unoptimized {"PASS" if no_op_pass else "FAIL"},'
+        print(f'unoptimized {"PASS" if no_op_pass else "FAIL"},'
               f' optimized {"PASS" if op_pass else "FAIL"}')
         if not no_op_pass:
             print("\nUnoptimized Diff\n")

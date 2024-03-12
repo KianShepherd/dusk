@@ -52,13 +52,14 @@ Null                    { yylval.str = new std::string(yytext, yyleng); return N
 \.                      { return DOT;       }
 ->                      { return ARROW;     }
 
-int                     { return INT;      }
-long                    { return LONG;     }
-void                    { return VOID;     }
-float                   { return FLOAT;    }
-bool                    { return BOOL;     }
-char                    { return CHAR;     }
-string                  { return STR;      }
+int                     { yylval.str = new std::string(yytext, yyleng); return INT;   }
+sizeof                  { yylval.str = new std::string(yytext, yyleng); return SIZEOF;   }
+long                    { yylval.str = new std::string(yytext, yyleng); return LONG;  }
+void                    { yylval.str = new std::string(yytext, yyleng); return VOID;  }
+float                   { yylval.str = new std::string(yytext, yyleng); return FLOAT; }
+bool                    { yylval.str = new std::string(yytext, yyleng); return BOOL;  }
+char                    { yylval.str = new std::string(yytext, yyleng); return CHAR;  }
+string                  { yylval.str = new std::string(yytext, yyleng); return STR;   }
 fn                      { return FUNCTION; }
 extern                  { return EXTERN;   }
 if                      { return IF;       }
